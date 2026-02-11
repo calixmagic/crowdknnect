@@ -1,0 +1,1583 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Expérience Magique</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body,
+        html {
+            width: 100%;
+            height: 100%;
+            background: #000;
+            color: #fff;
+            font-family: -apple-system, system-ui, sans-serif;
+            overflow: hidden;
+            user-select: none;
+            -webkit-user-select: none;
+            transition: background-color 0.5s ease;
+        }
+
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.5s ease;
+        }
+
+        /* Hidden by default */
+        #mask-overlay,
+        #eye-container,
+        #unlock-icon,
+        #wave-overlay,
+        #fire-container,
+        #static-overlay,
+        #puzzle-container {
+            display: none;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        #connect-screen {
+            z-index: 1000;
+            background: #000;
+        }
+
+        .mystic-wheel {
+            width: 80px;
+            height: 80px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-top: 2px solid #fff;
+            border-radius: 50%;
+            animation: spin 2s linear infinite;
+            margin-bottom: 30px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
+            }
+
+            70% {
+                transform: scale(1.05);
+                box-shadow: 0 0 0 12px rgba(255, 255, 255, 0);
+            }
+
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+            }
+        }
+
+        #start-btn {
+            animation: pulse 2s infinite;
+        }
+
+        #logo-container {
+            width: 80vw;
+            max-width: 400px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #logo-img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: none;
+            transition: transform 0.2s ease-out;
+        }
+
+        #engine-screen {
+            z-index: 500;
+        }
+
+        #emoji-display {
+            font-size: 15vh;
+        }
+
+        #media-display {
+            width: 85%;
+            max-width: 500px;
+            height: auto;
+            border-radius: 15px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            display: none;
+        }
+
+        #video-display {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: none;
+        }
+
+        #final-screen {
+            z-index: 2000;
+            background: #fff;
+            color: #000;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .final-btn {
+            width: 100%;
+            max-width: 300px;
+            padding: 20px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 15px;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-insta {
+            background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+            color: #fff;
+        }
+
+        .btn-google {
+            background: #4285F4;
+            color: #fff;
+        }
+
+        /* Flash Effects */
+        body.flash-bg {
+            background-color: #fff !important;
+        }
+
+        body.flash-strobe {
+            animation: strobeEffect 0.1s infinite;
+        }
+
+        @keyframes strobeEffect {
+
+            0%,
+            50% {
+                background-color: #000;
+            }
+
+            51%,
+            100% {
+                background-color: #fff;
+            }
+        }
+
+        .red {
+            color: #f00 !important;
+        }
+
+        .black {
+            color: #fff !important;
+        }
+
+        .white-bg {
+            background-color: #fff !important;
+            color: #000 !important;
+        }
+
+        .flash-bg {
+            background-color: #fff !important;
+            transition: none !important;
+        }
+
+        .blackout-bg {
+            background-color: #000 !important;
+            transition: none !important;
+        }
+
+        /* Heart morphing animation */
+        #heart-svg {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            display: none;
+        }
+
+        #heart-svg.active {
+            display: block;
+            animation: heartMorph 3s ease-in-out forwards;
+        }
+
+        @keyframes heartMorph {
+            0% {
+                transform: scale(0.1);
+                opacity: 1;
+            }
+
+            50% {
+                transform: scale(1.5);
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* Countdown */
+        #countdown-display {
+            position: absolute;
+            font-size: 30vh;
+            font-weight: bold;
+            color: #fff;
+            display: none;
+            animation: countdownPulse 1s infinite;
+        }
+
+        @keyframes countdownPulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.2);
+            }
+        }
+
+        /* Dice 3D */
+        #dice-container {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            perspective: 800px;
+            display: none;
+        }
+
+        #dice {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            animation: diceRoll 2s ease-out forwards;
+        }
+
+        .dice-face {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            background: #000;
+            border: 3px solid #333;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 80px;
+            font-weight: bold;
+        }
+
+        .dice-face:nth-child(1) {
+            transform: rotateY(0deg) translateZ(100px);
+        }
+
+        .dice-face:nth-child(2) {
+            transform: rotateY(180deg) translateZ(100px);
+        }
+
+        .dice-face:nth-child(3) {
+            transform: rotateY(90deg) translateZ(100px);
+        }
+
+        .dice-face:nth-child(4) {
+            transform: rotateY(-90deg) translateZ(100px);
+        }
+
+        .dice-face:nth-child(5) {
+            transform: rotateX(90deg) translateZ(100px);
+        }
+
+        .dice-face:nth-child(6) {
+            transform: rotateX(-90deg) translateZ(100px);
+        }
+
+        @keyframes diceRoll {
+            0% {
+                transform: rotate3d(1, 1, 1, 0deg);
+            }
+
+            100% {
+                transform: rotate3d(1, 1, 1, 720deg);
+            }
+        }
+
+        /* Ripple from logo */
+        #ripple-overlay {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 3px solid rgba(255, 255, 255, 0.8);
+            display: none;
+            pointer-events: none;
+        }
+
+        #ripple-overlay.active {
+            animation: rippleExpand 2s ease-out forwards;
+        }
+
+        @keyframes rippleExpand {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+
+            100% {
+                transform: scale(30);
+                opacity: 0;
+            }
+        }
+
+        /* Audio (hidden) */
+        #audio-player {
+            display: none;
+        }
+
+        /* Phase 2 Steps */
+        /* Text */
+        #text-display {
+            position: absolute;
+            font-size: 12vh;
+            font-weight: bold;
+            color: #fff;
+            text-align: center;
+            max-width: 90%;
+            display: none;
+        }
+
+        /* Pulse */
+        body.pulse-bg {
+            animation: pulseEffect 1.5s ease-in-out infinite !important;
+        }
+
+        @keyframes pulseEffect {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.3;
+            }
+        }
+
+        /* Spiral */
+        #spiral-overlay {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            border: 5px solid #fff;
+            border-radius: 50%;
+            display: none;
+        }
+
+        #spiral-overlay.active {
+            animation: spiralSpin 3s linear infinite;
+        }
+
+        @keyframes spiralSpin {
+            0% {
+                transform: rotate(0deg) scale(0.5);
+            }
+
+            50% {
+                transform: rotate(180deg) scale(1.5);
+            }
+
+            100% {
+                transform: rotate(360deg) scale(0.5);
+            }
+        }
+
+        /* Color overlay */
+        #color-overlay {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: none;
+            transition: background-color 0.5s;
+        }
+
+        /* Number */
+        #number-display {
+            position: absolute;
+            font-size: 25vh;
+            font-weight: bold;
+            color: #fff;
+            display: none;
+        }
+
+        /* Breathing */
+        body.breathing-bg {
+            animation: breatheEffect 4s ease-in-out infinite !important;
+        }
+
+        @keyframes breatheEffect {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.7;
+                transform: scale(1.05);
+            }
+        }
+
+        /* Glitch */
+        body.glitch-bg {
+            animation: glitchEffect 0.3s infinite !important;
+        }
+
+        @keyframes glitchEffect {
+            0% {
+                transform: translate(0);
+                filter: hue-rotate(0deg);
+            }
+
+            20% {
+                transform: translate(-2px, 2px);
+                filter: hue-rotate(90deg);
+            }
+
+            40% {
+                transform: translate(2px, -2px);
+                filter: hue-rotate(180deg);
+            }
+
+            60% {
+                transform: translate(-2px, -2px);
+                filter: hue-rotate(270deg);
+            }
+
+            80% {
+                transform: translate(2px, 2px);
+                filter: hue-rotate(360deg);
+            }
+
+            100% {
+                transform: translate(0);
+                filter: hue-rotate(0deg);
+            }
+        }
+
+        /* Ripple center */
+        #ripple-center {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 50px;
+            height: 50px;
+            margin-left: -25px;
+            margin-top: -25px;
+            border-radius: 50%;
+            border: 3px solid rgba(255, 255, 255, 0.8);
+            display: none;
+        }
+
+        #ripple-center.active {
+            animation: rippleCenterExpand 2s ease-out forwards;
+        }
+
+        @keyframes rippleCenterExpand {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+
+            100% {
+                transform: scale(30);
+                opacity: 0;
+            }
+        }
+
+        /* Zoom */
+        body.zoom-bg {
+            animation: zoomEffect 3s ease-in-out forwards !important;
+        }
+
+        @keyframes zoomEffect {
+            0% {
+                transform: scale(1);
+            }
+
+            100% {
+                transform: scale(3);
+            }
+        }
+
+        /* Shake */
+        body.shake-bg {
+            animation: shakeEffect 0.5s infinite !important;
+        }
+
+        @keyframes shakeEffect {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            10%,
+            30%,
+            50%,
+            70%,
+            90% {
+                transform: translateX(-5px);
+            }
+
+            20%,
+            40%,
+            60%,
+            80% {
+                transform: translateX(5px);
+            }
+        }
+
+        /* Fade */
+        #fade-overlay {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: none;
+            transition: opacity 2s;
+        }
+
+        #fade-overlay.active {
+            opacity: 1;
+        }
+
+        /* Phase 3 Advanced Steps */
+        /* CardFlip */
+        #card-flip-container {
+            position: absolute;
+            width: 300px;
+            height: 450px;
+            perspective: 1000px;
+            display: none;
+        }
+
+        #card-flip {
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            animation: cardFlipAnim 2s ease-in-out forwards;
+        }
+
+        @keyframes cardFlipAnim {
+            0% {
+                transform: rotateY(0deg);
+            }
+
+            100% {
+                transform: rotateY(180deg);
+            }
+        }
+
+        /* Slot */
+        #slot-container {
+            position: absolute;
+            display: none;
+            font-size: 15vh;
+        }
+
+        /* Pinpoint */
+        #pinpoint-target {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            border: 5px solid #f00;
+            border-radius: 50%;
+            display: none;
+            animation: pinpointShrink 3s ease-in forwards;
+        }
+
+        @keyframes pinpointShrink {
+            0% {
+                transform: scale(5);
+                opacity: 0.5;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* Unlock */
+        #unlock-icon {
+            position: absolute;
+            font-size: 20vh;
+            display: none;
+            animation: unlockAnim 2s ease-out forwards;
+        }
+
+        @keyframes unlockAnim {
+            0% {
+                content: '🔒';
+            }
+
+            50% {
+                content: '🔓';
+                transform: rotate(0deg);
+            }
+
+            100% {
+                content: '🔓';
+                transform: rotate(20deg);
+            }
+        }
+
+        /* Mirror */
+        body.mirror-h {
+            transform: scaleX(-1);
+        }
+
+        body.mirror-v {
+            transform: scaleY(-1);
+        }
+
+        /* Wave */
+        #wave-overlay {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(transparent, rgba(0, 150, 255, 0.5));
+            display: none;
+            animation: waveMove 3s ease-in-out infinite;
+        }
+
+        @keyframes waveMove {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-30px);
+            }
+        }
+
+        /* Sparkle */
+        .sparkle-particle {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #fff;
+            border-radius: 50%;
+            animation: sparklefall 2s linear forwards;
+        }
+
+        @keyframes sparklefall {
+            0% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+            100% {
+                opacity: 0;
+                transform: translateY(100vh);
+            }
+        }
+
+        /* Fire */
+        #fire-container {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 40%;
+            display: none;
+            background: linear-gradient(to top, #ff4500, #ff8c00, transparent);
+            animation: fireFlicker 0.3s infinite alternate;
+        }
+
+        @keyframes fireFlicker {
+            0% {
+                opacity: 0.8;
+                transform: scaleY(1);
+            }
+
+            100% {
+                opacity: 1;
+                transform: scaleY(1.1);
+            }
+        }
+
+        /* Beat */
+        body.beat-flash {
+            animation: beatFlash 0.3s ease-in-out !important;
+        }
+
+        @keyframes beatFlash {
+
+            0%,
+            100% {
+                background-color: inherit;
+            }
+
+            50% {
+                background-color: #fff;
+            }
+        }
+
+        /* StaticNoise */
+        #static-overlay {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(0deg, #000 0px, #fff 2px, #000 4px);
+            display: none;
+            animation: staticFlicker 0.1s infinite;
+        }
+
+        @keyframes staticFlicker {
+            0% {
+                opacity: 0.8;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        /* Eye */
+        #eye-container {
+            position: absolute;
+            font-size: 20vh;
+            display: none;
+            animation: eyeBlink 3s ease-in-out infinite;
+        }
+
+        @keyframes eyeBlink {
+
+            0%,
+            90%,
+            100% {
+                content: '👁️';
+            }
+
+            93%,
+            97% {
+                content: '😑';
+            }
+        }
+
+        /* Puzzle */
+        #puzzle-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: none;
+        }
+
+        .puzzle-piece {
+            position: absolute;
+            width: 50%;
+            height: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid #fff;
+        }
+
+        /* Mask */
+        #mask-overlay {
+            position: absolute;
+            font-size: 30vh;
+            display: none;
+            animation: maskAppear 2s ease-out forwards;
+        }
+
+        @keyframes maskAppear {
+            0% {
+                opacity: 0;
+                transform: scale(0);
+            }
+
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* Crystal */
+        #crystal-ball {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.8), rgba(100, 100, 255, 0.4));
+            display: none;
+            animation: crystalGlow 2s ease-in-out infinite;
+        }
+
+        @keyframes crystalGlow {
+
+            0%,
+            100% {
+                box-shadow: 0 0 20px #fff, 0 0 40px #88f;
+            }
+
+            50% {
+                box-shadow: 0 0 40px #fff, 0 0 80px #88f;
+            }
+        }
+
+        /* Snapshot */
+        #snapshot-flash {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: #fff;
+            display: none;
+        }
+
+        #snapshot-flash.active {
+            animation: cameraFlash 0.5s ease-out forwards;
+        }
+
+        @keyframes cameraFlash {
+            0% {
+                opacity: 1;
+            }
+
+            100% {
+                opacity: 0;
+            }
+        }
+
+        /* Starfield */
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: #fff;
+            border-radius: 50%;
+            animation: starMove 3s linear infinite;
+        }
+
+        @keyframes starMove {
+            0% {
+                transform: translateZ(0) scale(1);
+                opacity: 0;
+            }
+
+            50% {
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateZ(100px) scale(3);
+                opacity: 0;
+            }
+        }
+
+        #debug-log {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            width: 90%;
+            height: 60px;
+            pointer-events: auto;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            z-index: 3000;
+            font-size: 9px;
+            color: rgba(128, 128, 128, 0.5);
+            font-family: monospace;
+            overflow: hidden;
+            text-align: left;
+            line-height: 1.3;
+        }
+    </style>
+</head>
+
+<body id="main-body">
+
+    <div id="debug-log">Init...</div>
+
+    <!-- Écran 1 : Participer -->
+    <div id="connect-screen" class="screen active">
+        <div class="mystic-wheel"></div>
+        <p style="letter-spacing:3px; font-size:0.9rem; color:#fff; margin-bottom:40px; font-weight:300;">EXPÉRIENCE
+            INTERACTIVE</p>
+        <button id="start-btn"
+            style="background:#fff; border:none; color:#000; padding:20px 50px; border-radius:40px; font-size:16px; font-weight:700; letter-spacing:2px; cursor:pointer; text-transform:uppercase; box-shadow:0 10px 30px rgba(255,255,255,0.2);">Participer</button>
+    </div>
+
+    <!-- Écran 2 : Logo / Attente -->
+    <div id="logo-screen" class="screen">
+        <div id="logo-container"><img id="logo-img" src="" alt="Logo"></div>
+        <p id="tagline-text"
+            style="color:#fff; font-size:0.8rem; letter-spacing:2px; text-transform:uppercase; text-align:center; padding:0 20px;">
+            Réaliser une expérience.
+        </p>
+    </div>
+
+    <!-- Écran 3 : Moteur -->
+    <div id="engine-screen" class="screen">
+        <div id="emoji-display"></div>
+        <img id="media-display" src="" alt="Media">
+        <video id="video-display" playsinline></video>
+        <img id="arrow" src="fleche.png" alt=""
+            style="position:absolute;bottom:0;left:50%;transform:translateX(-50%);display:none;width:50vw;max-width:350px;pointer-events:none;">
+        <svg id="heart-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <path id="heart-path" fill="#ff0000" d="M50,30 C50,30 50,30 50,30 C50,30 50,30 50,30 Z">
+                <animate attributeName="d" dur="2s" fill="freeze" from="M50,50 L50,50 L50,50 Z"
+                    to="M50,85 C25,70 15,55 15,40 C15,25 25,15 40,15 C45,15 50,20 50,20 C50,20 55,15 60,15 C75,15 85,25 85,40 C85,55 75,70 50,85 Z" />
+            </path>
+        </svg>
+        <div id="countdown-display"></div>
+        <div id="dice-container">
+            <div id="dice">
+                <div class="dice-face">1</div>
+                <div class="dice-face">2</div>
+                <div class="dice-face">3</div>
+                <div class="dice-face">4</div>
+                <div class="dice-face">5</div>
+                <div class="dice-face">6</div>
+            </div>
+        </div>
+        <div id="ripple-overlay"></div>
+        <audio id="audio-player"></audio>
+        <div id="text-display"></div>
+        <div id="spiral-overlay"></div>
+        <div id="color-overlay"></div>
+        <div id="number-display"></div>
+        <div id="ripple-center"></div>
+        <div id="fade-overlay"></div>
+        <div id="card-flip-container">
+            <div id="card-flip"></div>
+        </div>
+        <div id="slot-container"></div>
+        <div id="pinpoint-target"></div>
+        <div id="unlock-icon">🔒</div>
+        <div id="wave-overlay"></div>
+        <div id="eye-container">👁️</div>
+        <div id="mask-overlay">🎭</div>
+        <div id="crystal-ball"></div>
+        <div id="snapshot-flash"></div>
+    </div>
+
+    <!-- Écran 4 : Final -->
+    <div id="final-screen" class="screen">
+        <h2 style="margin-bottom:20px;">MERCI !</h2>
+        <a href="https://www.instagram.com/calix_magicien/" target="_blank" class="final-btn btn-insta">S'ABONNER SUR
+            INSTAGRAM</a>
+        <a id="redirection-btn" href="#" target="_blank" class="final-btn btn-google">PARTAGER MON AVIS</a>
+        <p style="margin-top:20px; font-size:12px; color:#888;" onclick="window.location.reload()">Rejouer</p>
+    </div>
+
+
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script>
+        const socket = io();
+        let serverOffset = 0;
+        let config = {};
+        let hasStarted = false;
+        const logBox = document.getElementById('debug-log');
+
+        function log(msg) {
+            const time = new Date().toLocaleTimeString();
+            console.log(`[PUBLIC ${time}] ${msg}`);
+            if (!logBox) return;
+            const line = document.createElement('div');
+            line.innerText = `[${time}] ${msg}`;
+            logBox.appendChild(line);
+            if (logBox.childNodes.length > 5) logBox.removeChild(logBox.firstChild);
+        }
+
+        // === ANTI-VEILLE (silence.mp4 + WakeLock API) ===
+        let noSleepVideo = null;
+        let wakeLockSentinel = null;
+        let noSleepActive = false;
+
+        function createNoSleepVideo() {
+            const v = document.createElement('video');
+            v.setAttribute('playsinline', '');
+            v.setAttribute('muted', '');
+            v.setAttribute('loop', '');
+            v.muted = true;
+            v.style.cssText = 'position:fixed;top:-1px;left:-1px;width:1px;height:1px;opacity:0.01;pointer-events:none;z-index:-1;';
+            v.src = 'silence.mp4';
+            document.body.appendChild(v);
+            return v;
+        }
+
+        function enableNoSleep() {
+            if (noSleepActive) return;
+            // Vidéo silence.mp4 (fonctionne sur iOS Safari)
+            if (!noSleepVideo) noSleepVideo = createNoSleepVideo();
+            const p = noSleepVideo.play();
+            if (p) p.then(() => {
+                noSleepActive = true;
+                log("NoSleep vidéo activé ✓");
+            }).catch(e => log("NoSleep vidéo: " + e.message));
+            // Bonus: WakeLock API (Chrome, Safari 16.4+)
+            if ('wakeLock' in navigator) {
+                navigator.wakeLock.request('screen').then(s => {
+                    wakeLockSentinel = s;
+                    log("WakeLock API activé ✓");
+                    s.addEventListener('release', () => { log("WakeLock relâché"); });
+                }).catch(() => { });
+            }
+        }
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible' && hasStarted) {
+                enableNoSleep();
+            }
+        });
+
+        // === BOUTON PARTICIPER ===
+        document.getElementById('start-btn').addEventListener('click', () => {
+            // Unlock Audio
+            const audioEl = document.getElementById('audio-player');
+            if (audioEl) {
+                audioEl.src = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA';
+                audioEl.play().catch(e => console.log("Audio unlock failed/blocked", e));
+            }
+
+            hasStarted = true;
+            document.getElementById('connect-screen').classList.remove('active');
+            document.getElementById('logo-screen').classList.add('active');
+            log("Expérience démarrée ✓ (Audio Unlocked)");
+            enableNoSleep();
+            updateLogoDisplay();
+        });
+
+        // === GESTE SECRET 3 DOIGTS ===
+        let fingersCount = 0;
+        document.addEventListener('touchstart', (e) => {
+            fingersCount = e.touches.length;
+            if (fingersCount === 3) {
+                const timer = setTimeout(() => {
+                    if (fingersCount === 3) { log("Demande Admin..."); socket.emit('promote-to-admin'); }
+                }, 2000);
+                document.addEventListener('touchend', () => { clearTimeout(timer); fingersCount = 0; }, { once: true });
+            }
+        });
+
+        socket.on('admin-granted', () => {
+            log("Admin accordé! Redirection...");
+            window.location.href = '/admin.html';
+        });
+
+        // === CONNEXION SOCKET ===
+        socket.on('connect', () => {
+            log("Connecté: " + socket.id);
+            const now = Date.now();
+            socket.emit('sync-time', now, (serverTime) => {
+                const latency = (Date.now() - now) / 2;
+                serverOffset = serverTime - (Date.now() - latency);
+                log("Offset serveur: " + serverOffset + "ms");
+            });
+        });
+
+        socket.on('disconnect', () => log("Déconnecté du serveur!"));
+
+        socket.on('spectator-count', (data) => log("Spectateurs: " + data.count));
+
+        socket.on('state-update', (state) => {
+            config = state;
+            log("State reçu: " + (state.routines ? state.routines.length : 0) + " routines, logo=" + (state.logoVisible ? "visible" : "caché"));
+            updateLogoDisplay();
+            document.getElementById('redirection-btn').href = state.redirectionUrl || '#';
+            // Apply background color
+            if (state.bgColor) {
+                document.getElementById('logo-screen').style.background = state.bgColor;
+            }
+        });
+
+        function updateLogoDisplay() {
+            if (!hasStarted) return;
+            const img = document.getElementById('logo-img');
+            if (config.logoUrl && config.logoVisible) {
+                img.src = config.logoUrl;
+                img.style.display = 'block';
+                img.style.transform = `scale(${(config.logoZoom || 100) / 100})`;
+                log("Logo affiché (zoom " + (config.logoZoom || 100) + "%)");
+            } else {
+                img.style.display = 'none';
+            }
+            // Tagline personnalisable
+            const tagline = document.getElementById('tagline-text');
+            if (tagline && config.tagline) tagline.innerText = config.tagline;
+        }
+
+        // === SÉQUENCE ===
+        socket.on('start-sequence', (data) => {
+            log("Séquence reçue! " + data.routine.name + " (" + data.routine.steps.length + " étapes)");
+            runRoutine(data.routine, data.targetTime);
+        });
+
+        socket.on('reset-sequence', () => { log("Reset reçu"); window.location.reload(); });
+
+        async function runRoutine(routine, targetTime) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById('engine-screen').classList.add('active');
+            log("Moteur démarré, attente sync...");
+
+            let currentStepIdx = 0;
+            let stepStartTime = targetTime;
+
+            const update = () => {
+                const now = Date.now() + serverOffset;
+                if (now < targetTime) { requestAnimationFrame(update); return; }
+
+                const steps = routine.steps.filter(s => s.active);
+                if (currentStepIdx >= steps.length) { finishRoutine(); return; }
+
+                const step = steps[currentStepIdx];
+                const elapsedInStep = now - stepStartTime;
+
+                if (elapsedInStep === 0 || (currentStepIdx > 0 && elapsedInStep < 100)) {
+                    log("Step " + (currentStepIdx + 1) + "/" + steps.length + ": " + step.type + " (" + step.duration + "ms)");
+                }
+                // Log timing every second
+                if (elapsedInStep > 0 && elapsedInStep % 1000 < 20) {
+                    log("  ⏱ " + step.type + ": " + (elapsedInStep / 1000).toFixed(1) + "s / " + (step.duration / 1000).toFixed(1) + "s");
+                }
+
+                renderStep(step, now, elapsedInStep);
+
+                if (elapsedInStep >= step.duration && step.duration > 0) {
+                    currentStepIdx++;
+                    stepStartTime = now;
+                    log("  ✓ " + step.type + " terminé en " + (elapsedInStep / 1000).toFixed(1) + "s");
+                    document.getElementById('emoji-display').innerText = '';
+                    document.getElementById('media-display').style.display = 'none';
+                    document.getElementById('video-display').style.display = 'none';
+                    document.getElementById('arrow').style.display = 'none';
+                    document.getElementById('main-body').className = '';
+                }
+                requestAnimationFrame(update);
+            };
+            requestAnimationFrame(update);
+        }
+
+        function renderStep(step, now, elapsed) {
+            const body = document.getElementById('main-body');
+            const emojiDiv = document.getElementById('emoji-display');
+            const mediaImg = document.getElementById('media-display');
+            const videoVid = document.getElementById('video-display');
+
+            switch (step.type) {
+                case 'blackout':
+                    body.className = 'blackout-bg';
+                    break;
+                case 'flash':
+                    const flashDuration = step.duration;
+                    const flashCount = step.value || 1; // Default to 1 flash if not specified
+                    const singleFlashDur = flashDuration / flashCount;
+
+                    if (step.active === false) { // Clean up if inactive
+                        body.classList.remove('flash-bg', 'flash-strobe');
+                        break;
+                    }
+
+                    // Calculate current cycle in the sequence
+                    const currentCycle = Math.floor(elapsed / singleFlashDur);
+                    const cycleProgress = (elapsed % singleFlashDur) / singleFlashDur;
+
+                    // Flash is ON for first 50% of each cycle
+                    if (currentCycle < flashCount && cycleProgress < 0.5) {
+                        body.classList.add('flash-bg');
+                        if (step.vibrate && cycleProgress < 0.1) navigator.vibrate(50); // Vibrate at start of each flash
+                    } else {
+                        body.classList.remove('flash-bg');
+                    }
+                    break;
+                case 'emojis':
+                    const t = Math.min(1, elapsed / step.duration);
+                    const interval = 1200 * Math.pow(0.25, t);
+                    const emojis = ['♠️', '♥️', '♣️', '♦️'];
+                    const emoji = emojis[Math.floor(now / interval) % 4];
+                    emojiDiv.innerText = emoji;
+                    emojiDiv.className = (emoji === '♥️' || emoji === '♦️') ? 'red' : 'black';
+                    break;
+                case 'shuffle':
+                    body.className = 'white-bg';
+                    mediaImg.style.display = 'block';
+                    const cards = ['AS', 'KH', '2J', 'QC', '7H', '3C'];
+                    mediaImg.src = `cards/${cards[Math.floor(now / 150) % cards.length]}.jpg`;
+                    break;
+                case 'reveal':
+                    body.className = 'white-bg';
+                    mediaImg.style.display = 'block';
+                    mediaImg.src = `cards/${step.value}.jpg`;
+                    break;
+                case 'video':
+                    videoVid.style.display = 'block';
+                    // Initialisation sécurisée via attribut data
+                    if (videoVid.getAttribute('data-current-url') !== step.url) {
+                        videoVid.setAttribute('data-current-url', step.url);
+                        videoVid.src = step.url;
+                        videoVid.load();
+
+                        // Tentative de calage immédiat
+                        const startOffset = elapsed / 1000;
+                        if (startOffset > 0) videoVid.currentTime = startOffset;
+
+                        videoVid.play().catch(e => console.log("Video autoplay blocked/error", e));
+                    } else {
+                        // Sync Loop : si décalage > 0.5s, on recale (utile si buffering ou retard chargement)
+                        const targetTime = elapsed / 1000;
+                        if (!videoVid.paused && !videoVid.seeking && Math.abs(videoVid.currentTime - targetTime) > 0.5) {
+                            console.log(`Resync video: ${videoVid.currentTime.toFixed(2)} -> ${targetTime.toFixed(2)}`);
+                            videoVid.currentTime = targetTime;
+                        }
+                    }
+                    break;
+                case 'words':
+                    emojiDiv.style.fontSize = '8vh';
+                    emojiDiv.className = '';
+                    const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+                    const wordList = (step.words || []).length > 0 ? step.words : ['MAGIE', 'MYSTÈRE', 'ILLUSION'];
+                    const finalWord = step.value || wordList[wordList.length - 1];
+                    const lPctRaw = (step.letterPct || 60) / 100;
+                    const wPctRaw = (step.wordPct || 30) / 100;
+                    // Auto-clamp: toujours réserver au moins 10% pour le mot final
+                    const totalPct = lPctRaw + wPctRaw;
+                    const lPct = totalPct >= 0.95 ? lPctRaw * 0.85 / totalPct : lPctRaw;
+                    const wPct = totalPct >= 0.95 ? wPctRaw * 0.85 / totalPct : wPctRaw;
+                    const sSpeed = step.startSpeed || 800;
+                    const eSpeed = step.endSpeed || 120;
+                    const fSize = step.finalSize || 10;
+                    const pMs = step.pauseMs || 2000;
+                    const progress = Math.min(1, elapsed / step.duration);
+                    if (progress < lPct) {
+                        const p = progress / lPct;
+                        const speed = sSpeed * Math.pow(eSpeed / sSpeed, p);
+                        emojiDiv.innerText = alphabet[Math.floor(now / speed) % 26];
+                    } else if (progress < lPct + wPct) {
+                        const p = (progress - lPct) / wPct;
+                        const speed = (sSpeed * 0.75) * Math.pow(eSpeed / (sSpeed * 0.75), p);
+                        const idx = Math.floor(now / speed) % wordList.length;
+                        emojiDiv.innerText = wordList[idx];
+                    } else {
+                        emojiDiv.innerText = finalWord;
+                        emojiDiv.style.fontSize = fSize + 'vh';
+                    }
+                    break;
+                case 'arrow':
+                    document.getElementById('arrow').style.display = 'block';
+                    break;
+                case 'heart':
+                    const heartSvg = document.getElementById('heart-svg');
+                    heartSvg.style.display = 'block';
+                    heartSvg.classList.add('active');
+                    setTimeout(() => {
+                        heartSvg.classList.remove('active');
+                        heartSvg.style.display = 'none';
+                    }, 3000);
+                    break;
+                case 'countdown':
+                    const countdownDiv = document.getElementById('countdown-display');
+                    countdownDiv.style.display = 'block';
+                    const startFrom = step.startFrom || 3;
+                    const countInterval = step.duration / (startFrom + 1);
+                    const current = Math.ceil((step.duration - elapsed) / countInterval);
+                    countdownDiv.innerText = current > 0 ? current : '';
+                    break;
+                case 'dice':
+                    const diceContainer = document.getElementById('dice-container');
+                    const diceEl = document.getElementById('dice');
+                    diceContainer.style.display = 'block';
+                    if (elapsed < 2000) {
+                        diceEl.style.animation = 'diceRoll 2s ease-out forwards';
+                    } else {
+                        const finalFace = step.finalFace || 6;
+                        const rotations = {
+                            1: 'rotateY(0deg) rotateX(0deg)',
+                            2: 'rotateY(180deg) rotateX(0deg)',
+                            3: 'rotateY(90deg) rotateX(0deg)',
+                            4: 'rotateY(-90deg) rotateX(0deg)',
+                            5: 'rotateY(0deg) rotateX(90deg)',
+                            6: 'rotateY(0deg) rotateX(-90deg)'
+                        };
+                        diceEl.style.transform = rotations[finalFace] || rotations[6];
+                        diceEl.style.animation = 'none';
+                    }
+                    break;
+                case 'rippleFromLogo':
+                    const ripple = document.getElementById('ripple-overlay');
+                    const logoImg = document.querySelector('#logo-screen img');
+                    if (logoImg && elapsed === 0) {
+                        const rect = logoImg.getBoundingClientRect();
+                        ripple.style.left = (rect.left + rect.width / 2) + 'px';
+                        ripple.style.top = (rect.top + rect.height / 2) + 'px';
+                    }
+                    ripple.style.display = 'block';
+                    ripple.classList.add('active');
+                    setTimeout(() => {
+                        ripple.classList.remove('active');
+                        ripple.style.display = 'none';
+                    }, step.duration);
+                    break;
+                case 'audio':
+                    const audioEl = document.getElementById('audio-player');
+                    if (!step._audioStarted) {
+                        step._audioStarted = true; // Mark as started
+                        let url = step.url || '';
+                        // Fix for absolute paths in case they sneak in
+                        if (url.includes('/public/audio/')) {
+                            url = 'audio/' + url.split('/public/audio/')[1];
+                        } else if (url.includes('\\public\\audio\\')) {
+                            url = 'audio/' + url.split('\\public\\audio\\')[1];
+                        }
+                        console.log(`[AUDIO DEBUG] Playing URL: ${url}`);
+                        log(`Audio URL: ${url}`);
+                        audioEl.src = url;
+                        audioEl.volume = (step.startVol || 50) / 100;
+                        audioEl.play()
+                            .then(() => log("Audio démarré !"))
+                            .catch(e => {
+                                console.error("Audio error:", e);
+                                log(`Audio blocked/error: ${e.message}`, "#f00");
+                            });
+                    }
+                    const startVol = (step.startVol || 50) / 100;
+                    const endVol = (step.endVol || 100) / 100;
+                    const fadeMs = step.fadeMs || step.duration;
+                    const volProgress = Math.min(elapsed / fadeMs, 1);
+                    audioEl.volume = startVol + (endVol - startVol) * volProgress;
+                    break;
+                case 'text':
+                    const textDiv = document.getElementById('text-display');
+                    textDiv.style.display = 'block';
+                    textDiv.innerText = step.value || 'TEXTE';
+                    break;
+                case 'pulse':
+                    body.classList.add('pulse-bg');
+                    break;
+                case 'spiral':
+                    const spiralDiv = document.getElementById('spiral-overlay');
+                    spiralDiv.style.display = 'block';
+                    spiralDiv.classList.add('active');
+                    break;
+                case 'color':
+                    const colorDiv = document.getElementById('color-overlay');
+                    colorDiv.style.display = 'block';
+                    colorDiv.style.backgroundColor = step.value || '#ff0000';
+                    break;
+                case 'number':
+                    const numberDiv = document.getElementById('number-display');
+                    numberDiv.style.display = 'block';
+                    if (elapsed < step.duration - 1000) {
+                        numberDiv.innerText = Math.floor(Math.random() * 1000);
+                    } else {
+                        numberDiv.innerText = step.value || '42';
+                    }
+                    break;
+                case 'breathing':
+                    body.classList.add('breathing-bg');
+                    break;
+                case 'glitch':
+                    body.classList.add('glitch-bg');
+                    break;
+                case 'ripple':
+                    const rippleCenter = document.getElementById('ripple-center');
+                    rippleCenter.style.display = 'block';
+                    rippleCenter.classList.add('active');
+                    break;
+                case 'zoom':
+                    body.classList.add('zoom-bg');
+                    break;
+                case 'shake':
+                    body.classList.add('shake-bg');
+                    break;
+                case 'fade':
+                    const fadeDiv = document.getElementById('fade-overlay');
+                    fadeDiv.style.display = 'block';
+                    fadeDiv.style.backgroundColor = step.value || '#000';
+                    fadeDiv.classList.add('active');
+                    fadeDiv.style.opacity = Math.min(elapsed / (step.duration / 2), 1);
+                    break;
+                case 'cardFlip':
+                    const cardFlipContainer = document.getElementById('card-flip-container');
+                    cardFlipContainer.style.display = 'block';
+                    const cardFlip = document.getElementById('card-flip');
+                    cardFlip.innerHTML = `<img src="${step.value || 'cards/AC.jpg'}" style="width:100%;height:100%;object-fit:contain;">`;
+                    break;
+                case 'slot':
+                    const slotDiv = document.getElementById('slot-container');
+                    slotDiv.style.display = 'block';
+                    if (elapsed < step.duration - 1000) {
+                        const symbols = step.symbols || ['🍒', '🍋', '⭐'];
+                        slotDiv.innerText = symbols[Math.floor(Math.random() * symbols.length)].repeat(3);
+                    } else {
+                        const final = step.value || '⭐⭐⭐';
+                        slotDiv.innerText = final;
+                    }
+                    break;
+                case 'pinpoint':
+                    const pinpoint = document.getElementById('pinpoint-target');
+                    pinpoint.style.display = 'block';
+                    pinpoint.style.left = (step.x || 50) + '%';
+                    pinpoint.style.top = (step.y || 50) + '%';
+                    break;
+                case 'unlock':
+                    const unlockIcon = document.getElementById('unlock-icon');
+                    unlockIcon.style.display = 'block';
+                    if (elapsed > step.duration / 2) {
+                        unlockIcon.innerText = '🔓';
+                    }
+                    break;
+                case 'mirror':
+                    body.classList.add(step.axis === 'v' ? 'mirror-v' : 'mirror-h');
+                    break;
+                case 'wave':
+                    document.getElementById('wave-overlay').style.display = 'block';
+                    break;
+                case 'sparkle':
+                    if (elapsed % 200 < 20) {
+                        const sparkle = document.createElement('div');
+                        sparkle.className = 'sparkle-particle';
+                        sparkle.style.left = Math.random() * 100 + '%';
+                        sparkle.style.top = '0px';
+                        document.getElementById('engine-screen').appendChild(sparkle);
+                        setTimeout(() => sparkle.remove(), 2000);
+                    }
+                    break;
+                case 'fire':
+                    document.getElementById('fire-container').style.display = 'block';
+                    break;
+                case 'beat':
+                    const bpm = step.bpm || 120;
+                    const beatInterval = 60000 / bpm;
+                    if (elapsed % beatInterval < 300) {
+                        body.classList.add('beat-flash');
+                        setTimeout(() => body.classList.remove('beat-flash'), 300);
+                    }
+                    break;
+                case 'silence':
+                    const allAudio = document.querySelectorAll('audio');
+                    allAudio.forEach(a => a.pause());
+                    break;
+                case 'staticNoise':
+                    document.getElementById('static-overlay').style.display = 'block';
+                    break;
+                case 'eye':
+                    document.getElementById('eye-container').style.display = 'block';
+                    break;
+                case 'puzzle':
+                    const puzzleContainer = document.getElementById('puzzle-container');
+                    puzzleContainer.style.display = 'block';
+                    if (elapsed === 0) {
+                        for (let i = 0; i < 4; i++) {
+                            const piece = document.createElement('div');
+                            piece.className = 'puzzle-piece';
+                            piece.style.left = (i % 2) * 50 + '%';
+                            piece.style.top = Math.floor(i / 2) * 50 + '%';
+                            puzzleContainer.appendChild(piece);
+                        }
+                    }
+                    break;
+                case 'mask':
+                    const maskDiv = document.getElementById('mask-overlay');
+                    maskDiv.style.display = 'block';
+                    maskDiv.innerText = step.maskType || '🎭';
+                    break;
+                case 'crystal':
+                    document.getElementById('crystal-ball').style.display = 'block';
+                    break;
+                case 'snapshot':
+                    const snapFlash = document.getElementById('snapshot-flash');
+                    snapFlash.style.display = 'block';
+                    snapFlash.classList.add('active');
+                    setTimeout(() => {
+                        snapFlash.classList.remove('active');
+                        snapFlash.style.display = 'none';
+                    }, 500);
+                    break;
+                case 'starfield':
+                    if (elapsed % 100 < 20) {
+                        const star = document.createElement('div');
+                        star.className = 'star';
+                        star.style.left = Math.random() * 100 + '%';
+                        star.style.top = Math.random() * 100 + '%';
+                        document.getElementById('engine-screen').appendChild(star);
+                        setTimeout(() => star.remove(), 3000);
+                    }
+                    break;
+                case 'pause':
+                    // Pause: just wait, display nothing special
+                    break;
+                case 'revealImage':
+                    const revealImgDiv = document.getElementById('reveal-image-display') || (() => {
+                        const d = document.createElement('div');
+                        d.id = 'reveal-image-display';
+                        d.style.cssText = 'position:absolute;width:100%;height:100%;display:flex;align-items:center;justify-content:center;';
+                        document.getElementById('engine-screen').appendChild(d);
+                        return d;
+                    })();
+                    revealImgDiv.style.display = 'flex';
+                    const images = step.images || [];
+                    const finalImg = step.value || images[images.length - 1] || '';
+                    if (elapsed < step.duration * 0.8 && images.length > 1) {
+                        const randomImg = images[Math.floor(Math.random() * images.length)];
+                        revealImgDiv.innerHTML = `<img src="${randomImg}" style="max-width:90%;max-height:90%;object-fit:contain;border-radius:12px;">`;
+                    } else {
+                        revealImgDiv.innerHTML = `<img src="${finalImg}" style="max-width:90%;max-height:90%;object-fit:contain;border-radius:12px;box-shadow:0 0 40px rgba(255,255,255,0.5);">`;
+                    }
+                    break;
+                case 'stop':
+                    body.className = '';
+                    emojiDiv.innerText = '';
+                    mediaImg.style.display = 'none';
+                    videoVid.style.display = 'none';
+                    document.getElementById('arrow').style.display = 'none';
+                    return; // Stop halts the sequence
+            }
+        }
+
+        function finishRoutine() {
+            log("Routine terminée!");
+            document.getElementById('engine-screen').classList.remove('active');
+            document.getElementById('final-screen').classList.add('active');
+            if (config.redirectionUrl) {
+                setTimeout(() => { window.location.href = config.redirectionUrl; }, 1000);
+            }
+        }
+    </script>
+</body>
+
+</html>
