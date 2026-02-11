@@ -1389,9 +1389,16 @@
         <div class="row"><label>Texte d'accueil</label><input type="text" id="tagline-input"
                 placeholder="Réaliser une expérience."></div>
         <div class="row">
-            <label>Afficher les logs de timing</label>
+            <label>Afficher les logs de timing (Admin)</label>
             <label class="switch" style="margin:0;">
                 <input type="checkbox" id="logs-toggle" checked onchange="toggleLogs(this.checked)">
+                <span class="slider"></span>
+            </label>
+        </div>
+        <div class="row">
+            <label>Mode Debug (Visible sur public)</label>
+            <label class="switch" style="margin:0;">
+                <input type="checkbox" id="toggle-debug">
                 <span class="slider"></span>
             </label>
         </div>
