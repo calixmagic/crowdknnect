@@ -910,7 +910,9 @@
         }
 
         #debug-log {
-            display: none;
+            display: none !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
             position: fixed;
             bottom: 10px;
             left: 10px;
@@ -1036,16 +1038,12 @@
         let serverOffset = 0;
         let config = {};
         let hasStarted = false;
-        const logBox = document.getElementById('debug-log');
+        const logBox = null; // Désactivé
 
         function log(msg) {
             const time = new Date().toLocaleTimeString();
             console.log(`[PUBLIC ${time}] ${msg}`);
-            if (!logBox) return;
-            const line = document.createElement('div');
-            line.innerText = `[${time}] ${msg}`;
-            logBox.appendChild(line);
-            if (logBox.childNodes.length > 5) logBox.removeChild(logBox.firstChild);
+            // Nettoyage complet : plus d'écriture dans le DOM
         }
 
         // === ANTI-VEILLE (silence.mp4 + WakeLock API) ===

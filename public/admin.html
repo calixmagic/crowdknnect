@@ -1478,6 +1478,10 @@
             document.getElementById('bg-color-input').value = state.bgColor || '#000000';
             document.getElementById('logo-screen').style.background = state.bgColor || '#000';
 
+            // Sync debug toggle
+            const debugToggle = document.getElementById('toggle-debug');
+            if (debugToggle) debugToggle.checked = !!state.debug;
+
             const sel = document.getElementById('routine-select');
             if (state.routines && state.routines.length > 0) {
                 sel.innerHTML = state.routines.map((r, i) => `<option value="${i}" ${i == state.activeRoutineIndex ? 'selected' : ''}>${r.name}</option>`).join('');
@@ -1844,6 +1848,12 @@
             };
             reader.readAsDataURL(file);
         }
+
+        // Listeners for config changes
+        document.getElementById('toggle-debug').addEventListener('change', (e) => {
+            state.debug = e.target.checked;
+            log("Debug mode: " + (state.debug ? "ON" : "OFF"));
+        });
 
         // Gestes
         const logoScreen = document.getElementById('logo-screen');
