@@ -1745,10 +1745,10 @@
                         <span style="font-size:11px;color:#666;">ms</span>
                     </div>
                     <div style="margin-top:5px;">
-                        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;">
-                            <input id="edit-persist" type="checkbox" ${step.persist ? 'checked' : ''}> 
-                            Superposer (Overlay) <span style="font-size:10px;color:#666;">(N'efface pas l'écran à la fin)</span>
-                        </label>
+                        <label style="display:flex;align-items:center;gap:10px;font-size:12px;margin-bottom:10px;">
+                    <input type="checkbox" id="edit-persist" ${step.persist ? 'checked' : ''}>
+                    SUPERPOSER (OVERLAY) - <i>Ne pas effacer l'écran APRÈS cette étape</i>
+                </label>
                     </div>
                     ${extraFields}
                     <div style="display:flex;gap:8px;">
@@ -1859,7 +1859,8 @@
         // Listeners for config changes
         document.getElementById('toggle-debug').addEventListener('change', (e) => {
             state.debug = e.target.checked;
-            log("Debug mode: " + (state.debug ? "ON" : "OFF"));
+            log("Debug mode (Public): " + (state.debug ? "ON" : "OFF"));
+            socket.emit('update-state', state);
         });
 
         // Gestes

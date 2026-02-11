@@ -1187,7 +1187,10 @@
                     log("  ✓ " + step.type + " terminé en " + (elapsedInStep / 1000).toFixed(1) + "s");
 
                     // Gestion de la persistance (Overlay)
-                    if (!step.persist) {
+                    if (step.persist) {
+                        log("  → Persist: ON (L'écran n'est pas effacé)");
+                    } else {
+                        log("  → Persist: OFF (Écran effacé)");
                         document.getElementById('emoji-display').innerText = '';
                         document.getElementById('media-display').style.display = 'none';
                         document.getElementById('video-display').style.display = 'none';
