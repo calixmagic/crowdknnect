@@ -1733,6 +1733,12 @@
                         <input id="edit-dur" type="number" value="${step.duration}" style="max-width:90px;" placeholder="ms">
                         <span style="font-size:11px;color:#666;">ms</span>
                     </div>
+                    <div style="margin-top:5px;">
+                        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;">
+                            <input id="edit-persist" type="checkbox" ${step.persist ? 'checked' : ''}> 
+                            Superposer (Overlay) <span style="font-size:10px;color:#666;">(N'efface pas l'écran à la fin)</span>
+                        </label>
+                    </div>
                     ${extraFields}
                     <div style="display:flex;gap:8px;">
                         <button onclick="saveStep(${idx})" style="background:#34c759;color:#fff;border:none;padding:8px 15px;border-radius:8px;font-weight:600;cursor:pointer;flex:1;">✓ OK</button>
@@ -1747,6 +1753,9 @@
         function saveStep(idx) {
             const step = state.routines[state.activeRoutineIndex].steps[idx];
             step.duration = parseInt(document.getElementById('edit-dur').value) || step.duration;
+            const persistChk = document.getElementById('edit-persist');
+            if (persistChk) step.persist = persistChk.checked;
+
             if (step.type === 'reveal') {
                 const sel = document.getElementById('edit-val');
                 if (sel) step.value = sel.value;
