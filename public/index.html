@@ -910,6 +910,7 @@
         }
 
         #debug-log {
+            display: none;
             position: fixed;
             bottom: 10px;
             left: 10px;
@@ -1048,8 +1049,11 @@
             const p = noSleepVideo.play();
             if (p) p.then(() => {
                 noSleepActive = true;
-                log("NoSleep vidéo activé ✓");
-            }).catch(e => log("NoSleep vidéo: " + e.message));
+                // log("NoSleep vidéo activé ✓"); // Silencieux
+            }).catch(e => {
+                // Silencieux pour le public
+                console.log("NoSleep vidéo non supporté (normal sur desktop)");
+            });
             // Bonus: WakeLock API (Chrome, Safari 16.4+)
             if ('wakeLock' in navigator) {
                 navigator.wakeLock.request('screen').then(s => {
