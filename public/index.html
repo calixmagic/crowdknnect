@@ -1227,8 +1227,8 @@
                         document.getElementById('main-body').className = '';
                         document.getElementById('main-body').style.animation = '';
                         document.getElementById('main-body').style.removeProperty('--breathing-color');
-                        // Reset overlays
-                        document.querySelectorAll('.screen > div[id$="-overlay"], .screen > div[id$="-container"]').forEach(el => {
+                        // Reset overlays and specific displays
+                        document.querySelectorAll('.screen > div[id$="-overlay"], .screen > div[id$="-container"], #countdown-display, #text-display, #number-display, #crystal-ball, #unlock-icon, #reveal-image-display').forEach(el => {
                             if (el.id !== 'debug-log') el.style.display = 'none';
                         });
                     }

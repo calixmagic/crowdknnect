@@ -1520,6 +1520,7 @@
 
         function renderSteps() {
             const list = document.getElementById('steps-list');
+            const currentScroll = list.scrollTop; // Save scroll position
             const routine = state.routines[state.activeRoutineIndex];
             if (!routine) { list.innerHTML = '<p style="color:#444;font-size:12px;">Routine invalide.</p>'; return; }
             const icons = { emojis: '🃏', blackout: '⬛', flash: '⚡', shuffle: '🔀', reveal: '🎴', revealImage: '🖼️', video: '🎬', words: '🔤', lottie: '🎆', arrow: '⬇', heart: '❤️', countdown: '🔢', dice: '🎲', rippleFromLogo: '〰️', audio: '🔊', text: '📝', pulse: '💓', spiral: '🌀', color: '🎨', number: '🔢', breathing: '🫁', glitch: '⚡', ripple: '〰️', zoom: '🔍', shake: '📣', fade: '🌫️', pause: '⏸', cardFlip: '🎴', slot: '🎰', pinpoint: '🎯', unlock: '🔓', mirror: '🪞', wave: '🌊', sparkle: '✨', fire: '🔥', beat: '🎵', silence: '🔇', staticNoise: '📻', eye: '👁️', puzzle: '🧩', mask: '🎭', crystal: '🔮', snapshot: '📸', starfield: '🌟', stop: '⏹' };
@@ -1582,6 +1583,9 @@
                 const after = getDragAfter(list, e.clientY);
                 if (!after) list.appendChild(dragging); else list.insertBefore(dragging, after);
             });
+
+            // Restore scroll position
+            requestAnimationFrame(() => { list.scrollTop = currentScroll; });
         }
 
         function getDragAfter(container, y) {
@@ -1702,7 +1706,15 @@
                 const options = cards.map(c => `<option value="${c}" ${c === step.value ? 'selected' : ''}>${c}</option>`).join('');
                 extraFields = `<label>Carte à révéler</label><select id="edit-val">${options}</select>`;
             } else if (step.type === 'video') {
-                extraFields = `<label>Fichier vidéo</label><input id="edit-val" type="text" value="${step.url || ''}" placeholder="videos/mon-effet.mp4">`;
+                extraFields = `
+                    <label>Fichier Vidéo (URL ou Upload)</label>
+                    <div class="file-input-wrapper">
+                        <button class="btn btn-secondary" onclick="document.getElementById('video-upload-${idx}').click()">UPLOAD FICHIER</button>
+                        <input type="file" id="video-upload-${idx}" accept="video/*" style="display:none" onchange="uploadVideoFile(this, ${idx})">
+                    </div>
+                    <input id="edit-val" type="text" value="${step.url || ''}" placeholder="videos/mon-effet.mp4">
+                    <p style="font-size:11px;color:#888;margin-top:5px;">Formats supportés: mp4, webm.</p>
+                `;
             } else if (step.type === 'audio') {
                 extraFields = `
                     <label>Fichier Audio (URL ou Upload)</label>
@@ -2459,6 +2471,46 @@
             } catch (error) {
                 console.error("Erreur upload:", error);
                 log("Erreur upload audio", "#f00");
+                btn.innerText = "ERREUR";
+                setTimeout(() => { btn.innerText = "UPLOAD FICHIER"; btn.disabled = false; }, 2000);
+            }
+        }
+
+        async function uploadVideoFile(input, stepIdx) {
+            const file = input.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('videoFile', file);
+
+            const btn = input.previousElementSibling;
+            const originalText = btn.innerText;
+            btn.innerText = "UPLOADING...";
+            btn.disabled = true;
+
+            try {
+                const response = await fetch('/upload-video', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) throw new Error('Upload failed');
+
+                const data = await response.json();
+
+                // Mettre à jour le champ URL
+                const urlInput = input.parentElement.nextElementSibling; // L'input text est juste après le div wrapper
+                if (urlInput && urlInput.id === 'edit-val') {
+                    urlInput.value = data.path;
+                }
+
+                log("Vidéo uploadée: " + data.filename, "#34c759");
+                btn.innerText = "✅ OK";
+                setTimeout(() => { btn.innerText = originalText; btn.disabled = false; }, 2000);
+
+            } catch (error) {
+                console.error("Erreur upload:", error);
+                log("Erreur upload vidéo", "#f00");
                 btn.innerText = "ERREUR";
                 setTimeout(() => { btn.innerText = "UPLOAD FICHIER"; btn.disabled = false; }, 2000);
             }

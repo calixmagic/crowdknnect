@@ -35,6 +35,25 @@ app.post('/upload-audio', upload.single('audioFile'), (req, res) => {
     res.json({ filename: req.file.originalname, path: 'audio/' + req.file.originalname });
 });
 
+// Configuration Multer pour l'upload vidéo
+const videoStorage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        const dir = path.join(__dirname, 'public', 'videos');
+        if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+        cb(null, dir);
+    },
+    filename: function (req, file, cb) {
+        cb(null, file.originalname);
+    }
+});
+const uploadVideo = multer({ storage: videoStorage });
+
+app.post('/upload-video', uploadVideo.single('videoFile'), (req, res) => {
+    if (!req.file) return res.status(400).send('Aucun fichier.');
+    console.log(`[SERVER] Vidéo uploadée: ${req.file.originalname}`);
+    res.json({ filename: req.file.originalname, path: 'videos/' + req.file.originalname });
+});
+
 // État initial du Laboratoire
 let state = {
     logoUrl: '',
