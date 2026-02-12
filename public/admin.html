@@ -1518,11 +1518,26 @@
             state.bgColor = color;
         }
 
+        let lastRenderedSteps = '';
+
         function renderSteps() {
             const list = document.getElementById('steps-list');
             const currentScroll = list.scrollTop; // Save scroll position
             const routine = state.routines[state.activeRoutineIndex];
+
             if (!routine) { list.innerHTML = '<p style="color:#444;font-size:12px;">Routine invalide.</p>'; return; }
+
+            // Optimization: Skip render if steps haven't changed
+            const newStepsJSON = JSON.stringify(routine.steps);
+            if (newStepsJSON === lastRenderedSteps) {
+                // Determine if we should log verbose info (every 5s or something? No, let's just log "Skipped" if debug is on)
+                if (state.debug) console.log("Render skipped: No changes");
+                return;
+            }
+            lastRenderedSteps = newStepsJSON;
+
+            if (state.debug) console.log(`[Render] Rendering ${routine.steps.length} steps. Scroll: ${currentScroll}`);
+
             const icons = { emojis: '🃏', blackout: '⬛', flash: '⚡', shuffle: '🔀', reveal: '🎴', revealImage: '🖼️', video: '🎬', words: '🔤', lottie: '🎆', arrow: '⬇', heart: '❤️', countdown: '🔢', dice: '🎲', rippleFromLogo: '〰️', audio: '🔊', text: '📝', pulse: '💓', spiral: '🌀', color: '🎨', number: '🔢', breathing: '🫁', glitch: '⚡', ripple: '〰️', zoom: '🔍', shake: '📣', fade: '🌫️', pause: '⏸', cardFlip: '🎴', slot: '🎰', pinpoint: '🎯', unlock: '🔓', mirror: '🪞', wave: '🌊', sparkle: '✨', fire: '🔥', beat: '🎵', silence: '🔇', staticNoise: '📻', eye: '👁️', puzzle: '🧩', mask: '🎭', crystal: '🔮', snapshot: '📸', starfield: '🌟', stop: '⏹' };
             list.innerHTML = routine.steps.map((step, idx) => `
                 <div class="step-item" draggable="true" data-idx="${idx}">
@@ -1580,12 +1595,17 @@
             list.addEventListener('dragover', e => {
                 e.preventDefault();
                 const dragging = list.querySelector('.dragging');
-                const after = getDragAfter(list, e.clientY);
-                if (!after) list.appendChild(dragging); else list.insertBefore(dragging, after);
+                const after = getDragAfter(list, e.clientX); // Was clientY, but flex might be tricky? No, list is column.
+                // Wait, getDragAfter uses clientY.
+                const afterY = getDragAfter(list, e.clientY);
+                if (!afterY) list.appendChild(dragging); else list.insertBefore(dragging, afterY);
             });
 
             // Restore scroll position
-            requestAnimationFrame(() => { list.scrollTop = currentScroll; });
+            requestAnimationFrame(() => {
+                list.scrollTop = currentScroll;
+                if (state.debug) console.log(`[Render] Scroll restored to ${currentScroll}`);
+            });
         }
 
         function getDragAfter(container, y) {
@@ -1613,65 +1633,116 @@
                 log("Erreur: Créez une routine d'abord", "#f00"); return;
             }
             document.getElementById('step-add-area').innerHTML = `
-                <div class="step-add-form">
-                    <select id="new-step-type">
-                        <option value="arrow">⬇ Arrow</option>
-                        <option value="audio">🔊 Audio</option>
-                        <option value="beat">🎵 Beat</option>
-                        <option value="blackout">⬛ Blackout</option>
-                        <option value="breathing">🫁 Breathing</option>
-                        <option value="cardFlip">🎴 CardFlip</option>
-                        <option value="color">🎨 Color</option>
-                        <option value="countdown">🔢 Countdown</option>
-                        <option value="crystal">🔮 Crystal</option>
-                        <option value="dice">🎲 Dice</option>
-                        <option value="emojis">🃏 Emojis</option>
-                        <option value="eye">👁️ Eye</option>
-                        <option value="fade">🌫️ Fade</option>
-                        <option value="fire">🔥 Fire</option>
-                        <option value="flash">⚡ Flash</option>
-                        <option value="glitch">⚡ Glitch</option>
-                        <option value="heart">❤️ Heart</option>
-                        <option value="mask">🎭 Mask</option>
-                        <option value="mirror">🪞 Mirror</option>
-                        <option value="number">🔢 Number</option>
-                        <option value="pause">⏸ Pause</option>
-                        <option value="pinpoint">🎯 Pinpoint</option>
-                        <option value="pulse">💓 Pulse</option>
-                        <option value="puzzle">🧩 Puzzle</option>
-                        <option value="reveal">🎴 Reveal</option>
-                        <option value="revealImage">🖼️ RevealImage</option>
-                        <option value="ripple">〰️ Ripple</option>
-                        <option value="rippleFromLogo">〰️ RippleFromLogo</option>
-                        <option value="shake">📣 Shake</option>
-                        <option value="shuffle">🔀 Shuffle</option>
-                        <option value="silence">🔇 Silence</option>
-                        <option value="slot">🎰 Slot</option>
-                        <option value="snapshot">📸 Snapshot</option>
-                        <option value="sparkle">✨ Sparkle</option>
-                        <option value="spiral">🌀 Spiral</option>
-                        <option value="starfield">🌟 Starfield</option>
-                        <option value="staticNoise">📻 StaticNoise</option>
-                        <option value="text">📝 Text</option>
-                        <option value="unlock">🔓 Unlock</option>
-                        <option value="video">🎬 Video</option>
-                        <option value="wave">🌊 Wave</option>
-                        <option value="words">🔤 Words</option>
-                        <option value="zoom">🔍 Zoom</option>
-                        <option value="stop">⏹ Stop</option>
-                    </select>
-                    <input type="number" id="new-step-duration" value="2000" placeholder="ms" style="max-width:90px;">
-                    <button onclick="confirmAddStep()">OK</button>
+                <div class="step-add-form" style="display:flex; flex-direction:column; gap:8px; padding:10px; background:rgba(0,122,255,0.1); border-radius:8px;">
+                    <div style="display:flex; gap:5px;">
+                        <select id="new-step-type" style="flex:1;" onchange="updateNewStepPlaceholder()">
+                            <option value="arrow">⬇ Arrow</option>
+                            <option value="audio">🔊 Audio</option>
+                            <option value="beat">🎵 Beat</option>
+                            <option value="blackout">⬛ Blackout</option>
+                            <option value="breathing">🫁 Breathing</option>
+                            <option value="cardFlip">🎴 CardFlip</option>
+                            <option value="color">🎨 Color</option>
+                            <option value="countdown">🔢 Countdown</option>
+                            <option value="crystal">🔮 Crystal</option>
+                            <option value="dice">🎲 Dice</option>
+                            <option value="emojis">🃏 Emojis</option>
+                            <option value="eye">👁️ Eye</option>
+                            <option value="fade">🌫️ Fade</option>
+                            <option value="fire">🔥 Fire</option>
+                            <option value="flash">⚡ Flash</option>
+                            <option value="glitch">⚡ Glitch</option>
+                            <option value="heart">❤️ Heart</option>
+                            <option value="mask">🎭 Mask</option>
+                            <option value="mirror">🪞 Mirror</option>
+                            <option value="number">🔢 Number</option>
+                            <option value="pause">⏸ Pause</option>
+                            <option value="pinpoint">🎯 Pinpoint</option>
+                            <option value="pulse">💓 Pulse</option>
+                            <option value="puzzle">🧩 Puzzle</option>
+                            <option value="reveal">🎴 Reveal</option>
+                            <option value="revealImage">🖼️ RevealImage</option>
+                            <option value="ripple">〰️ Ripple</option>
+                            <option value="rippleFromLogo">〰️ RippleFromLogo</option>
+                            <option value="shake">📣 Shake</option>
+                            <option value="shuffle">🔀 Shuffle</option>
+                            <option value="silence">🔇 Silence</option>
+                            <option value="slot">🎰 Slot</option>
+                            <option value="snapshot">📸 Snapshot</option>
+                            <option value="sparkle">✨ Sparkle</option>
+                            <option value="spiral">🌀 Spiral</option>
+                            <option value="starfield">🌟 Starfield</option>
+                            <option value="staticNoise">📻 StaticNoise</option>
+                            <option value="text">📝 Text</option>
+                            <option value="unlock">🔓 Unlock</option>
+                            <option value="video">🎬 Video</option>
+                            <option value="wave">🌊 Wave</option>
+                            <option value="words">🔤 Words</option>
+                            <option value="zoom">🔍 Zoom</option>
+                            <option value="stop">⏹ Stop</option>
+                        </select>
+                    </div>
+                    <div style="display:flex; gap:5px;">
+                        <input type="text" id="new-step-value" placeholder="Valeur / URL (Optionnel)" style="flex:2;">
+                        <input type="number" id="new-step-duration" value="2000" placeholder="ms" style="width:70px;">
+                        <button onclick="confirmAddStep()" style="background:#007aff;color:white;border:none;border-radius:4px;width:40px;font-weight:bold;">OK</button>
+                    </div>
                 </div>
             `;
+            updateNewStepPlaceholder();
+        }
+
+        function updateNewStepPlaceholder() {
+            const type = document.getElementById('new-step-type').value;
+            const valInput = document.getElementById('new-step-value');
+            if (!valInput) return;
+
+            const placeholders = {
+                text: "Texte à afficher",
+                audio: "URL audio (audio/file.mp3)",
+                video: "URL vidéo (videos/file.mp4)",
+                color: "Code couleur (#ff0000)",
+                countdown: "Départ (ex: 3)",
+                number: "Nombre final",
+                reveal: "Carte (ex: KH, AS)",
+                revealImage: "URL image",
+                words: "Mot final",
+                pinpoint: "X,Y (ex: 50,50)",
+                glitch: "Message glitch",
+                slot: "Résultat (⭐⭐⭐)"
+            };
+            valInput.placeholder = placeholders[type] || "Valeur (Optionnel)";
         }
 
         function confirmAddStep() {
             const type = document.getElementById('new-step-type').value;
             const duration = parseInt(document.getElementById('new-step-duration').value) || 2000;
-            state.routines[state.activeRoutineIndex].steps.push({ id: Date.now(), type, duration, active: true });
-            log("Étape ajoutée: " + type + " " + duration + "ms");
-            document.getElementById('step-add-area').innerHTML = '';
+            const value = document.getElementById('new-step-value').value;
+
+            const newStep = { id: Date.now(), type, duration, active: true };
+            if (value) {
+                // Special handling for some types if needed, but generic assignment is usually fine
+                // For audio/video/lottie, map value to 'url' if it looks like a url, or just value if simple
+                if (['audio', 'video', 'lottie'].includes(type)) {
+                    newStep.url = value;
+                } else if (type === 'pinpoint') {
+                    // Try to parse "50,50"
+                    const parts = value.split(',');
+                    if (parts.length === 2) {
+                        newStep.x = parseInt(parts[0].trim());
+                        newStep.y = parseInt(parts[1].trim());
+                    }
+                } else {
+                    newStep.value = value;
+                }
+            }
+
+            state.routines[state.activeRoutineIndex].steps.push(newStep);
+            log("Ajout: " + type);
+            // Don't clear form completely, just value maybe? Or close it? 
+            // User might want to add multiple similar steps. Let's keep it but clear value.
+            document.getElementById('new-step-value').value = '';
+
             socket.emit('update-state', state);
             renderSteps();
         }
@@ -1741,6 +1812,7 @@
             } else if (step.type === 'flash') {
                 extraFields = `<div style="display:flex;gap:10px;align-items:center;">
                     <div style="flex:1"><label>Nombre de flashs</label><input id="edit-val" type="number" value="${step.value || 1}" min="1" max="20"></div>
+                    <div style="flex:1"><label>Couleur</label><input id="edit-color" type="color" value="${step.color || '#ffffff'}"></div>
                     <div style="flex:1;padding-top:18px;"><label style="display:flex;align-items:center;gap:8px;cursor:pointer;"><input id="edit-vib" type="checkbox" ${step.vibrate ? 'checked' : ''}> Vibration</label></div>
                 </div>`;
             } else if (step.type === 'words') {
@@ -1787,12 +1859,40 @@
                     <label>Vitesse Cycle (ms)</label><input id="edit-speed" type="number" value="${step.speed || 4000}">
                 `;
             } else if (step.type === 'countdown') {
-                extraFields = `<label>Commencer à</label><input id="edit-val" type="number" value="${step.value || 3}">`;
+                extraFields = `
+                    <label>Commencer à</label><input id="edit-val" type="number" value="${step.value || 3}">
+                    <label>Couleur</label><input id="edit-color" type="color" value="${step.color || '#ffffff'}">
+                `;
             } else if (step.type === 'text') {
                 extraFields = `
                     <label>Texte</label><input id="edit-val" type="text" value="${step.value || 'TEXTE'}">
-                    <label>Couleur</label><input id="edit-color" type="color" value="${step.color || '#ffffff'}">
-                    <label>Taille (vh)</label><input id="edit-size" type="number" value="${step.size || 12}">
+                    <div style="display:flex;gap:10px;">
+                        <div style="flex:1"><label>Couleur</label><input id="edit-color" type="color" value="${step.color || '#ffffff'}"></div>
+                        <div style="flex:1"><label>Taille (vh)</label><input id="edit-size" type="number" value="${step.size || 12}"></div>
+                    </div>
+                    <div style="display:flex;gap:10px;margin-top:5px;">
+                        <div style="flex:1">
+                            <label>Alignement</label>
+                            <select id="edit-align">
+                                <option value="center" ${step.align === 'center' ? 'selected' : ''}>Centré</option>
+                                <option value="left" ${step.align === 'left' ? 'selected' : ''}>Gauche</option>
+                                <option value="right" ${step.align === 'right' ? 'selected' : ''}>Droite</option>
+                            </select>
+                        </div>
+                        <div style="flex:1">
+                            <label>Police</label>
+                            <select id="edit-font">
+                                <option value="sans-serif" ${step.font === 'sans-serif' ? 'selected' : ''}>Sans Serif</option>
+                                <option value="serif" ${step.font === 'serif' ? 'selected' : ''}>Serif</option>
+                                <option value="monospace" ${step.font === 'monospace' ? 'selected' : ''}>Monospace</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div style="margin-top:5px;">
+                        <label style="display:flex;align-items:center;gap:5px;">
+                            <input id="edit-bold" type="checkbox" ${step.bold ? 'checked' : ''}> Gras (Bold)
+                        </label>
+                    </div>
                 `;
             } else if (step.type === 'pulse' || step.type === 'beat') {
                 extraFields = `
@@ -1812,8 +1912,11 @@
                 `;
             } else if (step.type === 'pinpoint') {
                 extraFields = `
-                    <label>Position X (%)</label><input id="edit-x" type="number" value="${step.x || 50}">
-                    <label>Position Y (%)</label><input id="edit-y" type="number" value="${step.y || 50}">
+                    <div style="display:flex;gap:10px;">
+                        <div style="flex:1"><label>Position X (%)</label><input id="edit-x" type="number" value="${step.x || 50}"></div>
+                        <div style="flex:1"><label>Position Y (%)</label><input id="edit-y" type="number" value="${step.y || 50}"></div>
+                    </div>
+                    <label>Couleur Cible</label><input id="edit-color" type="color" value="${step.color || '#ff0000'}">
                 `;
             } else if (step.type === 'unlock') {
                 extraFields = `<label>Emoji Cadenas</label><input id="edit-val" type="text" value="${step.value || '🔓'}">`;
@@ -1826,7 +1929,12 @@
                     </select>
                 `;
             } else if (step.type === 'sparkle' || step.type === 'fire' || step.type === 'staticNoise' || step.type === 'starfield') {
-                extraFields = `<label>Intensité / Densité</label><input id="edit-val" type="number" value="${step.value || 50}">`;
+                extraFields = `
+                    <div style="display:flex;gap:10px;">
+                        <div style="flex:1"><label>Intensité / Densité</label><input id="edit-val" type="number" value="${step.value || 50}"></div>
+                        <div style="flex:1"><label>Couleur</label><input id="edit-color" type="color" value="${step.color || '#ffffff'}"></div>
+                    </div>
+                `;
             } else if (step.type === 'eye' || step.type === 'puzzle' || step.type === 'crystal' || step.type === 'snapshot') {
                 extraFields = `<label>Durée / Vitesse (ms)</label><input id="edit-speed" type="number" value="${step.speed || 1000}">`;
             } else if (step.type === 'arrow') {
@@ -1895,8 +2003,10 @@
             } else if (step.type === 'flash') {
                 const chk = document.getElementById('edit-vib');
                 const val = document.getElementById('edit-val');
+                const col = document.getElementById('edit-color');
                 if (chk) step.vibrate = chk.checked;
                 if (val) step.value = parseInt(val.value) || 1;
+                if (col) step.color = col.value;
             } else if (step.type === 'words') {
                 const wordsInp = document.getElementById('edit-words');
                 const valInp = document.getElementById('edit-val');
@@ -1913,11 +2023,16 @@
                 if (cfVal) step.value = cfVal.value;
             } else if (['number', 'glitch', 'breathing', 'countdown', 'color', 'fade', 'mask', 'unlock', 'mirror', 'sparkle', 'fire', 'staticNoise', 'starfield', 'arrow', 'zoom', 'shake'].includes(step.type)) {
                 const gVal = document.getElementById('edit-val');
+                const gColor = document.getElementById('edit-color');
                 if (gVal) step.value = gVal.value;
+                if (gColor) step.color = gColor.value;
             } else if (step.type === 'text') {
                 step.value = document.getElementById('edit-val').value;
                 step.color = document.getElementById('edit-color').value;
                 step.size = parseInt(document.getElementById('edit-size').value);
+                step.align = document.getElementById('edit-align').value;
+                step.font = document.getElementById('edit-font').value;
+                step.bold = document.getElementById('edit-bold').checked;
             } else if (step.type === 'pulse' || step.type === 'beat') {
                 step.color = document.getElementById('edit-color').value;
                 const spd = document.getElementById('edit-speed');
@@ -1928,6 +2043,7 @@
             } else if (step.type === 'pinpoint') {
                 step.x = parseInt(document.getElementById('edit-x').value);
                 step.y = parseInt(document.getElementById('edit-y').value);
+                step.color = document.getElementById('edit-color').value;
             }
 
             // Generic speed saver

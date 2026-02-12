@@ -1265,9 +1265,11 @@
                     // Flash is ON for first 50% of each cycle
                     if (currentCycle < flashCount && cycleProgress < 0.5) {
                         body.classList.add('flash-bg');
+                        if (step.color) body.style.backgroundColor = step.color;
                         if (step.vibrate && cycleProgress < 0.1) navigator.vibrate(50); // Vibrate at start of each flash
                     } else {
                         body.classList.remove('flash-bg');
+                        body.style.backgroundColor = '';
                     }
                     break;
                 case 'emojis':
@@ -1421,6 +1423,10 @@
                     textDiv.innerText = step.value || 'TEXTE';
                     textDiv.style.color = step.color || '#ffffff';
                     textDiv.style.fontSize = (step.size || 12) + 'vh';
+                    // New Params
+                    textDiv.style.textAlign = step.align || 'center';
+                    textDiv.style.fontFamily = step.font || 'sans-serif';
+                    textDiv.style.fontWeight = step.bold ? 'bold' : 'normal';
                     break;
                 case 'pulse':
                     body.classList.add('pulse-bg');
@@ -1508,6 +1514,10 @@
                     pinpoint.style.display = 'block';
                     pinpoint.style.left = (step.x || 50) + '%';
                     pinpoint.style.top = (step.y || 50) + '%';
+                    if (step.color) {
+                        pinpoint.style.borderColor = step.color;
+                        pinpoint.style.boxShadow = `0 0 15px ${step.color}, inset 0 0 15px ${step.color}`;
+                    }
                     break;
                 case 'unlock':
                     const unlockIcon = document.getElementById('unlock-icon');
@@ -1533,6 +1543,7 @@
                         sparkle.className = 'sparkle-particle';
                         sparkle.style.left = Math.random() * 100 + '%';
                         sparkle.style.top = '0px';
+                        if (step.color) sparkle.style.background = step.color;
                         document.getElementById('engine-screen').appendChild(sparkle);
                         setTimeout(() => sparkle.remove(), 2000);
                     }
@@ -1541,6 +1552,10 @@
                     const fire = document.getElementById('fire-container');
                     fire.style.display = 'block';
                     if (step.value) fire.style.opacity = step.value / 100;
+                    if (step.color) {
+                        // Very basic tinting for fire - ideally would need more complex CSS filter
+                        fire.style.filter = `drop-shadow(0 0 10px ${step.color})`;
+                    }
                     break;
                 case 'beat':
                     const bpm = step.speed || 120;
@@ -1559,6 +1574,7 @@
                     const staticOv = document.getElementById('static-overlay');
                     staticOv.style.display = 'block';
                     if (step.value) staticOv.style.opacity = step.value / 100;
+                    if (step.color) staticOv.style.backgroundColor = step.color; // Tinting
                     break;
                 case 'eye':
                     const eye = document.getElementById('eye-container');
@@ -1606,6 +1622,7 @@
                         star.className = 'star';
                         star.style.left = Math.random() * 100 + '%';
                         star.style.top = Math.random() * 100 + '%';
+                        if (step.color) star.style.background = step.color;
                         document.getElementById('engine-screen').appendChild(star);
                         setTimeout(() => star.remove(), 3000);
                     }
@@ -1613,6 +1630,7 @@
                 case 'countdown':
                     const countdownDiv = document.getElementById('countdown-display');
                     countdownDiv.style.display = 'block';
+                    if (step.color) countdownDiv.style.color = step.color;
                     const startFrom = step.value || 3;
                     const countInterval = step.duration / (startFrom + 1);
                     const current = startFrom - Math.floor(elapsed / countInterval);
