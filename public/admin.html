@@ -1751,6 +1751,77 @@
                 const faces = [1, 2, 3, 4, 5, 6];
                 const options = faces.map(f => `<option value="${f}" ${f === (step.value || 6) ? 'selected' : ''}>${f}</option>`).join('');
                 extraFields = `<label>Face Finale</label><select id="edit-val">${options}</select>`;
+            } else if (step.type === 'shuffle') {
+                extraFields = `<label>Vitesse défilement (ms)</label><input id="edit-speed" type="number" value="${step.speed || 150}">`;
+            } else if (step.type === 'emojis') {
+                extraFields = `<label>Vitesse Initiale (ms)</label><input id="edit-speed" type="number" value="${step.speed || 1200}" placeholder="Plus petit = plus vite">`;
+            } else if (step.type === 'cardFlip') {
+                const cards = ['AS', '2S', '3S', '4S', '5S', '6S', '7S', '8S', '9S', '10S', 'JS', 'QS', 'KS', 'AH', '2H', '3H', '4H', '5H', '6H', '7H', '8H', '9H', '10H', 'JH', 'QH', 'KH', 'AD', '2D', '3D', '4D', '5D', '6D', '7D', '8D', '9D', '10D', 'JD', 'QD', 'KD', 'AC', '2C', '3C', '4C', '5C', '6C', '7C', '8C', '9C', '10C', 'JC', 'QC', 'KC'];
+                const options = cards.map(c => `<option value="cards/${c}.jpg" ${step.value === ('cards/' + c + '.jpg') ? 'selected' : ''}>${c}</option>`).join('');
+                extraFields = `
+                    <label>Carte Finale</label><select id="edit-val">${options}</select>
+                    <label>Vitesse Animation (ms)</label><input id="edit-speed" type="number" value="${step.speed || 2000}">
+                `;
+            } else if (step.type === 'number') {
+                extraFields = `<label>Nombre Final</label><input id="edit-val" type="text" value="${step.value || '42'}">`;
+            } else if (step.type === 'glitch') {
+                extraFields = `
+                    <label>Message (Optionnel)</label><input id="edit-val" type="text" value="${step.value || ''}" placeholder="SYSTEM FAILURE">
+                    <label>Vitesse Glitch (ms)</label><input id="edit-speed" type="number" value="${step.speed || 300}">
+                `;
+            } else if (step.type === 'breathing') {
+                extraFields = `
+                    <label>Couleur (au plus fort)</label><input id="edit-val" type="color" value="${step.value || '#222222'}">
+                    <label>Vitesse Cycle (ms)</label><input id="edit-speed" type="number" value="${step.speed || 4000}">
+                `;
+            } else if (step.type === 'countdown') {
+                extraFields = `<label>Commencer à</label><input id="edit-val" type="number" value="${step.value || 3}">`;
+            } else if (step.type === 'text') {
+                extraFields = `
+                    <label>Texte</label><input id="edit-val" type="text" value="${step.value || 'TEXTE'}">
+                    <label>Couleur</label><input id="edit-color" type="color" value="${step.color || '#ffffff'}">
+                    <label>Taille (vh)</label><input id="edit-size" type="number" value="${step.size || 12}">
+                `;
+            } else if (step.type === 'pulse' || step.type === 'beat') {
+                extraFields = `
+                    <label>Couleur</label><input id="edit-color" type="color" value="${step.color || '#ffffff'}">
+                    <label>BPM / Vitesse</label><input id="edit-speed" type="number" value="${step.speed || 120}">
+                `;
+            } else if (step.type === 'spiral' || step.type === 'ripple' || step.type === 'wave') {
+                extraFields = `<label>Vitesse Animation (ms)</label><input id="edit-speed" type="number" value="${step.speed || 3000}">`;
+            } else if (step.type === 'color' || step.type === 'fade' || step.type === 'mask') {
+                extraFields = `<label>Valeur / Couleur</label><input id="edit-val" type="text" value="${step.value || '#ff0000'}">`;
+            } else if (step.type === 'zoom' || step.type === 'shake') {
+                extraFields = `<label>Intensité</label><input id="edit-val" type="number" value="${step.value || 5}">`;
+            } else if (step.type === 'slot') {
+                extraFields = `
+                    <label>Symboles (séparés par virgule)</label><input id="edit-symbols" type="text" value="${(step.symbols || []).join(', ')}" placeholder="🍒, 🍋, ⭐">
+                    <label>Résultat Final (3 symboles)</label><input id="edit-val" type="text" value="${step.value || '⭐⭐⭐'}">
+                `;
+            } else if (step.type === 'pinpoint') {
+                extraFields = `
+                    <label>Position X (%)</label><input id="edit-x" type="number" value="${step.x || 50}">
+                    <label>Position Y (%)</label><input id="edit-y" type="number" value="${step.y || 50}">
+                `;
+            } else if (step.type === 'unlock') {
+                extraFields = `<label>Emoji Cadenas</label><input id="edit-val" type="text" value="${step.value || '🔓'}">`;
+            } else if (step.type === 'mirror') {
+                extraFields = `
+                    <label>Axe</label>
+                    <select id="edit-val">
+                        <option value="v" ${step.value === 'v' ? 'selected' : ''}>Vertical (Miroir V)</option>
+                        <option value="h" ${step.value === 'h' ? 'selected' : ''}>Horizontal (Miroir H)</option>
+                    </select>
+                `;
+            } else if (step.type === 'sparkle' || step.type === 'fire' || step.type === 'staticNoise' || step.type === 'starfield') {
+                extraFields = `<label>Intensité / Densité</label><input id="edit-val" type="number" value="${step.value || 50}">`;
+            } else if (step.type === 'eye' || step.type === 'puzzle' || step.type === 'crystal' || step.type === 'snapshot') {
+                extraFields = `<label>Durée / Vitesse (ms)</label><input id="edit-speed" type="number" value="${step.speed || 1000}">`;
+            } else if (step.type === 'arrow') {
+                extraFields = `<label>Animation</label><select id="edit-val">
+                    <option value="static" ${step.value === 'static' ? 'selected' : ''}>Fixe</option>
+                    <option value="bounce" ${step.value === 'bounce' ? 'selected' : ''}>Rebond</option>
+                 </select>`;
             }
 
             item.innerHTML = `
@@ -1825,7 +1896,32 @@
                 step.endSpeed = parseInt(document.getElementById('edit-endSpeed')?.value) || 120;
                 step.pauseMs = parseInt(document.getElementById('edit-pauseMs')?.value) || 2000;
                 step.finalSize = parseInt(document.getElementById('edit-finalSize')?.value) || 10;
+            } else if (step.type === 'cardFlip') {
+                const cfVal = document.getElementById('edit-val');
+                if (cfVal) step.value = cfVal.value;
+            } else if (['number', 'glitch', 'breathing', 'countdown', 'color', 'fade', 'mask', 'unlock', 'mirror', 'sparkle', 'fire', 'staticNoise', 'starfield', 'arrow', 'zoom', 'shake'].includes(step.type)) {
+                const gVal = document.getElementById('edit-val');
+                if (gVal) step.value = gVal.value;
+            } else if (step.type === 'text') {
+                step.value = document.getElementById('edit-val').value;
+                step.color = document.getElementById('edit-color').value;
+                step.size = parseInt(document.getElementById('edit-size').value);
+            } else if (step.type === 'pulse' || step.type === 'beat') {
+                step.color = document.getElementById('edit-color').value;
+                const spd = document.getElementById('edit-speed');
+                if (spd) step.speed = parseInt(spd.value);
+            } else if (step.type === 'slot') {
+                step.value = document.getElementById('edit-val').value;
+                step.symbols = document.getElementById('edit-symbols').value.split(',').map(s => s.trim());
+            } else if (step.type === 'pinpoint') {
+                step.x = parseInt(document.getElementById('edit-x').value);
+                step.y = parseInt(document.getElementById('edit-y').value);
             }
+
+            // Generic speed saver
+            const speedInp = document.getElementById('edit-speed');
+            if (speedInp) step.speed = parseInt(speedInp.value);
+
             log("Étape modifiée: " + step.type);
             socket.emit('update-state', state);
             renderSteps();

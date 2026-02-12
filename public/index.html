@@ -445,21 +445,36 @@
 
         /* Breathing */
         body.breathing-bg {
-            animation: breatheEffect 4s ease-in-out infinite !important;
+            animation: breatheEffect 4s ease-in-out infinite;
+            /* Default, overridden by JS */
         }
 
         @keyframes breatheEffect {
 
             0%,
             100% {
-                opacity: 1;
+                background-color: #000;
                 transform: scale(1);
             }
 
             50% {
-                opacity: 0.7;
-                transform: scale(1.05);
+                background-color: var(--breathing-color, #333);
+                transform: scale(1.02);
             }
+        }
+
+        /* Glitch */
+        #glitch-text-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 10vh;
+            font-weight: bold;
+            color: #fff;
+            display: none;
+            text-shadow: 2px 2px #f00, -2px -2px #00f;
+            z-index: 1000;
         }
 
         /* Glitch */
@@ -999,6 +1014,7 @@
         <div id="mask-overlay">🎭</div>
         <div id="crystal-ball"></div>
         <div id="snapshot-flash"></div>
+        <div id="glitch-text-overlay"></div>
     </div>
 
     <!-- Écran 4 : Final -->
@@ -1209,6 +1225,8 @@
                         document.getElementById('video-display').style.display = 'none';
                         document.getElementById('arrow').style.display = 'none';
                         document.getElementById('main-body').className = '';
+                        document.getElementById('main-body').style.animation = '';
+                        document.getElementById('main-body').style.removeProperty('--breathing-color');
                         // Reset overlays
                         document.querySelectorAll('.screen > div[id$="-overlay"], .screen > div[id$="-container"]').forEach(el => {
                             if (el.id !== 'debug-log') el.style.display = 'none';
@@ -1254,7 +1272,8 @@
                     break;
                 case 'emojis':
                     const t = Math.min(1, elapsed / step.duration);
-                    const interval = 1200 * Math.pow(0.25, t);
+                    const startSpeed = step.speed || 1200;
+                    const interval = startSpeed * Math.pow(0.25, t);
                     const emojis = ['♠️', '♥️', '♣️', '♦️'];
                     const emoji = emojis[Math.floor(now / interval) % 4];
                     emojiDiv.innerText = emoji;
@@ -1264,7 +1283,7 @@
                     body.className = 'white-bg';
                     mediaImg.style.display = 'block';
                     const cards = ['AS', 'KH', '2J', 'QC', '7H', '3C'];
-                    mediaImg.src = `cards/${cards[Math.floor(now / 150) % cards.length]}.jpg`;
+                    mediaImg.src = `cards/${cards[Math.floor(now / (step.speed || 150)) % cards.length]}.jpg`;
                     break;
                 case 'reveal':
                     body.className = 'white-bg';
@@ -1324,9 +1343,6 @@
                         emojiDiv.style.fontSize = fSize + 'vh';
                     }
                     break;
-                case 'arrow':
-                    document.getElementById('arrow').style.display = 'block';
-                    break;
                 case 'heart':
                     const heartSvg = document.getElementById('heart-svg');
                     heartSvg.style.display = 'block';
@@ -1336,14 +1352,6 @@
                         heartSvg.style.display = 'none';
                     }, 3000);
                     break;
-                case 'countdown':
-                    const countdownDiv = document.getElementById('countdown-display');
-                    countdownDiv.style.display = 'block';
-                    const startFrom = step.startFrom || 3;
-                    const countInterval = step.duration / (startFrom + 1);
-                    const current = Math.ceil((step.duration - elapsed) / countInterval);
-                    countdownDiv.innerText = current > 0 ? current : '';
-                    break;
                 case 'dice':
                     const diceContainer = document.getElementById('dice-container');
                     const diceEl = document.getElementById('dice');
@@ -1351,7 +1359,7 @@
                     if (elapsed < 2000) {
                         diceEl.style.animation = 'diceRoll 2s ease-out forwards';
                     } else {
-                        const finalFace = step.finalFace || 6;
+                        const finalFace = step.value || step.finalFace || 6;
                         const rotations = {
                             1: 'rotateY(0deg) rotateX(0deg)',
                             2: 'rotateY(180deg) rotateX(0deg)',
@@ -1411,14 +1419,20 @@
                     const textDiv = document.getElementById('text-display');
                     textDiv.style.display = 'block';
                     textDiv.innerText = step.value || 'TEXTE';
+                    textDiv.style.color = step.color || '#ffffff';
+                    textDiv.style.fontSize = (step.size || 12) + 'vh';
                     break;
                 case 'pulse':
                     body.classList.add('pulse-bg');
+                    // Note: pulse-bg uses CSS animation, color/speed would need extra inline styles or CSS var
+                    if (step.color) body.style.setProperty('--pulse-color', step.color);
+                    if (step.speed) body.style.animationDuration = step.speed + 'ms';
                     break;
                 case 'spiral':
                     const spiralDiv = document.getElementById('spiral-overlay');
                     spiralDiv.style.display = 'block';
                     spiralDiv.classList.add('active');
+                    if (step.speed) spiralDiv.style.animationDuration = step.speed + 'ms';
                     break;
                 case 'color':
                     const colorDiv = document.getElementById('color-overlay');
@@ -1436,20 +1450,33 @@
                     break;
                 case 'breathing':
                     body.classList.add('breathing-bg');
+                    body.style.setProperty('--breathing-color', step.value || '#333');
+                    body.style.animationDuration = (step.speed || 4000) + 'ms';
                     break;
                 case 'glitch':
                     body.classList.add('glitch-bg');
+                    body.style.animationDuration = (step.speed || 300) + 'ms';
+                    if (step.value) {
+                        const gText = document.getElementById('glitch-text-overlay');
+                        if (gText) {
+                            gText.innerText = step.value;
+                            gText.style.display = 'block';
+                        }
+                    }
                     break;
                 case 'ripple':
                     const rippleCenter = document.getElementById('ripple-center');
                     rippleCenter.style.display = 'block';
                     rippleCenter.classList.add('active');
+                    if (step.speed) rippleCenter.style.animationDuration = step.speed + 'ms';
                     break;
                 case 'zoom':
                     body.classList.add('zoom-bg');
+                    if (step.value) document.documentElement.style.setProperty('--zoom-intensity', step.value);
                     break;
                 case 'shake':
                     body.classList.add('shake-bg');
+                    if (step.value) document.documentElement.style.setProperty('--shake-intensity', step.value + 'px');
                     break;
                 case 'fade':
                     const fadeDiv = document.getElementById('fade-overlay');
@@ -1463,6 +1490,7 @@
                     cardFlipContainer.style.display = 'block';
                     const cardFlip = document.getElementById('card-flip');
                     cardFlip.innerHTML = `<img src="${step.value || 'cards/AC.jpg'}" style="width:100%;height:100%;object-fit:contain;">`;
+                    cardFlip.style.animationDuration = (step.speed || 2000) + 'ms';
                     break;
                 case 'slot':
                     const slotDiv = document.getElementById('slot-container');
@@ -1485,17 +1513,22 @@
                     const unlockIcon = document.getElementById('unlock-icon');
                     unlockIcon.style.display = 'block';
                     if (elapsed > step.duration / 2) {
-                        unlockIcon.innerText = '🔓';
+                        unlockIcon.innerText = step.value || '🔓';
+                    } else {
+                        unlockIcon.innerText = '🔒';
                     }
                     break;
                 case 'mirror':
-                    body.classList.add(step.axis === 'v' ? 'mirror-v' : 'mirror-h');
+                    body.classList.add(step.value === 'v' ? 'mirror-v' : 'mirror-h');
                     break;
                 case 'wave':
-                    document.getElementById('wave-overlay').style.display = 'block';
+                    const wave = document.getElementById('wave-overlay');
+                    wave.style.display = 'block';
+                    if (step.speed) wave.style.animationDuration = step.speed + 'ms';
                     break;
                 case 'sparkle':
-                    if (elapsed % 200 < 20) {
+                    const density = step.value || 50; // Higher value = less frequent
+                    if (elapsed % (20000 / density) < 20) {
                         const sparkle = document.createElement('div');
                         sparkle.className = 'sparkle-particle';
                         sparkle.style.left = Math.random() * 100 + '%';
@@ -1505,13 +1538,16 @@
                     }
                     break;
                 case 'fire':
-                    document.getElementById('fire-container').style.display = 'block';
+                    const fire = document.getElementById('fire-container');
+                    fire.style.display = 'block';
+                    if (step.value) fire.style.opacity = step.value / 100;
                     break;
                 case 'beat':
-                    const bpm = step.bpm || 120;
+                    const bpm = step.speed || 120;
                     const beatInterval = 60000 / bpm;
                     if (elapsed % beatInterval < 300) {
                         body.classList.add('beat-flash');
+                        if (step.color) document.documentElement.style.setProperty('--beat-color', step.color);
                         setTimeout(() => body.classList.remove('beat-flash'), 300);
                     }
                     break;
@@ -1520,20 +1556,26 @@
                     allAudio.forEach(a => a.pause());
                     break;
                 case 'staticNoise':
-                    document.getElementById('static-overlay').style.display = 'block';
+                    const staticOv = document.getElementById('static-overlay');
+                    staticOv.style.display = 'block';
+                    if (step.value) staticOv.style.opacity = step.value / 100;
                     break;
                 case 'eye':
-                    document.getElementById('eye-container').style.display = 'block';
+                    const eye = document.getElementById('eye-container');
+                    eye.style.display = 'block';
+                    if (step.speed) eye.style.animationDuration = step.speed + 'ms';
                     break;
                 case 'puzzle':
                     const puzzleContainer = document.getElementById('puzzle-container');
                     puzzleContainer.style.display = 'block';
                     if (elapsed === 0) {
+                        const gridSize = 2; // Fixed for now, could be parameterized
                         for (let i = 0; i < 4; i++) {
                             const piece = document.createElement('div');
                             piece.className = 'puzzle-piece';
                             piece.style.left = (i % 2) * 50 + '%';
                             piece.style.top = Math.floor(i / 2) * 50 + '%';
+                            piece.style.animationDuration = (step.speed || 1000) + 'ms';
                             puzzleContainer.appendChild(piece);
                         }
                     }
@@ -1541,10 +1583,12 @@
                 case 'mask':
                     const maskDiv = document.getElementById('mask-overlay');
                     maskDiv.style.display = 'block';
-                    maskDiv.innerText = step.maskType || '🎭';
+                    maskDiv.innerText = step.value || '🎭'; // Using value for maskType
                     break;
                 case 'crystal':
-                    document.getElementById('crystal-ball').style.display = 'block';
+                    const crystal = document.getElementById('crystal-ball');
+                    crystal.style.display = 'block';
+                    if (step.speed) crystal.style.animationDuration = step.speed + 'ms';
                     break;
                 case 'snapshot':
                     const snapFlash = document.getElementById('snapshot-flash');
@@ -1553,16 +1597,34 @@
                     setTimeout(() => {
                         snapFlash.classList.remove('active');
                         snapFlash.style.display = 'none';
-                    }, 500);
+                    }, step.speed || 500);
                     break;
                 case 'starfield':
-                    if (elapsed % 100 < 20) {
+                    const starDensity = step.value || 50;
+                    if (elapsed % (5000 / starDensity) < 20) {
                         const star = document.createElement('div');
                         star.className = 'star';
                         star.style.left = Math.random() * 100 + '%';
                         star.style.top = Math.random() * 100 + '%';
                         document.getElementById('engine-screen').appendChild(star);
                         setTimeout(() => star.remove(), 3000);
+                    }
+                    break;
+                case 'countdown':
+                    const countdownDiv = document.getElementById('countdown-display');
+                    countdownDiv.style.display = 'block';
+                    const startFrom = step.value || 3;
+                    const countInterval = step.duration / (startFrom + 1);
+                    const current = startFrom - Math.floor(elapsed / countInterval);
+                    countdownDiv.innerText = current > 0 ? current : 'GO';
+                    break;
+                case 'arrow':
+                    const arrow = document.getElementById('arrow');
+                    arrow.style.display = 'block';
+                    if (step.value === 'bounce') {
+                        arrow.style.animation = 'bounceArrow 1s infinite';
+                    } else {
+                        arrow.style.animation = 'none';
                     }
                     break;
                 case 'pause':
