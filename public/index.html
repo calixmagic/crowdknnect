@@ -1158,6 +1158,7 @@
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById('engine-screen').classList.add('active');
             log("Moteur démarré, attente sync...");
+            window.hasLoggedDelay = false;
 
             let currentStepIdx = 0;
             let stepStartTime = targetTime;
@@ -1171,7 +1172,10 @@
                 // Catch-up logic: if we are late, we might need to skip steps or fast-forward
                 // But for now, we just ensure we start.
                 if (currentStepIdx === 0 && stepStartTime === targetTime && (now - targetTime) > 100) {
-                    log("Retard au démarrage: " + (now - targetTime) + "ms (Catch-up)");
+                    if (!window.hasLoggedDelay) {
+                        log("Retard au démarrage: " + (now - targetTime) + "ms (Catch-up)");
+                        window.hasLoggedDelay = true;
+                    }
                 }
 
                 const steps = routine.steps.filter(s => s.active);
@@ -1190,7 +1194,7 @@
 
                 renderStep(step, now, elapsedInStep);
 
-                if (elapsedInStep >= step.duration && step.duration > 0) {
+                if (elapsedInStep >= step.duration) {
                     currentStepIdx++;
                     stepStartTime = now;
                     log("  ✓ " + step.type + " terminé en " + (elapsedInStep / 1000).toFixed(1) + "s");

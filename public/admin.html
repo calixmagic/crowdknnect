@@ -1668,12 +1668,14 @@
             state.routines[state.activeRoutineIndex].steps.push({ id: Date.now(), type, duration, active: true });
             log("Étape ajoutée: " + type + " " + duration + "ms");
             document.getElementById('step-add-area').innerHTML = '';
+            socket.emit('update-state', state);
             renderSteps();
         }
 
         function deleteStep(idx) {
             state.routines[state.activeRoutineIndex].steps.splice(idx, 1);
             log("Étape supprimée");
+            socket.emit('update-state', state);
             renderSteps();
         }
 
@@ -1776,7 +1778,8 @@
 
         function saveStep(idx) {
             const step = state.routines[state.activeRoutineIndex].steps[idx];
-            step.duration = parseInt(document.getElementById('edit-dur').value) || step.duration;
+            const durInput = parseInt(document.getElementById('edit-dur').value);
+            step.duration = isNaN(durInput) ? step.duration : durInput;
             const persistChk = document.getElementById('edit-persist');
             if (persistChk) step.persist = persistChk.checked;
 
@@ -1823,6 +1826,7 @@
                 step.finalSize = parseInt(document.getElementById('edit-finalSize')?.value) || 10;
             }
             log("Étape modifiée: " + step.type);
+            socket.emit('update-state', state);
             renderSteps();
         }
 
