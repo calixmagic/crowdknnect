@@ -1391,7 +1391,7 @@
         <div class="row">
             <label>Afficher les logs de timing (Admin)</label>
             <label class="switch" style="margin:0;">
-                <input type="checkbox" id="logs-toggle" checked onchange="toggleLogs(this.checked)">
+                <input type="checkbox" id="logs-toggle" onchange="toggleLogs(this.checked)">
                 <span class="slider"></span>
             </label>
         </div>
@@ -1426,6 +1426,14 @@
         let serverOffset = 0;
         const logBox = document.getElementById('debug-log');
 
+        // Init logs toggle from localStorage
+        const savedLogState = localStorage.getItem('adminLogsParams') === 'true';
+        const logToggle = document.getElementById('logs-toggle');
+        if (logToggle) {
+            logToggle.checked = savedLogState;
+            toggleLogs(savedLogState);
+        }
+
         function log(msg, color) {
             const time = new Date().toLocaleTimeString();
             console.log(`[ADMIN ${time}] ${msg}`);
@@ -1435,6 +1443,11 @@
             line.innerText = `[${time}] ${msg}`;
             logBox.appendChild(line);
             if (logBox.childNodes.length > 5) logBox.removeChild(logBox.firstChild);
+        }
+
+        function toggleLogs(checked) {
+            if (logBox) logBox.style.display = checked ? 'block' : 'none';
+            localStorage.setItem('adminLogsParams', checked);
         }
 
         socket.on('connect', () => {
