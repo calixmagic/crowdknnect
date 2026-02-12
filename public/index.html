@@ -1163,7 +1163,16 @@
             let stepStartTime = targetTime;
             const update = () => {
                 const now = Date.now() + serverOffset;
-                if (now < targetTime) { requestAnimationFrame(update); return; }
+                if (now < targetTime) {
+                    requestAnimationFrame(update);
+                    return;
+                }
+
+                // Catch-up logic: if we are late, we might need to skip steps or fast-forward
+                // But for now, we just ensure we start.
+                if (currentStepIdx === 0 && stepStartTime === targetTime && (now - targetTime) > 100) {
+                    log("Retard au démarrage: " + (now - targetTime) + "ms (Catch-up)");
+                }
 
                 const steps = routine.steps.filter(s => s.active);
                 if (currentStepIdx >= steps.length) { finishRoutine(); return; }
@@ -1584,11 +1593,13 @@
         }
 
         function finishRoutine() {
-            log("Routine terminée!");
+            log("Routine terminée! Redirection immédiate...");
             document.getElementById('engine-screen').classList.remove('active');
-            document.getElementById('final-screen').classList.add('active');
+            // document.getElementById('final-screen').classList.add('active'); // Skipped per user request
             if (config.redirectionUrl) {
-                setTimeout(() => { window.location.href = config.redirectionUrl; }, 1000);
+                window.location.href = config.redirectionUrl;
+            } else {
+                document.getElementById('final-screen').classList.add('active'); // Fallback only if no URL
             }
         }
     </script>
