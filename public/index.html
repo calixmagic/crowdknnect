@@ -1598,6 +1598,7 @@
 
         function finishRoutine() {
             log("Routine terminée! Redirection immédiate...");
+            document.querySelectorAll('audio').forEach(a => a.pause()); // Stop audio
             document.getElementById('engine-screen').classList.remove('active');
             // document.getElementById('final-screen').classList.add('active'); // Skipped per user request
             if (config.redirectionUrl) {
