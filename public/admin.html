@@ -1475,6 +1475,25 @@
                         ENREGISTRER</button>
                     <button class="btn btn-secondary" onclick="closePanel()">FERMER PANNEAU</button>
                 </div>
+            </div>
+            <!-- End of Settings Panel -->
+
+            <div id="wrapper">
+                <!-- Background Preview Canvas -->
+                <canvas id="bg-canvas"
+                    style="position:fixed; top:0; left:0; width:100%; height:100%; z-index:-1; pointer-events:none;"
+                    width="430" height="932"></canvas>
+                <div id="bg-overlay-css"
+                    style="position: fixed; top: 0px; left: 0px; width: 100%; height: 100%; z-index: -1; pointer-events: none;"
+                    class="">
+                </div>
+
+                <div class="header">
+                    <h1>CrowdConnect Admin</h1>
+                    <button id="msg-btn"
+                        style="position:absolute; top:20px; right:20px; font-size:24px; background:none; border:none; cursor:pointer;"
+                        onclick="openSettings()">⚙️</button>
+                </div>
 
                 <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
                 <script>
@@ -2101,7 +2120,17 @@
                     function initRain(c) { for (let i = 0; i < 200; i++)bgParticles.push({ x: Math.random() * bgCanvas.width, y: Math.random() * bgCanvas.height, vy: Math.random() * 10 + 10, l: Math.random() * 20 + 10 }); function l() { bgCtx.fillStyle = '#0003'; bgCtx.fillRect(0, 0, bgCanvas.width, bgCanvas.height); bgCtx.strokeStyle = c || '#0af'; bgCtx.lineWidth = 1; bgCtx.beginPath(); bgParticles.forEach(p => { p.y += p.vy; if (p.y > bgCanvas.height) { p.y = -p.l; p.x = Math.random() * bgCanvas.width } bgCtx.moveTo(p.x, p.y); bgCtx.lineTo(p.x, p.y + p.l) }); bgCtx.stroke(); bgAnimFrameId = requestAnimationFrame(l) } l() }
                     function initGeometric(c) { let t = 0; function l() { t += .005; bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height); bgCtx.strokeStyle = c; bgCtx.lineWidth = 1; const cx = bgCanvas.width / 2, cy = bgCanvas.height / 2; for (let i = 0; i < 10; i++) { const s = 100 + i * 50; bgCtx.save(); bgCtx.translate(cx, cy); bgCtx.rotate(t * (i % 2 === 0 ? 1 : -1) + i * .1); bgCtx.strokeRect(-s / 2, -s / 2, s, s); bgCtx.restore() } bgAnimFrameId = requestAnimationFrame(l) } l() }
 
+                    // Settings Panel Logic
+                    function openSettings() {
+                        document.getElementById('settings-panel').classList.add('open');
+                    }
+
+                    function closePanel() {
+                        document.getElementById('settings-panel').classList.remove('open');
+                    }
+
                 </script>
+            </div><!-- End of Wrapper -->
 </body>
 
 </html>
