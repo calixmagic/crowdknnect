@@ -1852,46 +1852,11 @@
             updateLogoDisplay();
         });
 
-        // === GESTE SECRET ADMIN (Appui long 2.5s) ===
-        let adminTimer = null;
-        let startX = 0, startY = 0;
 
-        document.addEventListener('touchstart', (e) => {
-            clearTimeout(adminTimer);
-            if (e.touches.length === 1) {
-                startX = e.touches[0].clientX;
-                startY = e.touches[0].clientY;
-                adminTimer = setTimeout(() => {
-                    log("Demande Admin (Long Press)...");
-                    socket.emit('promote-to-admin');
-                    if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
-                }, 2500);
-            }
-        }, { passive: true });
-
-        document.addEventListener('touchmove', (e) => {
-            // Cancel ONLY if moved significantly (>20px)
-            if (adminTimer && e.touches.length === 1) {
-                const moveX = Math.abs(e.touches[0].clientX - startX);
-                const moveY = Math.abs(e.touches[0].clientY - startY);
-                if (moveX > 20 || moveY > 20) clearTimeout(adminTimer);
-            } else {
-                clearTimeout(adminTimer);
-            }
-        }, { passive: true });
-
-        document.addEventListener('touchend', () => clearTimeout(adminTimer));
-
-
-
-        socket.on('admin-granted', () => {
-            log("Admin accordé! Redirection...");
-            window.location.href = '/admin.html';
-        });
 
         // === CONNEXION SOCKET ===
         socket.on('connect', () => {
-            log("VERSION: v4.1 - Public UI Fix");
+            log("VERSION: v5.0 - Single URL");
             log("Connecté: " + socket.id);
             const now = Date.now();
             socket.emit('sync-time', now, (serverTime) => {
@@ -2939,10 +2904,9 @@
 
         function openAdminPanel() {
             if (!isAdmin) {
-                // Check if we should request admin or just prompt
-                // For now, assume if not admin, we request it
-                const pwd = prompt("Mot de passe Admin :");
-                if (pwd) socket.emit('request-admin', pwd);
+                // Auto-request admin without password
+                socket.emit('promote-to-admin');
+                // We wait for 'admin-granted' event to actually open the panel and set isAdmin=true
                 return;
             }
             document.getElementById('settings-panel').classList.add('open');
@@ -3330,11 +3294,16 @@
             if (e.target.closest('button, input, select, .step-handle')) return;
 
             if (e.touches.length === 1) {
-                adminStartX = e.touches[0].clientX;
-                adminStartY = e.touches[0].clientY;
+                // Restriction zone haut-gauche (150x150px)
+                const x = e.touches[0].clientX;
+                const y = e.touches[0].clientY;
+                if (x > 150 || y > 150) return;
+
+                adminStartX = x;
+                adminStartY = y;
                 adminTouchTimer = setTimeout(() => {
                     // Trigger
-                    log("Long Press Detected");
+                    log("Long Press (Top-Left) Detected");
                     if (navigator.vibrate) navigator.vibrate(50);
                     openAdminPanel();
                 }, 1500);
