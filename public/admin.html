@@ -1754,22 +1754,16 @@
                             const handle = item.querySelector('.step-handle');
                             let startY = 0, currentItem = null;
 
-                            // Ensure handle consumes event and prevents scroll
-                            handle.style.touchAction = 'none';
-
                             handle.addEventListener('touchstart', (e) => {
-                                // e.preventDefault(); // Prevents scroll, allows drag
+                                e.preventDefault();
                                 currentItem = item;
                                 startY = e.touches[0].clientY;
                                 item.classList.add('dragging');
                                 item.style.zIndex = '100';
-                                item.style.transform = 'scale(1.02)';
-                                if (state.debug) console.log("Drag started via Handle");
-                                if (navigator.vibrate) navigator.vibrate(50);
                             }, { passive: false });
 
                             handle.addEventListener('touchmove', (e) => {
-                                e.preventDefault(); // Critical for drag to work instead of scroll
+                                e.preventDefault();
                                 if (!currentItem) return;
                                 const y = e.touches[0].clientY;
                                 const after = getDragAfter(list, y);
@@ -1781,13 +1775,8 @@
                                 if (!currentItem) return;
                                 currentItem.classList.remove('dragging');
                                 currentItem.style.zIndex = '';
-                                currentItem.style.transform = '';
                                 currentItem = null;
 
-                                // Persist ordering
-                                const newOrder = [...list.querySelectorAll('.step-item')].map(el => parseInt(el.dataset.idx));
-                                const steps = state.routines[state.activeRoutineIndex].steps;
-                                const reordered = newOrder.map(i => steps[i]);
                                 state.routines[state.activeRoutineIndex].steps = reordered;
                                 syncState();
                                 renderSteps();
