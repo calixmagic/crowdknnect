@@ -113,7 +113,7 @@
             width: 150px;
             height: 150px;
             object-fit: contain;
-            border-radius: 50%;
+            border-radius: 20px;
             /* Optional, for specific aesthetics */
             animation: pulse-zoom 2s infinite ease-in-out;
             margin-bottom: 20px;
@@ -126,7 +126,14 @@
             color: #fff;
             text-transform: uppercase;
             letter-spacing: 2px;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
+        }
+
+        #sub-text {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 20px;
+            font-weight: 300;
         }
 
         @keyframes pulse-zoom {
@@ -1010,9 +1017,9 @@
     <div id="connect-screen" class="screen active">
         <!-- <div class="mystic-wheel"></div> Removed wheel in favor of logo -->
         <div id="connect-wrapper">
-            <img id="connect-logo" src="logo.png" alt="Toucher pour entrer">
-            <p id="welcome-text">Toucher pour commencer</p>
-            <p style="font-size:0.8rem; color:#888; letter-spacing:1px;">Expérience Interactive</p>
+            <img id="connect-logo" src="img/logo.png" alt="Logo">
+            <div id="welcome-text">TOUCHER POUR COMMENCER</div>
+            <div id="sub-text">Expérience Interactive</div>
         </div>
     </div>
 
@@ -1634,14 +1641,19 @@
         // === END BG ANIMATIONS ===
 
         function updateConnectScreen() {
-            if (config.logoUrl) {
-                document.getElementById('connect-logo').src = config.logoUrl;
+            // Start Image
+            const logoEl = document.getElementById('connect-logo');
+            if (config.startImageSource === 'custom' && config.startImageUrl) {
+                logoEl.src = config.startImageUrl;
+            } else if (config.logoUrl) {
+                logoEl.src = config.logoUrl;
             }
-            if (config.tagline) {
-                document.getElementById('welcome-text').innerText = config.tagline; // Reuse tagline as welcome text or separate?
-                // User asked for "Texte d'accueil". Let's use tagline for now or add a specific field later. 
-                // For now, re-use existing config properties to avoid schema changes if possible.
-                // Or just keep it generic "Toucher pour commencer" if not specified.
+
+            // Texts
+            if (config.welcomeText) document.getElementById('welcome-text').innerText = config.welcomeText;
+            if (config.subText) {
+                const sub = document.getElementById('sub-text');
+                if (sub) sub.innerText = config.subText;
             }
         }
 

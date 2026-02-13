@@ -1382,14 +1382,47 @@
             <div class="row"><label>Délai d'Entrée (s)</label><input type="number" id="delay-input" value="2"
                     step="0.5">
             </div>
-            <div class="row"><label>Zoom Logo (<span id="zoom-val">100</span>%)</label><input type="range"
-                    id="zoom-range" min="50" max="250" value="100" oninput="updateZoom(this.value)"></div>
-            <div class="row"><label>Logo : Galerie</label>
-                <div class="file-input-wrapper"><button class="btn btn-secondary">CHOISIR IMAGE</button><input
-                        type="file" id="logo-file" accept="image/*" onchange="handleFileUpload(this)"></div>
+            <div class="row">
+                <div class="setting-row">
+                    <label for="logo-zoom-input">Zoom Logo: <span id="zoom-val">100</span>%</label>
+                    <!-- Transparency logic added inline for speed, or via script -->
+                    <input type="range" id="zoom-range" min="10" max="500" value="100" oninput="updateZoom(this.value)"
+                        onmousedown="document.getElementById('settings-panel').style.opacity='0.1'"
+                        onmouseup="document.getElementById('settings-panel').style.opacity='1'"
+                        ontouchstart="document.getElementById('settings-panel').style.opacity='0.1'"
+                        ontouchend="document.getElementById('settings-panel').style.opacity='1'">
+                </div>
+                <div class="setting-row">
+                    <label>Image d'accueil:</label>
+                    <div style="display:flex; gap:10px; margin-bottom:5px;">
+                        <label><input type="radio" name="startImgSrc" value="logo" onchange="setStartImgSource('logo')"
+                                checked> Logo</label>
+                        <label><input type="radio" name="startImgSrc" value="custom"
+                                onchange="setStartImgSource('custom')"> Autre</label>
+                    </div>
+                    <div id="custom-start-img-container" style="display:none;">
+                        <input type="file" id="custom-start-file" onchange="handleStartImageUpload(this)">
+                        <input type="text" id="start-img-url-input" placeholder="URL Image..."
+                            onchange="updateStartImage(this.value)">
+                    </div>
+                </div>
+                <div class="setting-row">
+                    <label>Textes d'accueil:</label>
+                    <input type="text" id="welcome-text-input" placeholder="TOUCHER POUR COMMENCER"
+                        onchange="updateTexts()">
+                    <input type="text" id="sub-text-input" placeholder="Expérience Interactive" onchange="updateTexts()"
+                        style="margin-top:5px;">
+                </div>
+                <div class="setting-row">
+                    <label for="logo-url-input">URL Logo:</label>
+                    <div style="display:flex; gap:5px;">
+                        <input type="text" id="logo-url-input" placeholder="http://..."
+                            onchange="previewLogo(this.value)">
+                        <input type="file" id="logo-file" accept="image/*" style="width:110px;"
+                            onchange="handleFileUpload(this)">
+                    </div>
+                </div>
             </div>
-            <div class="row"><label>Logo : URL</label><input type="text" id="logo-url-input" placeholder="https://..."
-                    oninput="previewLogo(this.value)"></div>
             <div class="row"><label>URL Redirection Finale</label><input type="text" id="redir-url-input"
                     placeholder="https://g.page/..."></div>
             <div class="row"><label>Texte d'accueil</label><input type="text" id="tagline-input"
@@ -1484,15 +1517,20 @@
 
         <div class="header">
             <h1>CrowdConnect Admin</h1>
-            <button id="msg-btn"
-                style="position:absolute; top:20px; right:20px; font-size:24px; background:none; border:none; cursor:pointer;"
-                onclick="openSettings()">⚙️</button>
+            <!-- Settings Button Removed as requested -->
         </div>
 
         <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
         <script>
             const socket = io();
-            let state = { routines: [], activeRoutineIndex: 0, sequenceDelay: 2, logoZoom: 100, logoUrl: '', redirectionUrl: '', logoVisible: false, tagline: '', bgAnim: 'none', startAnim: 'fade' };
+
+            let state = {
+                routines: [], activeRoutineIndex: 0, sequenceDelay: 2,
+                logoZoom: 100, logoUrl: '', redirectionUrl: '', logoVisible: false, tagline: '',
+                bgAnim: 'none', startAnim: 'fade',
+                welcomeText: 'TOUCHER POUR COMMENCER', subText: 'Expérience Interactive',
+                startImageSource: 'logo', startImageUrl: ''
+            };
             let lpTimer = null;
             let showStep = 0;
             let serverOffset = 0;
@@ -1652,6 +1690,15 @@
                 document.getElementById('logo-url-input').value = state.logoUrl || '';
                 document.getElementById('redir-url-input').value = state.redirectionUrl || '';
                 document.getElementById('tagline-input').value = state.tagline || '';
+                if (state.welcomeText) document.getElementById('welcome-text-input').value = state.welcomeText;
+                if (state.subText) document.getElementById('sub-text-input').value = state.subText;
+
+                // Start Image Logic
+                const startSrc = state.startImageSource || 'logo';
+                document.querySelector(`input[name="startImgSrc"][value="${startSrc}"]`).checked = true;
+                document.getElementById('custom-start-img-container').style.display = (startSrc === 'custom') ? 'block' : 'none';
+                document.getElementById('start-img-url-input').value = state.startImageUrl || '';
+
                 const adminTagline = document.getElementById('admin-tagline');
                 if (adminTagline && state.tagline) adminTagline.innerText = state.tagline;
                 // Background color & Anim
@@ -2201,7 +2248,55 @@
                 state.logoZoom = val;
                 document.getElementById('zoom-val').innerText = val;
                 socket.emit('update-state', state);
+                // Fix distortion: Ensure local preview handled by updateUI or direct style
+                const img = document.getElementById('logo-img');
+                if (img) img.style.transform = `scale(${val / 100})`;
             }
+
+            // === NEW FUNCTIONS ===
+            function updateTexts() {
+                state.welcomeText = document.getElementById('welcome-text-input').value;
+                state.subText = document.getElementById('sub-text-input').value;
+                socket.emit('update-state', state);
+            }
+
+            function setStartImgSource(val) {
+                state.startImageSource = val;
+                updateUI();
+                socket.emit('update-state', state);
+            }
+
+            function updateStartImage(url) {
+                state.startImageUrl = url;
+                socket.emit('update-state', state);
+            }
+
+            function handleStartImageUpload(input) {
+                const file = input.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    state.startImageUrl = e.target.result;
+                    document.getElementById('start-img-url-input').value = "(Image Uploadée)";
+                    socket.emit('update-state', state);
+                };
+                reader.readAsDataURL(file);
+            }
+
+            // === TRIGGER LISTENER (Restored) ===
+            document.addEventListener('click', (e) => {
+                // Ignore UI elements
+                if (e.target.closest('button, input, select, textarea, .step-item, #settings-panel')) return;
+                // Ignore if settings open
+                if (document.getElementById('settings-panel').classList.contains('open')) return;
+
+                log("Routine Trigger (Click)");
+                // Visual feedback
+                if (navigator.vibrate) navigator.vibrate(50);
+
+                socket.emit('admin-trigger', { delay: state.sequenceDelay });
+            });
+
 
             function switchRoutine(index) {
                 state.activeRoutineIndex = parseInt(index);
