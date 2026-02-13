@@ -996,7 +996,309 @@
                 transform: translateX(-50%) translateY(-10px);
             }
         }
+
+        /* Admin Panel CSS */
+        #settings-panel {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 10, 10, 0.85);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            z-index: 2000;
+            display: none;
+            flex-direction: column;
+            padding: 20px;
+            overflow-y: auto;
+            text-align: left;
+        }
+
+        #settings-panel.open {
+            display: flex;
+        }
+
+        .section-title {
+            font-size: 10px;
+            color: #555;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin: 20px 0 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .add-link {
+            color: #007aff;
+            text-transform: none;
+            letter-spacing: 0;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .row {
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        label {
+            color: #888;
+            font-size: 11px;
+            text-transform: uppercase;
+        }
+
+        input,
+        select {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            color: #fff;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 14px;
+            width: 100%;
+        }
+
+        #steps-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .step-item {
+            background: #151515;
+            border: 1px solid #222;
+            border-radius: 12px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            cursor: grab;
+            transition: background 0.2s;
+        }
+
+        .step-add-form {
+            background: #0d1117;
+            border: 1px dashed #007aff;
+            border-radius: 12px;
+            padding: 15px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .step-add-form select,
+        .step-add-form input {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            color: #fff;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 14px;
+            flex: 1;
+            min-width: 80px;
+        }
+
+        .step-add-form button {
+            background: #34c759;
+            color: #fff;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .step-delete {
+            color: #666;
+            font-size: 16px;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .step-item.dragging {
+            opacity: 0.5;
+            background: #222;
+        }
+
+        .step-handle {
+            color: #444;
+            font-size: 20px;
+            cursor: grab;
+        }
+
+        .step-info {
+            flex: 1;
+        }
+
+        .step-name {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 2px;
+        }
+
+        .step-meta {
+            font-size: 11px;
+            color: #666;
+        }
+
+        .step-toggle {
+            width: 40px;
+            height: 20px;
+            background: #333;
+            border-radius: 10px;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .step-toggle.active {
+            background: #34c759;
+        }
+
+        .step-toggle::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 16px;
+            height: 16px;
+            background: #fff;
+            border-radius: 50%;
+            transition: 0.2s;
+        }
+
+        .step-toggle.active::after {
+            left: 22px;
+        }
+
+        .btn {
+            background: #007aff;
+            color: #fff;
+            border: none;
+            padding: 15px;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 10px;
+            width: 100%;
+        }
+
+        .btn-secondary {
+            background: #222;
+            border: 1px solid #333;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-input-wrapper input[type=file] {
+            font-size: 100px;
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+        }
+
+        input[type=range] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            background: #333;
+            border-radius: 2px;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            height: 18px;
+            width: 18px;
+            border-radius: 50%;
+            background: #007aff;
+            cursor: pointer;
+            margin-top: -7px;
+        }
+
+        #debug-log {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            width: 90%;
+            height: 60px;
+            pointer-events: auto;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            z-index: 3000;
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.5);
+            font-family: monospace;
+            text-align: left;
+            line-height: 1.3;
+        }
+
+        /* Toggle switch */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #333;
+            transition: 0.3s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: #666;
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+
+        input:checked+.slider {
+            background-color: #34c759;
+        }
+
+        input:checked+.slider:before {
+            background-color: white;
+            transform: translateX(20px);
+        }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 
 <body id="main-body">
@@ -1088,11 +1390,345 @@
 
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
+    <!-- Admin Settings Panel -->
+    <div id="settings-panel">
+        <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:20px;">
+            <h2>Magic Lab</h2>
+            <div id="connection-count"
+                style="font-size:12px; background:#222; padding:4px 10px; border-radius:20px; color:#34c759;">👤 1</div>
+        </div>
+
+        <div class="header">
+            <h1>CrowdConnect Admin</h1>
+            <div class="row"><label>Routine Active <span class="add-link" onclick="addRoutine()">+
+                        Nouvelle</span></label>
+                <select id="routine-select" onchange="switchRoutine(this.value)"></select>
+            </div>
+
+            <div class="section-title">Étapes de la séquence <span class="add-link" onclick="showAddStepForm()">+
+                    Ajouter</span><span class="guide-toggle" onclick="toggleGuide()">❓ Guide</span></div>
+            <div id="step-guide">
+                <div class="guide-content">
+                    <button class="guide-close" onclick="toggleGuide()">×</button>
+                    <h3>📋 Guide des types d'étapes</h3>
+                    <table>
+                        <tr>
+                            <td>⬇ Arrow</td>
+                            <td>Flèche rouge en bas d'écran</td>
+                        </tr>
+                        <tr>
+                            <td>🔊 Audio</td>
+                            <td>Audio avec fade volume (startVol→endVol)</td>
+                        </tr>
+                        <tr>
+                            <td>🎵 Beat</td>
+                            <td>Flash au rythme d'un BPM</td>
+                        </tr>
+                        <tr>
+                            <td>⬛ Blackout</td>
+                            <td>Écran noir total</td>
+                        </tr>
+                        <tr>
+                            <td>🫁 Breathing</td>
+                            <td>Animation respiration Zen</td>
+                        </tr>
+                        <tr>
+                            <td>🎴 CardFlip</td>
+                            <td>Carte 3D qui se retourne</td>
+                        </tr>
+                        <tr>
+                            <td>🎨 Color</td>
+                            <td>Couleur de fond personnalisée</td>
+                        </tr>
+                        <tr>
+                            <td>🔢 Countdown</td>
+                            <td>Compte à rebours (startFrom: 3-10)</td>
+                        </tr>
+                        <tr>
+                            <td>🔮 Crystal</td>
+                            <td>Boule de cristal luminescente</td>
+                        </tr>
+                        <tr>
+                            <td>🎲 Dice</td>
+                            <td>Dé 3D → face finale (finalFace: 1-6)</td>
+                        </tr>
+                        <tr>
+                            <td>🃏 Emojis</td>
+                            <td>Symboles de cartes accélérés (♠♥♣♦)</td>
+                        </tr>
+                        <tr>
+                            <td>👁️ Eye</td>
+                            <td>Œil qui cligne</td>
+                        </tr>
+                        <tr>
+                            <td>🌫️ Fade</td>
+                            <td>Fondu vers noir ou blanc</td>
+                        </tr>
+                        <tr>
+                            <td>🔥 Fire</td>
+                            <td>Flammes montantes</td>
+                        </tr>
+                        <tr>
+                            <td>⚡ Flash</td>
+                            <td>Flash blanc + vibration (500ms)</td>
+                        </tr>
+                        <tr>
+                            <td>⚡ Glitch</td>
+                            <td>Effet matrix/bug visuel</td>
+                        </tr>
+                        <tr>
+                            <td>❤️ Heart</td>
+                            <td>Animation morphing point → cœur battant</td>
+                        </tr>
+                        <tr>
+                            <td>🎆 Lottie</td>
+                            <td>Animation Lottie JSON</td>
+                        </tr>
+                        <tr>
+                            <td>🎭 Mask</td>
+                            <td>Masque qui apparaît</td>
+                        </tr>
+                        <tr>
+                            <td>🪞 Mirror</td>
+                            <td>Effet miroir horizontal/vertical</td>
+                        </tr>
+                        <tr>
+                            <td>🔢 Number</td>
+                            <td>Nombre qui défile puis s'arrête</td>
+                        </tr>
+                        <tr>
+                            <td>⏸ Pause</td>
+                            <td>Pause configurable (défaut 2s)</td>
+                        </tr>
+                        <tr>
+                            <td>🎯 Pinpoint</td>
+                            <td>Cible qui se resserre sur un point</td>
+                        </tr>
+                        <tr>
+                            <td>💓 Pulse</td>
+                            <td>Pulsation hypnotique de l'écran</td>
+                        </tr>
+                        <tr>
+                            <td>🧩 Puzzle</td>
+                            <td>Pièces de puzzle qui s'assemblent</td>
+                        </tr>
+                        <tr>
+                            <td>🎴 Reveal</td>
+                            <td>Révélation d'UNE carte (ex: 9C)</td>
+                        </tr>
+                        <tr>
+                            <td>🖼️ RevealImage</td>
+                            <td>Révélation d'une image/photo (URL)</td>
+                        </tr>
+                        <tr>
+                            <td>〰️ Ripple</td>
+                            <td>Ondulation depuis le centre</td>
+                        </tr>
+                        <tr>
+                            <td>〰️ RippleFromLogo</td>
+                            <td>Ondulation depuis le logo</td>
+                        </tr>
+                        <tr>
+                            <td>📣 Shake</td>
+                            <td>Tremblement de l'écran</td>
+                        </tr>
+                        <tr>
+                            <td>🔀 Shuffle</td>
+                            <td>Mélange rapide de cartes</td>
+                        </tr>
+                        <tr>
+                            <td>🔇 Silence</td>
+                            <td>Coupe tous les sons</td>
+                        </tr>
+                        <tr>
+                            <td>🎰 Slot</td>
+                            <td>Machine à sous (3 symboles)</td>
+                        </tr>
+                        <tr>
+                            <td>📸 Snapshot</td>
+                            <td>Flash caméra + freeze frame</td>
+                        </tr>
+                        <tr>
+                            <td>✨ Sparkle</td>
+                            <td>Paillettes qui tombent</td>
+                        </tr>
+                        <tr>
+                            <td>🌀 Spiral</td>
+                            <td>Spirale tournante hypnotique</td>
+                        </tr>
+                        <tr>
+                            <td>🌟 Starfield</td>
+                            <td>Champ d'étoiles en mouvement</td>
+                        </tr>
+                        <tr>
+                            <td>📻 StaticNoise</td>
+                            <td>Bruit blanc TV/static</td>
+                        </tr>
+                        <tr>
+                            <td>⏹ Stop</td>
+                            <td>Stoppe la séquence (reset manuel)</td>
+                        </tr>
+                        <tr>
+                            <td>📝 Text</td>
+                            <td>Texte géant personnalisable</td>
+                        </tr>
+                        <tr>
+                            <td>🔓 Unlock</td>
+                            <td>Cadenas qui s'ouvre</td>
+                        </tr>
+                        <tr>
+                            <td>🎬 Video</td>
+                            <td>Vidéo plein écran (URL)</td>
+                        </tr>
+                        <tr>
+                            <td>🌊 Wave</td>
+                            <td>Vague liquide qui traverse l'écran</td>
+                        </tr>
+                        <tr>
+                            <td>🔤 Words</td>
+                            <td>Lettres → mots → MOT FINAL</td>
+                        </tr>
+                        <tr>
+                            <td>🔍 Zoom</td>
+                            <td>Zoom progressif sur l'écran</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div id="step-add-area"></div>
+            <div id="steps-list"></div>
+
+            <div class="section-title">Configuration Globale</div>
+            <div class="row"><label>Délai d'Entrée (s)</label><input type="number" id="delay-input" value="2"
+                    step="0.5">
+            </div>
+            <div class="row">
+                <div class="setting-row">
+                    <label for="logo-zoom-input">Zoom Logo: <span id="zoom-val">100</span>%</label>
+                    <input type="range" id="zoom-range" min="10" max="500" value="100" oninput="updateZoom(this.value)"
+                        onmousedown="document.getElementById('settings-panel').style.opacity='0.3'"
+                        onmouseup="document.getElementById('settings-panel').style.opacity='1'"
+                        ontouchstart="document.getElementById('settings-panel').style.opacity='0.3'"
+                        ontouchend="document.getElementById('settings-panel').style.opacity='1'">
+                </div>
+                <div class="setting-row">
+                    <label>Image d'accueil:</label>
+                    <div style="display:flex; gap:10px; margin-bottom:5px;">
+                        <label><input type="radio" name="startImgSrc" value="logo" onchange="setStartImgSource('logo')"
+                                checked> Logo</label>
+                        <label><input type="radio" name="startImgSrc" value="custom"
+                                onchange="setStartImgSource('custom')"> Autre</label>
+                    </div>
+                    <div id="custom-start-img-container" style="display:none;">
+                        <input type="file" id="custom-start-file" onchange="handleStartImageUpload(this)">
+                        <input type="text" id="start-img-url-input" placeholder="URL Image..."
+                            onchange="updateStartImage(this.value)">
+                    </div>
+                </div>
+                <div class="setting-row">
+                    <label>Textes d'accueil:</label>
+                    <input type="text" id="welcome-text-input" placeholder="TOUCHER POUR COMMENCER"
+                        onchange="updateTexts()">
+                    <input type="text" id="sub-text-input" placeholder="Expérience Interactive" onchange="updateTexts()"
+                        style="margin-top:5px;">
+                </div>
+                <div class="setting-row">
+                    <label for="logo-url-input">URL Logo:</label>
+                    <div style="display:flex; gap:5px;">
+                        <input type="text" id="logo-url-input" placeholder="http://..."
+                            onchange="previewLogo(this.value)">
+                        <input type="file" id="logo-file" accept="image/*" style="width:110px;"
+                            onchange="handleFileUpload(this)">
+                    </div>
+                </div>
+            </div>
+            <div class="row"><label>URL Redirection Finale</label><input type="text" id="redir-url-input"
+                    placeholder="https://g.page/..."></div>
+            <div class="row"><label>Texte d'accueil</label><input type="text" id="tagline-input"
+                    placeholder="Réaliser une expérience."></div>
+            <div class="row">
+                <label for="logs-toggle">Afficher les logs de timing (Admin)</label>
+                <label class="switch" style="margin:0;">
+                    <input type="checkbox" id="logs-toggle" onchange="toggleLogs(this.checked)">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="row">
+                <label for="toggle-debug">Mode Debug (Visible sur public)</label>
+                <label class="switch" style="margin:0;">
+                    <input type="checkbox" id="toggle-debug">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="row">
+                <div class="setting-row">
+                    <label for="bg-color-input">Couleur de fond:</label>
+                    <div style="display:flex; gap:5px; align-items:center;">
+                        <input type="color" id="bg-color-input" onchange="setBgColor(this.value)">
+                        <button onclick="autoColorFromLogo()"
+                            style="font-size:12px; padding:2px 8px; border:1px solid #555; background:#333; color:#fff; border-radius:4px; cursor:pointer;"
+                            title="Extraire du logo">🎨 Auto</button>
+                    </div>
+                </div>
+                <div class="setting-row">
+                    <label for="bg-anim-select">Animation de fond:</label>
+                    <select id="bg-anim-select" onchange="setBgAnim(this.value)" style="padding:5px;border-radius:4px;">
+                        <option value="none">Aucune</option>
+                        <option value="particles">Particules</option>
+                        <option value="gradient">Dégradé</option>
+                        <option value="stars">Étoiles</option>
+                        <option value="matrix">Matrix</option>
+                        <option value="fireflies">Lucioles</option>
+                        <option value="bokeh">Bokeh</option>
+                        <option value="plasma">Plasma</option>
+                        <option value="snow">Neige</option>
+                        <option value="rain">Pluie</option>
+                        <option value="geometric">Géométrique</option>
+                    </select>
+                </div>
+                <div class="setting-row">
+                    <label for="start-anim-select">Anim. Départ:</label>
+                    <select id="start-anim-select" onchange="setStartAnim(this.value)"
+                        style="padding:5px;border-radius:4px;">
+                        <option value="fade">Fondu (Défaut)</option>
+                        <option value="zoom">Zoom</option>
+                        <option value="slide">Glisser Haut</option>
+                        <option value="none">Aucune</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="section-title">Outils</div>
+            <div class="row" style="flex-direction:column;align-items:flex-start;">
+                <label>Générateur QR Code (Vers Public)</label>
+                <div style="display:flex;gap:20px;margin-top:10px;align-items:flex-start;width:100%;">
+                    <div id="qr-container"
+                        style="background:#fff;padding:15px;border-radius:12px;min-width:200px;min-height:200px;display:flex;justify-content:center;align-items:center;">
+                        <span style="color:#ccc;font-size:12px;">QR Code ici</span>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:10px;flex:1;">
+                        <p style="font-size:12px;color:#aaa;margin-bottom:5px;">Le QR dirigera vers l'URL actuelle (sans
+                            /admin.html). Le logo actif sera incrusté.</p>
+                        <button class="btn btn-secondary" onclick="generateQR()">🔄 Générer</button>
+                        <button class="btn btn-secondary" onclick="downloadQR()"
+                            style="background:#34c759;color:#fff;">💾 Télécharger HD</button>
+                    </div>
+                </div>
+                <canvas id="qr-canvas" style="display:none;"></canvas>
+            </div>
+
+            <button class="btn" style="background:#34c759" onclick="saveAll()">SYNCHRONISER &
+                ENREGISTRER</button>
+            <button class="btn btn-secondary" onclick="closePanel()">FERMER PANNEAU</button>
+        </div>
+    </div>
+    <!-- End Settings Panel -->
+
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <script>
         const socket = io();
         let serverOffset = 0;
-        let config = {};
+        let state = {};
         let hasStarted = false;
         const logBox = null; // Désactivé
 
@@ -1149,12 +1785,12 @@
 
         // === PRELOADING LOGIC ===
         function preloadAllAssets() {
-            if (!config || !config.routines) return;
+            if (!state || !state.routines) return;
             log("🚀 Préchargement des assets...");
             const assets = [];
 
             // Collect assets
-            config.routines.forEach(routine => {
+            state.routines.forEach(routine => {
                 routine.steps.forEach(step => {
                     if (step.url) assets.push({ url: step.url, type: step.type });
                     if (step.value && (step.type === 'reveal' || step.type === 'cardFlip')) {
@@ -1269,8 +1905,8 @@
 
         socket.on('spectator-count', (data) => log("Spectateurs: " + data.count));
 
-        socket.on('state-update', (state) => {
-            config = state;
+        socket.on('state-update', (serverState) => {
+            state = serverState;
             log("State reçu: " + (state.routines ? state.routines.length : 0) + " routines, logo=" + (state.logoVisible ? "visible" : "caché"));
             updateLogoDisplay();
             updateConnectScreen(); // Update connect logo if customized
@@ -1641,11 +2277,11 @@
             const logoEl = document.getElementById('connect-logo');
             let hasImage = false;
 
-            if (config.startImageSource === 'custom' && config.startImageUrl) {
-                logoEl.src = config.startImageUrl;
+            if (state.startImageSource === 'custom' && state.startImageUrl) {
+                logoEl.src = state.startImageUrl;
                 hasImage = true;
-            } else if (config.logoUrl) {
-                logoEl.src = config.logoUrl;
+            } else if (state.logoUrl) {
+                logoEl.src = state.logoUrl;
                 hasImage = true;
             }
 
@@ -1653,36 +2289,49 @@
                 logoEl.style.display = 'block';
                 // Apply Zoom to Start Image (Base 150px * Zoom/100)
                 // Use Width to control size so it reflows correctly in flex container
-                const zoom = config.logoZoom || 100;
+                const zoom = state.logoZoom || 100;
                 // Base width 150px at 100% zoom
                 logoEl.style.width = (150 * (zoom / 100)) + 'px';
                 logoEl.style.height = (150 * (zoom / 100)) + 'px';
-            } else {
                 logoEl.style.display = 'none';
             }
 
             // Texts
-            if (config.welcomeText) document.getElementById('welcome-text').innerText = config.welcomeText;
-            if (config.subText) {
-                const sub = document.getElementById('sub-text');
-                if (sub) sub.innerText = config.subText;
+            const wText = state.welcomeText || '';
+            const wEl = document.getElementById('welcome-text');
+            if (wText.trim()) {
+                wEl.innerText = wText;
+                wEl.style.display = 'block';
+            } else {
+                wEl.style.display = 'none';
+            }
+
+            const sText = state.subText || '';
+            const sEl = document.getElementById('sub-text');
+            if (sEl) {
+                if (sText.trim()) {
+                    sEl.innerText = sText;
+                    sEl.style.display = 'block';
+                } else {
+                    sEl.style.display = 'none';
+                }
             }
         }
 
         function updateLogoDisplay() {
             if (!hasStarted) return;
             const img = document.getElementById('logo-img');
-            if (config.logoUrl && config.logoVisible) {
-                img.src = config.logoUrl;
+            if (state.logoUrl && state.logoVisible) {
+                img.src = state.logoUrl;
                 img.style.display = 'block';
-                img.style.transform = `scale(${(config.logoZoom || 100) / 100})`;
-                log("Logo affiché (zoom " + (config.logoZoom || 100) + "%)");
+                img.style.transform = `scale(${(state.logoZoom || 100) / 100})`;
+                log("Logo affiché (zoom " + (state.logoZoom || 100) + "%)");
             } else {
                 img.style.display = 'none';
             }
             // Tagline personnalisable
             const tagline = document.getElementById('tagline-text');
-            if (tagline && config.tagline) tagline.innerText = config.tagline;
+            if (tagline && state.tagline) tagline.innerText = state.tagline;
         }
 
         // === SÉQUENCE ===
@@ -2262,12 +2911,451 @@
             document.querySelectorAll('audio').forEach(a => a.pause()); // Stop audio
             document.getElementById('engine-screen').classList.remove('active');
             // document.getElementById('final-screen').classList.add('active'); // Skipped per user request
-            if (config.redirectionUrl) {
-                window.location.href = config.redirectionUrl;
+            if (state.redirectionUrl) {
+                window.location.href = state.redirectionUrl;
             } else {
                 document.getElementById('final-screen').classList.add('active'); // Fallback only if no URL
             }
         }
+        // ==========================================
+        // ADMIN LOGIC MERGED
+        // ==========================================
+
+        let isAdmin = false;
+        let lastRenderedSteps = '';
+
+        // Admin Authentication / Panel Toggle
+        // Long Press Logic is handled below or via existing listeners
+        // Here we just need the open/close functions
+
+        // Socket Listeners for Admin
+        socket.on('admin-granted', () => {
+            isAdmin = true;
+            log("Mode Admin ACTIVE !");
+            openAdminPanel();
+            // Request current state to populate UI
+            socket.emit('request-state');
+        });
+
+        function openAdminPanel() {
+            if (!isAdmin) {
+                // Check if we should request admin or just prompt
+                // For now, assume if not admin, we request it
+                const pwd = prompt("Mot de passe Admin :");
+                if (pwd) socket.emit('request-admin', pwd);
+                return;
+            }
+            document.getElementById('settings-panel').classList.add('open');
+            renderSteps();
+            updateUI();
+        }
+
+        function closePanel() {
+            document.getElementById('settings-panel').classList.remove('open');
+        }
+
+        // Update UI from state
+        function updateUI() {
+            if (!state || !state.routines) return;
+
+            // Populate Routine Select
+            const rSelect = document.getElementById('routine-select');
+            rSelect.innerHTML = state.routines.map((r, i) => `<option value="${i}" ${i === state.activeRoutineIndex ? 'selected' : ''}>${r.name}</option>`).join('');
+
+            // Populate Inputs
+            document.getElementById('delay-input').value = state.synchroDelay / 1000 || 2;
+            document.getElementById('zoom-val').innerText = state.logoZoom || 100;
+            document.getElementById('zoom-range').value = state.logoZoom || 100;
+            document.querySelector(`input[name="startImgSrc"][value="${state.startImageSource || 'logo'}"]`).checked = true;
+
+            if (state.startImageSource === 'custom') {
+                document.getElementById('custom-start-img-container').style.display = 'block';
+                document.getElementById('start-img-url-input').value = state.startImageUrl || '';
+            } else {
+                document.getElementById('custom-start-img-container').style.display = 'none';
+            }
+
+            document.getElementById('welcome-text-input').value = state.welcomeText || '';
+            document.getElementById('sub-text-input').value = state.subText || '';
+            document.getElementById('logo-url-input').value = state.logoUrl || '';
+            document.getElementById('redir-url-input').value = state.redirectionUrl || '';
+            document.getElementById('tagline-input').value = state.tagline || '';
+
+            document.getElementById('logs-toggle').checked = !!state.showLogs;
+            document.getElementById('toggle-debug').checked = !!state.debug;
+            document.getElementById('bg-color-input').value = state.bgColor || '#000000';
+            document.getElementById('bg-anim-select').value = state.bgAnim || 'none';
+            document.getElementById('start-anim-select').value = state.startAnim || 'fade';
+
+            document.getElementById('connection-count').innerText = `👤 ?`; // We don't have count in state usually, handled by socket event 'spectator-count'
+        }
+
+        // Render Steps List (Drag & Drop Logic included)
+        function renderSteps() {
+            if (!state.routines) return;
+            const list = document.getElementById('steps-list');
+            const currentScroll = list.scrollTop;
+            const routine = state.routines[state.activeRoutineIndex];
+
+            if (!routine) { list.innerHTML = '<p style="color:#aaa;font-size:12px;padding:10px;">Aucune routine active.</p>'; return; }
+
+            // Icons mapping
+            const icons = { emojis: '🃏', blackout: '⬛', flash: '⚡', shuffle: '🔀', reveal: '🎴', revealImage: '🖼️', video: '🎬', words: '🔤', lottie: '🎆', arrow: '⬇', heart: '❤️', countdown: '🔢', dice: '🎲', rippleFromLogo: '〰️', audio: '🔊', text: '📝', pulse: '💓', spiral: '🌀', color: '🎨', number: '🔢', breathing: '🫁', glitch: '⚡', ripple: '〰️', zoom: '🔍', shake: '📣', fade: '🌫️', pause: '⏸', cardFlip: '🎴', slot: '🎰', pinpoint: '🎯', unlock: '🔓', mirror: '🪞', wave: '🌊', sparkle: '✨', fire: '🔥', beat: '🎵', silence: '🔇', staticNoise: '📻', eye: '👁️', puzzle: '🧩', mask: '🎭', crystal: '🔮', snapshot: '📸', starfield: '🌟', stop: '⏹' };
+
+            list.innerHTML = routine.steps.map((step, idx) => `
+            <div class="step-item" draggable="true" data-idx="${idx}">
+                <div class="step-handle">☰</div>
+                <div class="step-info" onclick="editStep(${idx})">
+                    <div class="step-name">${icons[step.type] || '▶'} ${step.type.toUpperCase()}</div>
+                    <div class="step-meta">${step.duration}ms ${step.value ? '| ' + step.value : ''} ${step.vibrate ? '| Vib' : ''}</div>
+                </div>
+                <div class="step-toggle ${step.active ? 'active' : ''}" onclick="event.stopPropagation(); toggleStep(${idx})"></div>
+                <div class="step-delete" onclick="event.stopPropagation(); deleteStep(${idx})">🗑️</div>
+            </div>
+        `).join('');
+
+            // Re-attach Drag Listeners
+            list.querySelectorAll('.step-item').forEach(item => {
+                const handle = item.querySelector('.step-handle');
+                let startY = 0, currentItem = null;
+
+                // Touch Drag
+                handle.addEventListener('touchstart', (e) => {
+                    e.preventDefault(); // Prevent scroll
+                    currentItem = item;
+                    // startY = e.touches[0].clientY; // Not needed if we use simple append logic
+                    item.classList.add('dragging');
+                    item.style.zIndex = '100';
+                }, { passive: false });
+
+                handle.addEventListener('touchmove', (e) => {
+                    e.preventDefault();
+                    if (!currentItem) return;
+                    const y = e.touches[0].clientY;
+                    const after = getDragAfter(list, y);
+                    if (!after) list.appendChild(currentItem);
+                    else list.insertBefore(currentItem, after);
+                }, { passive: false });
+
+                handle.addEventListener('touchend', () => {
+                    if (!currentItem) return;
+                    currentItem.classList.remove('dragging');
+                    currentItem.style.zIndex = '';
+                    currentItem = null;
+                    saveReorder();
+                });
+
+                // Desktop Drag
+                item.addEventListener('dragstart', () => {
+                    item.classList.add('dragging');
+                });
+                item.addEventListener('dragend', () => {
+                    item.classList.remove('dragging');
+                    saveReorder();
+                });
+            });
+
+            // Container Drag Over (Desktop)
+            list.addEventListener('dragover', e => {
+                e.preventDefault();
+                const dragging = list.querySelector('.dragging');
+                const after = getDragAfter(list, e.clientY);
+                if (!after) list.appendChild(dragging); else list.insertBefore(dragging, after);
+            });
+
+            // Restore scroll
+            requestAnimationFrame(() => { list.scrollTop = currentScroll; });
+        }
+
+        function getDragAfter(container, y) {
+            const els = [...container.querySelectorAll('.step-item:not(.dragging)')];
+            return els.reduce((closest, child) => {
+                const box = child.getBoundingClientRect();
+                const offset = y - box.top - box.height / 2;
+                if (offset < 0 && offset > closest.offset) return { offset, element: child };
+                return closest;
+            }, { offset: Number.NEGATIVE_INFINITY }).element;
+        }
+
+        function saveReorder() {
+            const list = document.getElementById('steps-list');
+            const newOrder = [...list.querySelectorAll('.step-item')].map(el => parseInt(el.dataset.idx));
+            const routine = state.routines[state.activeRoutineIndex];
+            const oldSteps = routine.steps;
+            const reordered = newOrder.map(i => oldSteps[i]);
+
+            routine.steps = reordered;
+            syncState(); // Emit update
+        }
+
+        // --- Actions ---
+
+        function syncState() {
+            socket.emit('update-state', state);
+            // Also update local UI if needed, but socket 'state-update' listener usually handles it.
+            // However, for admin inputs, we might want immediate feedback or wait for server.
+            // Let's rely on server echo for robustness, but renderSteps might flicker if we wait. 
+            // Admin.html logic called renderSteps immediately.
+            renderSteps();
+        }
+
+        function addRoutine() {
+            const name = prompt("Nom de la routine ?", "Nouveau Spectacle");
+            if (!name) return;
+            state.routines.push({ id: Date.now(), name, steps: [] });
+            state.activeRoutineIndex = state.routines.length - 1;
+            syncState();
+            updateUI();
+        }
+
+        function switchRoutine(idx) {
+            state.activeRoutineIndex = parseInt(idx);
+            syncState();
+            renderSteps();
+        }
+
+        function toggleStep(idx) {
+            const step = state.routines[state.activeRoutineIndex].steps[idx];
+            step.active = !step.active;
+            syncState();
+        }
+
+        function deleteStep(idx) {
+            if (!confirm("Supprimer cette étape ?")) return;
+            state.routines[state.activeRoutineIndex].steps.splice(idx, 1);
+            syncState();
+        }
+
+        // Add Step Form
+        function showAddStepForm() {
+            const area = document.getElementById('step-add-area');
+            area.innerHTML = `
+            <div class="step-add-form">
+                <select id="new-step-type">
+                    <option value="flash">⚡ Flash</option>
+                    <option value="text">📝 Text</option>
+                    <option value="audio">🔊 Audio</option>
+                    <option value="video">🎬 Video (URL)</option>
+                    <option value="image">🖼️ Image (URL)</option>
+                    <option value="reveal">🎴 Reveal Card</option>
+                    <option value="revealImage">🖼️ Reveal Image</option>
+                    <option value="pause">⏸ Pause</option>
+                    <option value="blackout">⬛ Blackout</option>
+                    <option value="stop">⏹ Stop</option>
+                    <!-- Add others as needed -->
+                </select>
+                <input type="number" id="new-step-duration" placeholder="MS (ex: 2000)" value="2000">
+                <input type="text" id="new-step-value" placeholder="Valeur (Texte, URL...)">
+                <button onclick="confirmAddStep()">AJOUTER</button>
+                <button onclick="document.getElementById('step-add-area').innerHTML=''" style="background:#555">ANNULER</button>
+            </div>
+        `;
+        }
+
+        function confirmAddStep() {
+            const type = document.getElementById('new-step-type').value;
+            const duration = parseInt(document.getElementById('new-step-duration').value) || 2000;
+            const value = document.getElementById('new-step-value').value;
+
+            const newStep = { type, duration, value, active: true, id: Date.now() };
+            state.routines[state.activeRoutineIndex].steps.push(newStep);
+            syncState();
+            // Keep form open? Admin.html kept it but cleared value
+            document.getElementById('new-step-value').value = '';
+        }
+
+        function editStep(idx) {
+            const step = state.routines[state.activeRoutineIndex].steps[idx];
+            const val = prompt("Nouvelle valeur (ou laisser vide) :", step.value || '');
+            if (val !== null) {
+                step.value = val;
+                const dur = prompt("Nouvelle durée (ms) :", step.duration);
+                if (dur) step.duration = parseInt(dur);
+                syncState();
+            }
+        }
+
+        // Settings Handlers
+        function toggleGuide() {
+            const guide = document.getElementById('step-guide');
+            guide.style.display = guide.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function updateZoom(val) {
+            document.getElementById('zoom-val').innerText = val;
+            state.logoZoom = parseInt(val);
+            // Note: transparency logic is inline in HTML event handlers
+            syncState();
+            // Live update local logo to see effect immediately?
+            // updateLogoDisplay(); // Called by socket update, but we can call it here too
+        }
+
+        function setStartImgSource(src) {
+            state.startImageSource = src;
+            if (src === 'custom') {
+                document.getElementById('custom-start-img-container').style.display = 'block';
+            } else {
+                document.getElementById('custom-start-img-container').style.display = 'none';
+            }
+            syncState();
+        }
+
+        function updateStartImage(url) {
+            state.startImageUrl = url;
+            syncState();
+        }
+
+        function updateTexts() {
+            state.welcomeText = document.getElementById('welcome-text-input').value;
+            state.subText = document.getElementById('sub-text-input').value;
+            state.tagline = document.getElementById('tagline-input').value;
+            state.redirectionUrl = document.getElementById('redir-url-input').value;
+            state.logoUrl = document.getElementById('logo-url-input').value;
+            syncState();
+        }
+
+        function toggleLogs(checked) {
+            state.showLogs = checked;
+            syncState();
+        }
+
+        function setBgColor(col) {
+            state.bgColor = col;
+            syncState();
+        }
+
+        function setBgAnim(anim) {
+            state.bgAnim = anim;
+            syncState();
+        }
+
+        function setStartAnim(anim) {
+            state.startAnim = anim;
+            syncState();
+        }
+
+        function previewLogo(url) {
+            // Just update local input, calling sync in onchange
+            updateTexts();
+        }
+
+        function autoColorFromLogo() {
+            // Placeholder - logic was to invoke ColorThief or similar, but maybe just simple tint
+            alert("Fonctionnalité Auto-Color à implémenter (nécessite lib externe ou canvas analysis)");
+        }
+
+        // QR Generation
+        function generateQR() {
+            const canvas = document.getElementById('qr-canvas');
+            const container = document.getElementById('qr-container');
+            const url = window.location.href.split('?')[0]; // Current URL base
+
+            container.innerHTML = '';
+            const qr = new QRCode(container, {
+                text: url,
+                width: 200,
+                height: 200,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+
+            // Wait for generation then draw to canvas for download
+            setTimeout(() => {
+                const img = container.querySelector('img');
+                if (img) {
+                    canvas.width = 200;
+                    canvas.height = 200;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0);
+                }
+            }, 500);
+        }
+
+        function downloadQR() {
+            const canvas = document.getElementById('qr-canvas');
+            const link = document.createElement('a');
+            link.download = 'crowdconnect-qr.png';
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+
+        function saveAll() {
+            // Just sync
+            syncState();
+            alert("Configuration sauvegardée et synchronisée !");
+        }
+
+        // File Upload Handlers (Simple fetch)
+        async function handleFileUpload(input) {
+            // Logic to upload logo
+            const file = input.files[0];
+            if (!file) return;
+            const formData = new FormData();
+            formData.append('logoFile', file);
+            try {
+                const res = await fetch('/upload-logo', { method: 'POST', body: formData });
+                if (res.ok) {
+                    const data = await res.json();
+                    state.logoUrl = data.path; // server returns path
+                    updateTexts(); // Sync
+                    alert("Logo uploadé !");
+                }
+            } catch (e) { console.error(e); alert("Erreur upload"); }
+        }
+
+        async function handleStartImageUpload(input) {
+            const file = input.files[0];
+            if (!file) return;
+            const formData = new FormData();
+            formData.append('startImage', file); // Check server endpoint expectation
+            try {
+                const res = await fetch('/upload-start-image', { method: 'POST', body: formData });
+                if (res.ok) {
+                    const data = await res.json();
+                    state.startImageUrl = data.path;
+                    syncState();
+                    alert("Image uploadée !");
+                }
+            } catch (e) { console.error(e); alert("Erreur upload"); }
+        }
+
+        // Admin Gesture (Long Press) - Re-implementing with flag check
+        // If not admin, request admin. If admin, open panel.
+        let adminTouchTimer = null;
+        let adminStartX = 0, adminStartY = 0;
+
+        document.addEventListener('touchstart', (e) => {
+            // Ignore if valid interaction
+            if (e.target.closest('button, input, select, .step-handle')) return;
+
+            if (e.touches.length === 1) {
+                adminStartX = e.touches[0].clientX;
+                adminStartY = e.touches[0].clientY;
+                adminTouchTimer = setTimeout(() => {
+                    // Trigger
+                    log("Long Press Detected");
+                    if (navigator.vibrate) navigator.vibrate(50);
+                    openAdminPanel();
+                }, 1500);
+            }
+        }, { passive: false });
+
+        document.addEventListener('touchmove', (e) => {
+            if (adminTouchTimer) {
+                const diffX = Math.abs(e.touches[0].clientX - adminStartX);
+                const diffY = Math.abs(e.touches[0].clientY - adminStartY);
+                if (diffX > 20 || diffY > 20) {
+                    clearTimeout(adminTouchTimer);
+                    adminTouchTimer = null;
+                }
+            }
+        }, { passive: true });
+
+        document.addEventListener('touchend', () => {
+            if (adminTouchTimer) clearTimeout(adminTouchTimer);
+        });
+
     </script>
 </body>
 
