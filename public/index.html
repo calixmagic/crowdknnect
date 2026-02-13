@@ -100,6 +100,53 @@
             animation: pulse 2s infinite;
         }
 
+        /* New Connect Screen Styles */
+        #connect-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        #connect-logo {
+            width: 150px;
+            height: 150px;
+            object-fit: contain;
+            border-radius: 50%;
+            /* Optional, for specific aesthetics */
+            animation: pulse-zoom 2s infinite ease-in-out;
+            margin-bottom: 20px;
+            /* Default fallback if no logo */
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        #welcome-text {
+            font-size: 1.2rem;
+            color: #fff;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+
+        @keyframes pulse-zoom {
+            0% {
+                transform: scale(1);
+                opacity: 0.8;
+            }
+
+            50% {
+                transform: scale(1.1);
+                opacity: 1;
+                filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.5));
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 0.8;
+            }
+        }
+
         #logo-container {
             width: 80vw;
             max-width: 400px;
@@ -953,13 +1000,20 @@
 
 
 
+    <canvas id="bg-canvas"
+        style="position:fixed;top:0;left:0;width:100%;height:100%;z-index:-1;pointer-events:none;"></canvas>
+    <div id="bg-overlay-css" style="position:fixed;top:0;left:0;width:100%;height:100%;z-index:-1;pointer-events:none;">
+    </div>
+
+
     <!-- Écran 1 : Participer -->
     <div id="connect-screen" class="screen active">
-        <div class="mystic-wheel"></div>
-        <p style="letter-spacing:3px; font-size:0.9rem; color:#fff; margin-bottom:40px; font-weight:300;">EXPÉRIENCE
-            INTERACTIVE</p>
-        <button id="start-btn"
-            style="background:#fff; border:none; color:#000; padding:20px 50px; border-radius:40px; font-size:16px; font-weight:700; letter-spacing:2px; cursor:pointer; text-transform:uppercase; box-shadow:0 10px 30px rgba(255,255,255,0.2);">Participer</button>
+        <!-- <div class="mystic-wheel"></div> Removed wheel in favor of logo -->
+        <div id="connect-wrapper">
+            <img id="connect-logo" src="logo.png" alt="Toucher pour entrer">
+            <p id="welcome-text">Toucher pour commencer</p>
+            <p style="font-size:0.8rem; color:#888; letter-spacing:1px;">Expérience Interactive</p>
+        </div>
     </div>
 
     <!-- Écran 2 : Logo / Attente -->
@@ -1090,19 +1144,67 @@
             }
         });
 
-        // === BOUTON PARTICIPER ===
-        document.getElementById('start-btn').addEventListener('click', () => {
-            // Unlock Audio
+        // === PRELOADING LOGIC ===
+        function preloadAllAssets() {
+            if (!config || !config.routines) return;
+            log("🚀 Préchargement des assets...");
+            const assets = [];
+
+            // Collect assets
+            config.routines.forEach(routine => {
+                routine.steps.forEach(step => {
+                    if (step.url) assets.push({ url: step.url, type: step.type });
+                    if (step.value && (step.type === 'reveal' || step.type === 'cardFlip')) {
+                        let val = step.value;
+                        if (!val.includes('/')) val = 'cards/' + val + (val.endsWith('.jpg') ? '' : '.jpg');
+                        assets.push({ url: val, type: 'image' });
+                    }
+                    if (step.images && Array.isArray(step.images)) {
+                        step.images.forEach(img => assets.push({ url: img, type: 'image' }));
+                    }
+                });
+            });
+
+            // Unique assets
+            const unique = [...new Set(assets.map(JSON.stringify))].map(JSON.parse);
+
+            unique.forEach(asset => {
+                const url = asset.url;
+                if (!url) return;
+
+                if (url.match(/\.(jpg|jpeg|png|gif|webp|svg)$/i) || asset.type === 'image') {
+                    const img = new Image();
+                    img.src = url;
+                } else if (url.match(/\.(mp3|wav|ogg)$/i) || asset.type === 'audio') {
+                    const a = new Audio();
+                    a.src = url;
+                    a.load();
+                } else if (url.match(/\.(mp4|webm)$/i) || asset.type === 'video') {
+                    const v = document.createElement('video');
+                    v.src = url;
+                    v.preload = 'auto';
+                    v.load();
+                }
+            });
+            log(`📦 ${unique.length} fichiers mis en cache.`);
+        }
+
+        // === INTERACTIVE CONNECT ===
+        document.getElementById('connect-wrapper').addEventListener('click', () => {
+            // Unlock Audio Context
             const audioEl = document.getElementById('audio-player');
             if (audioEl) {
                 audioEl.src = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA';
                 audioEl.play().catch(e => console.log("Audio unlock failed/blocked", e));
             }
 
+            // Trigger Preload
+            preloadAllAssets();
+
             hasStarted = true;
             document.getElementById('connect-screen').classList.remove('active');
             document.getElementById('logo-screen').classList.add('active');
-            log("Expérience démarrée ✓ (Audio Unlocked)");
+            log("Expérience démarrée ✓ (Preloading ON)");
             enableNoSleep();
             updateLogoDisplay();
         });
@@ -1143,12 +1245,376 @@
             config = state;
             log("State reçu: " + (state.routines ? state.routines.length : 0) + " routines, logo=" + (state.logoVisible ? "visible" : "caché"));
             updateLogoDisplay();
+            updateConnectScreen(); // Update connect logo if customized
             document.getElementById('redirection-btn').href = state.redirectionUrl || '#';
-            // Apply background color
+            // Apply background color/animation
             if (state.bgColor) {
-                document.getElementById('logo-screen').style.background = state.bgColor;
+                document.body.style.backgroundColor = state.bgColor;
+            }
+            if (state.bgAnim) {
+                setBgAnimation(state.bgAnim, state.bgColor || '#000000');
             }
         });
+
+        // === BACKGROUND ANIMATIONS ===
+        let bgCanvas = document.getElementById('bg-canvas');
+        let bgCtx = bgCanvas.getContext('2d');
+        let bgAnimFrameId = null;
+        let bgParticles = [];
+
+        function resizeBgCanvas() {
+            bgCanvas.width = window.innerWidth;
+            bgCanvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeBgCanvas);
+        resizeBgCanvas();
+
+        function setBgAnimation(type, color) {
+            // Reset
+            cancelAnimationFrame(bgAnimFrameId);
+            bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+            document.getElementById('bg-overlay-css').className = '';
+            document.getElementById('bg-overlay-css').style = 'position:fixed;top:0;left:0;width:100%;height:100%;z-index:-1;pointer-events:none;';
+            bgParticles = [];
+
+            log("Background Anim: " + type);
+
+            switch (type) {
+                case 'none':
+                    break;
+                case 'particles':
+                    initParticles(color);
+                    break;
+                case 'gradient':
+                    const cssEl = document.getElementById('bg-overlay-css');
+                    cssEl.style.background = `linear-gradient(45deg, ${color}, #000, ${color})`;
+                    cssEl.style.backgroundSize = '400% 400%';
+                    cssEl.style.animation = 'gradientBG 15s ease infinite';
+                    if (!document.getElementById('style-gradient')) {
+                        const s = document.createElement('style');
+                        s.id = 'style-gradient';
+                        s.innerHTML = `@keyframes gradientBG { 0% {background-position: 0% 50%;} 50% {background-position: 100% 50%;} 100% {background-position: 0% 50%;} }`;
+                        document.head.appendChild(s);
+                    }
+                    break;
+                case 'stars':
+                    initStarfield();
+                    break;
+                case 'matrix':
+                    initMatrix(color);
+                    break;
+                case 'fireflies':
+                    initFireflies(color);
+                    break;
+                case 'bokeh':
+                    initBokeh(color);
+                    break;
+                case 'plasma':
+                    initPlasma(color);
+                    break;
+                case 'snow':
+                    initSnow();
+                    break;
+                case 'rain':
+                    initRain(color);
+                    break;
+                case 'geometric':
+                    initGeometric(color);
+                    break;
+                // Add more as needed
+            }
+        }
+
+        // --- Animation Implementations ---
+        function initParticles(color) {
+            for (let i = 0; i < 100; i++) {
+                bgParticles.push({
+                    x: Math.random() * bgCanvas.width,
+                    y: Math.random() * bgCanvas.height,
+                    vx: (Math.random() - 0.5) * 1,
+                    vy: (Math.random() - 0.5) * 1,
+                    size: Math.random() * 3 + 1,
+                    alpha: Math.random()
+                });
+            }
+            function loop() {
+                bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+                bgCtx.fillStyle = color;
+                bgParticles.forEach(p => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    if (p.x < 0) p.x = bgCanvas.width;
+                    if (p.x > bgCanvas.width) p.x = 0;
+                    if (p.y < 0) p.y = bgCanvas.height;
+                    if (p.y > bgCanvas.height) p.y = 0;
+                    bgCtx.globalAlpha = p.alpha;
+                    bgCtx.beginPath();
+                    bgCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    bgCtx.fill();
+                });
+                bgAnimFrameId = requestAnimationFrame(loop);
+            }
+            loop();
+        }
+
+        function initMatrix(color) {
+            const cols = Math.floor(bgCanvas.width / 20);
+            const ypos = Array(cols).fill(0);
+            bgCtx.fillStyle = '#000';
+            bgCtx.fillRect(0, 0, bgCanvas.width, bgCanvas.height);
+
+            function loop() {
+                bgCtx.fillStyle = '#0001'; // Fade trail
+                bgCtx.fillRect(0, 0, bgCanvas.width, bgCanvas.height);
+
+                bgCtx.fillStyle = color || '#0f0';
+                bgCtx.font = '15pt monospace';
+
+                ypos.forEach((y, ind) => {
+                    const text = String.fromCharCode(Math.random() * 128);
+                    const x = ind * 20;
+                    bgCtx.fillText(text, x, y);
+                    if (y > 100 + Math.random() * 10000) ypos[ind] = 0;
+                    else ypos[ind] = y + 20;
+                });
+                bgAnimFrameId = requestAnimationFrame(loop);
+            }
+            loop();
+        }
+
+        function initStarfield() {
+            for (let i = 0; i < 200; i++) {
+                bgParticles.push({
+                    x: Math.random() * bgCanvas.width,
+                    y: Math.random() * bgCanvas.height,
+                    z: Math.random() * bgCanvas.width
+                });
+            }
+            function loop() {
+                bgCtx.fillStyle = '#000';
+                bgCtx.fillRect(0, 0, bgCanvas.width, bgCanvas.height); // Clear
+                bgCtx.fillStyle = '#fff';
+
+                const cx = bgCanvas.width / 2;
+                const cy = bgCanvas.height / 2;
+
+                bgParticles.forEach(p => {
+                    p.z -= 2; // Speed
+                    if (p.z <= 0) {
+                        p.z = bgCanvas.width;
+                        p.x = Math.random() * bgCanvas.width;
+                        p.y = Math.random() * bgCanvas.height;
+                    }
+                    const k = 128.0 / p.z;
+                    const x = (p.x - cx) * k + cx;
+                    const y = (p.y - cy) * k + cy;
+
+                    if (x >= 0 && x < bgCanvas.width && y >= 0 && y < bgCanvas.height) {
+                        bgCtx.beginPath();
+                        bgCtx.arc(x, y, (1 - p.z / bgCanvas.width) * 3, 0, Math.PI * 2);
+                        bgCtx.fill();
+                    }
+                });
+                bgAnimFrameId = requestAnimationFrame(loop);
+            }
+            loop();
+        }
+
+        function initFireflies(color) {
+            // Similar to particles but glows
+            for (let i = 0; i < 50; i++) {
+                bgParticles.push({
+                    x: Math.random() * bgCanvas.width,
+                    y: Math.random() * bgCanvas.height,
+                    vx: (Math.random() - 0.5) * 0.5,
+                    vy: (Math.random() - 0.5) * 0.5,
+                    size: Math.random() * 2 + 1,
+                    phase: Math.random() * Math.PI * 2
+                });
+            }
+            function loop() {
+                bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+                bgParticles.forEach(p => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.phase += 0.05;
+                    const alpha = (Math.sin(p.phase) + 1) / 2 * 0.8 + 0.2;
+
+                    if (p.x < 0) p.x = bgCanvas.width;
+                    if (p.x > bgCanvas.width) p.x = 0;
+                    if (p.y < 0) p.y = bgCanvas.height;
+                    if (p.y > bgCanvas.height) p.y = 0;
+
+                    bgCtx.shadowBlur = 10;
+                    bgCtx.shadowColor = color;
+                    bgCtx.fillStyle = color;
+                    bgCtx.globalAlpha = alpha;
+                    bgCtx.beginPath();
+                    bgCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    bgCtx.fill();
+                    bgCtx.shadowBlur = 0;
+                });
+                bgAnimFrameId = requestAnimationFrame(loop);
+            }
+            loop();
+        }
+
+        function initBokeh(color) {
+            // Large blurry circles
+            for (let i = 0; i < 20; i++) {
+                bgParticles.push({
+                    x: Math.random() * bgCanvas.width,
+                    y: Math.random() * bgCanvas.height,
+                    vx: (Math.random() - 0.5) * 0.2,
+                    vy: (Math.random() - 0.5) * 0.2,
+                    size: Math.random() * 50 + 20,
+                    alpha: Math.random() * 0.2 + 0.05
+                });
+            }
+            function loop() {
+                bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+                bgParticles.forEach(p => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    if (p.x < -100) p.x = bgCanvas.width + 100;
+                    if (p.x > bgCanvas.width + 100) p.x = -100;
+                    if (p.y < -100) p.y = bgCanvas.height + 100;
+                    if (p.y > bgCanvas.height + 100) p.y = -100;
+
+                    bgCtx.fillStyle = color;
+                    bgCtx.globalAlpha = p.alpha;
+                    bgCtx.beginPath();
+                    bgCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    bgCtx.fill();
+                });
+                bgAnimFrameId = requestAnimationFrame(loop);
+            }
+            loop();
+        }
+
+        function initPlasma(color) {
+            let t = 0;
+            function loop() {
+                t += 0.01;
+                // Expensive for full pixel manipulation, let's use a simplified approach or just clear
+                // Plasma usually requires pixel manipulation which is slow in JS for full screen.
+                // Let's draw moving sine waves.
+                bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+                bgCtx.strokeStyle = color;
+                bgCtx.lineWidth = 2;
+
+                for (let i = 0; i < 5; i++) {
+                    bgCtx.beginPath();
+                    for (let x = 0; x < bgCanvas.width; x += 10) {
+                        const y = bgCanvas.height / 2 + Math.sin(x * 0.01 + t + i) * 100 * Math.sin(t * 0.5);
+                        if (x === 0) bgCtx.moveTo(x, y); else bgCtx.lineTo(x, y);
+                    }
+                    bgCtx.stroke();
+                }
+                bgAnimFrameId = requestAnimationFrame(loop);
+            }
+            loop();
+        }
+
+        function initSnow() {
+            for (let i = 0; i < 150; i++) {
+                bgParticles.push({
+                    x: Math.random() * bgCanvas.width,
+                    y: Math.random() * bgCanvas.height,
+                    vx: (Math.random() - 0.5) * 0.5,
+                    vy: Math.random() * 2 + 1,
+                    size: Math.random() * 2 + 1
+                });
+            }
+            function loop() {
+                bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+                bgCtx.fillStyle = '#fff';
+                bgParticles.forEach(p => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    if (p.y > bgCanvas.height) {
+                        p.y = -5;
+                        p.x = Math.random() * bgCanvas.width;
+                    }
+                    if (p.x > bgCanvas.width) p.x = 0;
+                    if (p.x < 0) p.x = bgCanvas.width;
+
+                    bgCtx.beginPath();
+                    bgCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    bgCtx.fill();
+                });
+                bgAnimFrameId = requestAnimationFrame(loop);
+            }
+            loop();
+        }
+
+        function initRain(color) {
+            for (let i = 0; i < 300; i++) {
+                bgParticles.push({
+                    x: Math.random() * bgCanvas.width,
+                    y: Math.random() * bgCanvas.height,
+                    vy: Math.random() * 10 + 10,
+                    l: Math.random() * 20 + 10
+                });
+            }
+            function loop() {
+                bgCtx.fillStyle = '#0003'; // trail
+                bgCtx.fillRect(0, 0, bgCanvas.width, bgCanvas.height);
+                bgCtx.strokeStyle = color || '#0af';
+                bgCtx.lineWidth = 1;
+                bgCtx.beginPath();
+                bgParticles.forEach(p => {
+                    p.y += p.vy;
+                    if (p.y > bgCanvas.height) {
+                        p.y = -p.l;
+                        p.x = Math.random() * bgCanvas.width;
+                    }
+                    bgCtx.moveTo(p.x, p.y);
+                    bgCtx.lineTo(p.x, p.y + p.l);
+                });
+                bgCtx.stroke();
+                bgAnimFrameId = requestAnimationFrame(loop);
+            }
+            loop();
+        }
+
+        function initGeometric(color) {
+            let t = 0;
+            function loop() {
+                t += 0.005;
+                bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+                bgCtx.strokeStyle = color;
+                bgCtx.lineWidth = 1;
+
+                const cx = bgCanvas.width / 2;
+                const cy = bgCanvas.height / 2;
+
+                for (let i = 0; i < 10; i++) {
+                    const size = 100 + i * 50;
+                    bgCtx.save();
+                    bgCtx.translate(cx, cy);
+                    bgCtx.rotate(t * (i % 2 === 0 ? 1 : -1) + i * 0.1);
+                    bgCtx.strokeRect(-size / 2, -size / 2, size, size);
+                    bgCtx.restore();
+                }
+                bgAnimFrameId = requestAnimationFrame(loop);
+            }
+            loop();
+        }
+
+        // === END BG ANIMATIONS ===
+
+        function updateConnectScreen() {
+            if (config.logoUrl) {
+                document.getElementById('connect-logo').src = config.logoUrl;
+            }
+            if (config.tagline) {
+                document.getElementById('welcome-text').innerText = config.tagline; // Reuse tagline as welcome text or separate?
+                // User asked for "Texte d'accueil". Let's use tagline for now or add a specific field later. 
+                // For now, re-use existing config properties to avoid schema changes if possible.
+                // Or just keep it generic "Toucher pour commencer" if not specified.
+            }
+        }
 
         function updateLogoDisplay() {
             if (!hasStarted) return;
@@ -1277,6 +1743,15 @@
                     }
                     break;
                 case 'emojis':
+                    // Randomize Layout
+                    const seedE = step.id || 12345;
+                    const rngE = (o) => { const x = Math.sin(seedE + o) * 10000; return x - Math.floor(x); };
+                    emojiDiv.style.position = 'absolute';
+                    emojiDiv.style.top = (20 + rngE(0) * 60) + '%';
+                    emojiDiv.style.left = (10 + rngE(1) * 80) + '%';
+                    emojiDiv.style.fontSize = (10 + rngE(2) * 15) + 'vh';
+                    emojiDiv.style.transform = `translate(-50%, -50%) rotate(${rngE(3) * 40 - 20}deg)`;
+
                     const t = Math.min(1, elapsed / step.duration);
                     const startSpeed = step.speed || 1200;
                     const interval = startSpeed * Math.pow(0.25, t);
@@ -1346,6 +1821,11 @@
                     } catch (e) { console.error(e); }
                     break;
                 case 'words':
+                    // Reset position for words (center)
+                    emojiDiv.style.position = 'absolute';
+                    emojiDiv.style.top = '50%';
+                    emojiDiv.style.left = '50%';
+                    emojiDiv.style.transform = 'translate(-50%, -50%)';
                     emojiDiv.style.fontSize = '8vh';
                     emojiDiv.className = '';
                     const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
@@ -1480,6 +1960,16 @@
                 case 'number':
                     const numberDiv = document.getElementById('number-display');
                     numberDiv.style.display = 'block';
+
+                    // Randomize Layout
+                    const seedN = step.id || 67890;
+                    const rngN = (o) => { const x = Math.sin(seedN + o) * 10000; return x - Math.floor(x); };
+                    numberDiv.style.position = 'absolute';
+                    numberDiv.style.top = (20 + rngN(0) * 60) + '%';
+                    numberDiv.style.left = (10 + rngN(1) * 80) + '%';
+                    numberDiv.style.fontSize = (15 + rngN(2) * 25) + 'vh';
+                    numberDiv.style.transform = `translate(-50%, -50%) rotate(${rngN(3) * 30 - 15}deg)`;
+
                     if (elapsed < step.duration - 1000) {
                         numberDiv.innerText = Math.floor(Math.random() * 1000);
                     } else {
@@ -1529,6 +2019,7 @@
                     const cardFlip = document.getElementById('card-flip');
                     cardFlip.innerHTML = `<img src="${step.value || 'cards/AC.jpg'}" style="width:100%;height:100%;object-fit:contain;">`;
                     cardFlip.style.animationDuration = (step.speed || 2000) + 'ms';
+                    cardFlip.style.animationIterationCount = step.loop ? 'infinite' : '1';
                     break;
                 case 'slot':
                     const slotDiv = document.getElementById('slot-container');
