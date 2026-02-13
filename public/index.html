@@ -1298,6 +1298,47 @@
             transform: translateX(20px);
         }
     </style>
+    #step-guide {
+    display: none;
+    background: #111;
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 15px;
+    margin-top: 10px;
+    }
+
+    .guide-content {
+    position: relative;
+    }
+
+    .guide-close {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    background: transparent;
+    border: none;
+    color: #888;
+    font-size: 20px;
+    cursor: pointer;
+    }
+
+    table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    color: #ccc;
+    }
+
+    td {
+    padding: 6px 0;
+    border-bottom: 1px solid #222;
+    }
+
+    td:first-child {
+    width: 120px;
+    color: #fff;
+    }
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 
@@ -2916,6 +2957,8 @@
 
         function closePanel() {
             document.getElementById('settings-panel').classList.remove('open');
+            // Force refresh of background if needed
+            // setBgAnimation(state.bgAnim || 'particles', state.bgColor || '#000000');
         }
 
         // Update UI from state

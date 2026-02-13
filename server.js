@@ -54,6 +54,40 @@ app.post('/upload-video', uploadVideo.single('videoFile'), (req, res) => {
     res.json({ filename: req.file.originalname, path: 'videos/' + req.file.originalname });
 });
 
+// Upload Logo
+const logoStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        const dir = path.join(__dirname, 'public', 'images');
+        if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+        cb(null, dir);
+    },
+    filename: (req, file, cb) => cb(null, 'logo-' + Date.now() + path.extname(file.originalname))
+});
+const uploadLogo = multer({ storage: logoStorage });
+
+app.post('/upload-logo', uploadLogo.single('logoFile'), (req, res) => {
+    if (!req.file) return res.status(400).send('Aucun fichier.');
+    console.log(`[SERVER] Logo uploadé: ${req.file.filename}`);
+    res.json({ filename: req.file.filename, path: 'images/' + req.file.filename });
+});
+
+// Upload Start Image
+const startStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        const dir = path.join(__dirname, 'public', 'images');
+        if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+        cb(null, dir);
+    },
+    filename: (req, file, cb) => cb(null, 'start-' + Date.now() + path.extname(file.originalname))
+});
+const uploadStart = multer({ storage: startStorage });
+
+app.post('/upload-start-image', uploadStart.single('startImage'), (req, res) => {
+    if (!req.file) return res.status(400).send('Aucun fichier.');
+    console.log(`[SERVER] Start Image uploadée: ${req.file.filename}`);
+    res.json({ filename: req.file.filename, path: 'images/' + req.file.filename });
+});
+
 // État initial du Laboratoire
 let state = {
     logoUrl: '',
