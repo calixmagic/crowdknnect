@@ -1419,14 +1419,14 @@
                     <div class="row"><label>Texte d'accueil</label><input type="text" id="tagline-input"
                             placeholder="Réaliser une expérience."></div>
                     <div class="row">
-                        <label>Afficher les logs de timing (Admin)</label>
+                        <label for="logs-toggle">Afficher les logs de timing (Admin)</label>
                         <label class="switch" style="margin:0;">
                             <input type="checkbox" id="logs-toggle" onchange="toggleLogs(this.checked)">
                             <span class="slider"></span>
                         </label>
                     </div>
                     <div class="row">
-                        <label>Mode Debug (Visible sur public)</label>
+                        <label for="toggle-debug">Mode Debug (Visible sur public)</label>
                         <label class="switch" style="margin:0;">
                             <input type="checkbox" id="toggle-debug">
                             <span class="slider"></span>
@@ -1434,7 +1434,7 @@
                     </div>
                     <div class="row">
                         <div class="setting-row">
-                            <label>Couleur de fond:</label>
+                            <label for="bg-color-input">Couleur de fond:</label>
                             <div style="display:flex; gap:5px; align-items:center;">
                                 <input type="color" id="bg-color-input" onchange="setBgColor(this.value)">
                                 <button onclick="autoColorFromLogo()"
@@ -1443,7 +1443,7 @@
                             </div>
                         </div>
                         <div class="setting-row">
-                            <label>Animation de fond:</label>
+                            <label for="bg-anim-select">Animation de fond:</label>
                             <select id="bg-anim-select" onchange="setBgAnim(this.value)"
                                 style="padding:5px;border-radius:4px;">
                                 <option value="none">Aucune</option>
@@ -1460,7 +1460,7 @@
                             </select>
                         </div>
                         <div class="setting-row">
-                            <label>Anim. Départ:</label>
+                            <label for="start-anim-select">Anim. Départ:</label>
                             <select id="start-anim-select" onchange="setStartAnim(this.value)"
                                 style="padding:5px;border-radius:4px;">
                                 <option value="fade">Fondu (Défaut)</option>
@@ -1749,87 +1749,53 @@
                 </div>
             `).join('');
 
-                        // Touch drag for mobile (Long Press on Item)
+                        // Touch drag for mobile (Reverted to Handle-Based)
                         list.querySelectorAll('.step-item').forEach(item => {
+                            const handle = item.querySelector('.step-handle');
                             let startY = 0, currentItem = null;
-                            let longPressTimer = null;
-                            let isDragging = false;
 
-                            const startLongPress = (e) => {
-                                // Ignore clicks on toggle button
-                                if (e.target.classList.contains('step-toggle')) return;
+                            // Ensure handle consumes event and prevents scroll
+                            handle.style.touchAction = 'none';
 
-                                startY = e.touches[0].clientY;
+                            handle.addEventListener('touchstart', (e) => {
+                                // e.preventDefault(); // Prevents scroll, allows drag
                                 currentItem = item;
-                                isDragging = false;
+                                startY = e.touches[0].clientY;
+                                item.classList.add('dragging');
+                                item.style.zIndex = '100';
+                                item.style.transform = 'scale(1.02)';
+                                if (state.debug) console.log("Drag started via Handle");
+                                if (navigator.vibrate) navigator.vibrate(50);
+                            }, { passive: false });
 
-                                // Visual feedback feedback imminent
-                                item.style.transition = 'transform 0.1s';
-                                item.style.transform = 'scale(0.98)';
+                            handle.addEventListener('touchmove', (e) => {
+                                e.preventDefault(); // Critical for drag to work instead of scroll
+                                if (!currentItem) return;
+                                const y = e.touches[0].clientY;
+                                const after = getDragAfter(list, y);
+                                if (!after) list.appendChild(currentItem);
+                                else list.insertBefore(currentItem, after);
+                            }, { passive: false });
 
-                                longPressTimer = setTimeout(() => {
-                                    isDragging = true;
-                                    if (navigator.vibrate) navigator.vibrate(50);
-                                    item.classList.add('dragging');
-                                    item.style.transform = 'scale(1.02)';
-                                    item.style.zIndex = '100';
-                                    // Log for debug
-                                    if (state.debug) console.log("Drag started via Long Press");
-                                }, 600); // 600ms long press
-                            };
+                            handle.addEventListener('touchend', () => {
+                                if (!currentItem) return;
+                                currentItem.classList.remove('dragging');
+                                currentItem.style.zIndex = '';
+                                currentItem.style.transform = '';
+                                currentItem = null;
 
-                            const cancelLongPress = () => {
-                                clearTimeout(longPressTimer);
-                                if (!isDragging && currentItem) {
-                                    item.style.transform = '';
-                                }
-                            };
-
-                            item.addEventListener('touchstart', (e) => {
-                                startLongPress(e);
-                            }, { passive: true }); // Passive true initially to allow scroll start
-
-                            item.addEventListener('touchmove', (e) => {
-                                if (isDragging) {
-                                    e.preventDefault(); // Prevent scroll while dragging
-                                    const y = e.touches[0].clientY;
-                                    const after = getDragAfter(list, y);
-                                    if (!after) list.appendChild(currentItem);
-                                    else list.insertBefore(currentItem, after);
-                                } else {
-                                    // If moved significantly before timer, cancel timer (it's a scroll)
-                                    const moveY = e.touches[0].clientY;
-                                    if (Math.abs(moveY - startY) > 10) {
-                                        cancelLongPress();
-                                        item.style.transform = '';
-                                    }
-                                }
-                            }, { passive: false }); // Passive false allows preventDefault
-
-                            item.addEventListener('touchend', () => {
-                                cancelLongPress();
-                                if (isDragging) {
-                                    item.classList.remove('dragging');
-                                    item.style.zIndex = '';
-                                    item.style.transform = '';
-                                    currentItem = null;
-                                    isDragging = false;
-
-                                    // Persist new order
-                                    const newOrder = [...list.querySelectorAll('.step-item')].map(el => parseInt(el.dataset.idx));
-                                    const steps = state.routines[state.activeRoutineIndex].steps;
-                                    const reordered = newOrder.map(i => steps[i]);
-                                    state.routines[state.activeRoutineIndex].steps = reordered;
-                                    syncState();
-                                    renderSteps();
-                                } else {
-                                    // It was a tap (click), usually handled by onclick but let's ensure cleanup
-                                    item.style.transform = '';
-                                }
+                                // Persist ordering
+                                const newOrder = [...list.querySelectorAll('.step-item')].map(el => parseInt(el.dataset.idx));
+                                const steps = state.routines[state.activeRoutineIndex].steps;
+                                const reordered = newOrder.map(i => steps[i]);
+                                state.routines[state.activeRoutineIndex].steps = reordered;
+                                syncState();
+                                renderSteps();
                             });
-
-                            // Desktop drag fallback
-                            item.addEventListener('dragstart', () => item.classList.add('dragging'));
+                            // Desktop drag fallback (native HTML5 DnD)
+                            item.addEventListener('dragstart', () => {
+                                item.classList.add('dragging');
+                            });
                             item.addEventListener('dragend', () => {
                                 item.classList.remove('dragging');
                                 // Persist new order to state
@@ -1841,6 +1807,15 @@
                                 renderSteps();
                             });
                         });
+
+                        // Container Drag Over (for Desktop)
+                        list.addEventListener('dragover', e => {
+                            e.preventDefault();
+                            const dragging = list.querySelector('.dragging');
+                            const after = getDragAfter(list, e.clientY);
+                            if (!after) list.appendChild(dragging); else list.insertBefore(dragging, after);
+                        });
+
                         list.addEventListener('dragover', e => {
                             e.preventDefault();
                             const dragging = list.querySelector('.dragging');
