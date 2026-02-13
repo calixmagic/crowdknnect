@@ -1252,6 +1252,7 @@
 
         // === CONNEXION SOCKET ===
         socket.on('connect', () => {
+            log("VERSION: v4.1 - Public UI Fix");
             log("Connecté: " + socket.id);
             const now = Date.now();
             socket.emit('sync-time', now, (serverTime) => {

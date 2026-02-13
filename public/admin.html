@@ -1616,6 +1616,7 @@
                     }
 
                     socket.on('connect', () => {
+                        log("VERSION: v4.1 - Admin UI Fix", "#00adff");
                         log("Socket connecté: " + socket.id, "#34c759");
                         const now = Date.now();
                         socket.emit('sync-time', now, (serverTime) => {
@@ -2128,6 +2129,47 @@
                     function closePanel() {
                         document.getElementById('settings-panel').classList.remove('open');
                     }
+
+                    // === LONG PRESS TO OPEN SETTINGS (Admin) ===
+                    let settingsTimer = null;
+                    let sX = 0, sY = 0;
+
+                    document.addEventListener('touchstart', (e) => {
+                        // Ignore if touching a button or input
+                        if (e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.closest('.step-handle')) return;
+
+                        if (e.touches.length === 1) {
+                            sX = e.touches[0].clientX;
+                            sY = e.touches[0].clientY;
+                            log(`Touch start: ${parseInt(sX)},${parseInt(sY)}`);
+
+                            settingsTimer = setTimeout(() => {
+                                log("Geste Admin détecté: Ouverture Paramètres");
+                                if (navigator.vibrate) navigator.vibrate(50);
+                                openSettings();
+                            }, 1500); // 1.5s long press
+                        }
+                    }, { passive: true });
+
+                    document.addEventListener('touchmove', (e) => {
+                        if (settingsTimer) {
+                            const mX = Math.abs(e.touches[0].clientX - sX);
+                            const mY = Math.abs(e.touches[0].clientY - sY);
+                            if (mX > 20 || mY > 20) {
+                                clearTimeout(settingsTimer);
+                                settingsTimer = null;
+                                // log("Touch cancel (move)"); // Trop verbeux
+                            }
+                        }
+                    }, { passive: true });
+
+                    document.addEventListener('touchend', () => {
+                        if (settingsTimer) {
+                            clearTimeout(settingsTimer);
+                            settingsTimer = null;
+                            log("Touch end (trop tôt)");
+                        }
+                    });
 
                 </script>
             </div><!-- End of Wrapper -->
