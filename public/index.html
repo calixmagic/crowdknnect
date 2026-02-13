@@ -1209,17 +1209,25 @@
             updateLogoDisplay();
         });
 
-        // === GESTE SECRET 3 DOIGTS ===
-        let fingersCount = 0;
+        // === GESTE SECRET ADMIN (Appui long 2.5s) ===
+        let adminTimer = null;
         document.addEventListener('touchstart', (e) => {
-            fingersCount = e.touches.length;
-            if (fingersCount === 3) {
-                const timer = setTimeout(() => {
-                    if (fingersCount === 3) { log("Demande Admin..."); socket.emit('promote-to-admin'); }
-                }, 2000);
-                document.addEventListener('touchend', () => { clearTimeout(timer); fingersCount = 0; }, { once: true });
+            // Cancel previous if any
+            clearTimeout(adminTimer);
+
+            // Only trigger if 1 finger
+            if (e.touches.length === 1) {
+                adminTimer = setTimeout(() => {
+                    log("Demande Admin (Long Press)...");
+                    socket.emit('promote-to-admin');
+                    if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+                }, 2500);
             }
-        });
+        }, { passive: true });
+
+        document.addEventListener('touchend', () => clearTimeout(adminTimer));
+        document.addEventListener('touchmove', () => clearTimeout(adminTimer));
+
 
         socket.on('admin-granted', () => {
             log("Admin accordé! Redirection...");
