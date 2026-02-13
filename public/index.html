@@ -1254,6 +1254,10 @@
             if (state.bgAnim) {
                 setBgAnimation(state.bgAnim, state.bgColor || '#000000');
             }
+            // Pre-set start anim state if needed (though mostly used on click)
+            if (state.startAnim) {
+                // Store locally if helpful, or just access state.startAnim directly in click handler
+            }
         });
 
         // === BACKGROUND ANIMATIONS ===
