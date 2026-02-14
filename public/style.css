@@ -1,0 +1,2352 @@
+/* =========================================
+   1. CORE APP STYLES
+   ========================================= */
+body,
+html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #000;
+    color: #fff;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    touch-action: manipulation;
+}
+
+/* Screen Containers */
+.screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 0.5s ease;
+}
+
+.screen.active {
+    display: flex;
+}
+
+/* Connect Screen (Z-Index 1000) */
+#connect-screen {
+    z-index: 1000;
+    background: #000;
+}
+
+#connect-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    width: 100%;
+}
+
+#connect-logo {
+    width: 150px;
+    height: 150px;
+    object-fit: contain;
+    margin-bottom: 20px;
+    transition: all 0.3s ease-out;
+    max-width: 80vw;
+    max-height: 50vh;
+}
+
+#welcome-text {
+    font-size: 1.2rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 5px;
+}
+
+#sub-text {
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 20px;
+    font-weight: 300;
+}
+
+/* Logo Screen (Waiting) */
+#logo-container {
+    width: 80vw;
+    max-width: 400px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#logo-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: none;
+    transition: transform 0.2s ease-out;
+}
+
+/* Engine Screen (Z-Index 500) */
+#engine-screen {
+    z-index: 500;
+}
+
+/* Final Screen (Z-Index 2000) */
+#final-screen {
+    z-index: 2000;
+    background: #fff;
+    color: #000;
+    padding: 20px;
+    text-align: center;
+}
+
+.final-btn {
+    width: 100%;
+    max-width: 300px;
+    padding: 20px;
+    margin: 10px 0;
+    border: none;
+    border-radius: 15px;
+    font-weight: 700;
+    font-size: 16px;
+    cursor: pointer;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+}
+
+.btn-insta {
+    background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+}
+
+.btn-google {
+    background: #4285F4;
+}
+
+/* =========================================
+   2. MAGIC EFFECT CLASSES & ANIMATIONS
+   ========================================= */
+
+/* Utilities */
+.red {
+    color: #f00 !important;
+}
+
+.black {
+    color: #fff !important;
+}
+
+.white-bg {
+    background-color: #fff !important;
+    color: #000 !important;
+}
+
+.blackout-bg {
+    background-color: #000 !important;
+    transition: none !important;
+}
+
+/* Flash Effects */
+body.flash-bg {
+    background-color: #fff !important;
+    transition: none !important;
+}
+
+body.flash-strobe {
+    animation: strobeEffect 0.1s infinite;
+}
+
+body.beat-flash {
+    animation: beatFlash 0.3s ease-in-out !important;
+}
+
+@keyframes strobeEffect {
+
+    0%,
+    50% {
+        background: #000;
+    }
+
+    51%,
+    100% {
+        background: #fff;
+    }
+}
+
+@keyframes beatFlash {
+
+    0%,
+    100% {
+        background-color: inherit;
+    }
+
+    50% {
+        background-color: #fff;
+    }
+}
+
+/* Shared Overlay Elements (Hidden by default) */
+#mask-overlay,
+#eye-container,
+#unlock-icon,
+#wave-overlay,
+#fire-container,
+#static-overlay,
+#puzzle-container,
+#spiral-overlay,
+#color-overlay,
+#ripple-overlay,
+#ripple-center,
+#card-flip-container,
+#slot-container,
+#pinpoint-target,
+#crystal-ball,
+#snapshot-flash,
+#text-display,
+#number-display,
+#countdown-display,
+#dice-container,
+#heart-svg,
+#arrow,
+#media-display,
+#video-display {
+    display: none;
+    position: absolute;
+}
+
+/* Specific Effect Styles */
+
+/* Text & Numbers */
+#text-display {
+    font-size: 12vh;
+    font-weight: bold;
+    text-align: center;
+    max-width: 90%;
+}
+
+#number-display {
+    font-size: 25vh;
+    font-weight: bold;
+}
+
+#emoji-display {
+    font-size: 15vh;
+}
+
+#countdown-display {
+    font-size: 30vh;
+    font-weight: bold;
+    animation: pulse 1s infinite;
+}
+
+/* Media */
+#media-display {
+    width: 85%;
+    max-width: 500px;
+    height: auto;
+    border-radius: 15px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+}
+
+#video-display {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Heart */
+#heart-svg {
+    width: 100px;
+    height: 100px;
+}
+
+#heart-svg.active {
+    display: block;
+    animation: heartMorph 3s ease-in-out forwards;
+}
+
+@keyframes heartMorph {
+    0% {
+        transform: scale(0.1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(1.5);
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Dice 3D */
+#dice-container {
+    width: 200px;
+    height: 200px;
+    perspective: 800px;
+}
+
+#dice {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+    animation: diceRoll 2s ease-out forwards;
+}
+
+.dice-face {
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    background: #000;
+    border: 3px solid #333;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 80px;
+    font-weight: bold;
+}
+
+.dice-face:nth-child(1) {
+    transform: rotateY(0deg) translateZ(100px);
+}
+
+.dice-face:nth-child(2) {
+    transform: rotateY(180deg) translateZ(100px);
+}
+
+.dice-face:nth-child(3) {
+    transform: rotateY(90deg) translateZ(100px);
+}
+
+.dice-face:nth-child(4) {
+    transform: rotateY(-90deg) translateZ(100px);
+}
+
+.dice-face:nth-child(5) {
+    transform: rotateX(90deg) translateZ(100px);
+}
+
+.dice-face:nth-child(6) {
+    transform: rotateX(-90deg) translateZ(100px);
+}
+
+@keyframes diceRoll {
+    0% {
+        transform: rotate3d(1, 1, 1, 0deg);
+    }
+
+    100% {
+        transform: rotate3d(1, 1, 1, 720deg);
+    }
+}
+
+/* Ripples */
+#ripple-overlay,
+#ripple-center {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: 3px solid rgba(255, 255, 255, 0.8);
+    pointer-events: none;
+}
+
+#ripple-center {
+    left: 50%;
+    top: 50%;
+    margin: -25px 0 0 -25px;
+}
+
+#ripple-overlay.active,
+#ripple-center.active {
+    animation: rippleExpand 2s ease-out forwards;
+}
+
+@keyframes rippleExpand {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    100% {
+        transform: scale(30);
+        opacity: 0;
+    }
+}
+
+/* Spiral */
+#spiral-overlay {
+    width: 300px;
+    height: 300px;
+    border: 5px solid #fff;
+    border-radius: 50%;
+}
+
+#spiral-overlay.active {
+    animation: spiralSpin 3s linear infinite;
+}
+
+@keyframes spiralSpin {
+    0% {
+        transform: rotate(0deg) scale(0.5);
+    }
+
+    50% {
+        transform: rotate(180deg) scale(1.5);
+    }
+
+    100% {
+        transform: rotate(360deg) scale(0.5);
+    }
+}
+
+/* Glitch */
+#glitch-text-overlay {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 10vh;
+    font-weight: bold;
+    text-shadow: 2px 2px #f00, -2px -2px #00f;
+    z-index: 1000;
+}
+
+body.glitch-bg {
+    animation: glitchEffect 0.3s infinite !important;
+}
+
+@keyframes glitchEffect {
+
+    0%,
+    100% {
+        transform: translate(0);
+        filter: hue-rotate(0deg);
+    }
+
+    20% {
+        transform: translate(-2px, 2px);
+        filter: hue-rotate(90deg);
+    }
+
+    40% {
+        transform: translate(2px, -2px);
+        filter: hue-rotate(180deg);
+    }
+
+    60% {
+        transform: translate(-2px, -2px);
+        filter: hue-rotate(270deg);
+    }
+
+    80% {
+        transform: translate(2px, 2px);
+        filter: hue-rotate(360deg);
+    }
+}
+
+/* Card Flip */
+#card-flip-container {
+    width: 300px;
+    height: 450px;
+    perspective: 1000px;
+}
+
+#card-flip {
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    animation: cardFlipAnim 2s ease-in-out forwards;
+}
+
+@keyframes cardFlipAnim {
+    0% {
+        transform: rotateY(0deg);
+    }
+
+    100% {
+        transform: rotateY(180deg);
+    }
+}
+
+/* Other Animations (Pulse, Breathing, Zoom, Shake, Fade, Wave, Starfield, etc) */
+body.pulse-bg {
+    animation: pulseEffect 1.5s ease-in-out infinite !important;
+}
+
+@keyframes pulseEffect {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.3;
+    }
+}
+
+body.breathing-bg {
+    animation: breatheEffect 4s ease-in-out infinite;
+}
+
+@keyframes breatheEffect {
+
+    0%,
+    100% {
+        background-color: #000;
+        transform: scale(1);
+    }
+
+    50% {
+        background-color: var(--breathing-color, #333);
+        transform: scale(1.02);
+    }
+}
+
+body.zoom-bg {
+    animation: zoomEffect 3s ease-in-out forwards !important;
+}
+
+@keyframes zoomEffect {
+    0% {
+        transform: scale(1);
+    }
+
+    100% {
+        transform: scale(3);
+    }
+}
+
+body.shake-bg {
+    animation: shakeEffect 0.5s infinite !important;
+}
+
+@keyframes shakeEffect {
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    25% {
+        transform: translateX(-5px);
+    }
+
+    75% {
+        transform: translateX(5px);
+    }
+}
+
+#fade-overlay {
+    width: 100%;
+    height: 100%;
+    transition: opacity 2s;
+}
+
+#fade-overlay.active {
+    opacity: 1;
+}
+
+#wave-overlay {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(transparent, rgba(0, 150, 255, 0.5));
+    animation: waveMove 3s ease-in-out infinite;
+}
+
+@keyframes waveMove {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-30px);
+    }
+}
+
+#pinpoint-target {
+    width: 100px;
+    height: 100px;
+    border: 5px solid #f00;
+    border-radius: 50%;
+    animation: pinpointShrink 3s ease-in forwards;
+}
+
+@keyframes pinpointShrink {
+    0% {
+        transform: scale(5);
+        opacity: 0.5;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+#unlock-icon {
+    font-size: 20vh;
+    animation: unlockAnim 2s ease-out forwards;
+}
+
+@keyframes unlockAnim {
+    0% {
+        content: '🔒';
+    }
+
+    50% {
+        content: '🔓';
+        transform: rotate(0deg);
+    }
+
+    100% {
+        content: '🔓';
+        transform: rotate(20deg);
+    }
+}
+
+#crystal-ball {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.8), rgba(100, 100, 255, 0.4));
+    animation: crystalGlow 2s ease-in-out infinite;
+}
+
+@keyframes crystalGlow {
+
+    0%,
+    100% {
+        box-shadow: 0 0 20px #fff, 0 0 40px #88f;
+    }
+
+    50% {
+        box-shadow: 0 0 40px #fff, 0 0 80px #88f;
+    }
+}
+
+#snapshot-flash {
+    width: 100%;
+    height: 100%;
+    background: #fff;
+}
+
+#snapshot-flash.active {
+    animation: cameraFlash 0.5s ease-out forwards;
+}
+
+@keyframes cameraFlash {
+    0% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+    }
+}
+
+#static-overlay {
+    width: 100%;
+    height: 100%;
+    background: repeating-linear-gradient(0deg, #000 0px, #fff 2px, #000 4px);
+    animation: staticFlicker 0.1s infinite;
+}
+
+@keyframes staticFlicker {
+    0% {
+        opacity: 0.8;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+#eye-container {
+    font-size: 20vh;
+    animation: eyeBlink 3s ease-in-out infinite;
+}
+
+@keyframes eyeBlink {
+
+    0%,
+    90%,
+    100% {
+        content: '👁️';
+    }
+
+    93%,
+    97% {
+        content: '😑';
+    }
+}
+
+#mask-overlay {
+    font-size: 30vh;
+    animation: maskAppear 2s ease-out forwards;
+}
+
+@keyframes maskAppear {
+    0% {
+        opacity: 0;
+        transform: scale(0);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+#arrow {
+    animation: arrowBounce 2s infinite;
+}
+
+@keyframes arrowBounce {
+
+    0%,
+    20%,
+    50%,
+    80%,
+    100% {
+        transform: translateX(-50%) translateY(0);
+    }
+
+    40% {
+        transform: translateX(-50%) translateY(-20px);
+    }
+
+    60% {
+        transform: translateX(-50%) translateY(-10px);
+    }
+}
+
+body.mirror-h {
+    transform: scaleX(-1);
+}
+
+body.mirror-v {
+    transform: scaleY(-1);
+}
+
+/* Pulse Helper */
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
+    }
+
+    70% {
+        transform: scale(1.05);
+        box-shadow: 0 0 0 12px rgba(255, 255, 255, 0);
+    }
+
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+    }
+}
+
+#start-btn {
+    animation: pulse 2s infinite;
+}
+
+
+/* =========================================
+   3. ADMIN PANEL STYLES
+   ========================================= */
+#settings-panel {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(10, 10, 10, 0.85);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    z-index: 2000;
+    display: none;
+    flex-direction: column;
+    padding: 20px;
+    overflow-y: auto;
+    text-align: left;
+}
+
+#settings-panel.open {
+    display: flex;
+}
+
+.section-title {
+    font-size: 10px;
+    color: #555;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin: 20px 0 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.add-link {
+    color: #007aff;
+    text-transform: none;
+    letter-spacing: 0;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.guide-toggle {
+    cursor: pointer;
+}
+
+.row {
+    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+label {
+    color: #888;
+    font-size: 11px;
+    text-transform: uppercase;
+}
+
+input,
+select {
+    background: #1a1a1a;
+    border: 1px solid #333;
+    color: #fff;
+    padding: 12px;
+    border-radius: 10px;
+    font-size: 14px;
+    width: 100%;
+}
+
+/* Steps List */
+#steps-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.step-item {
+    background: #151515;
+    border: 1px solid #222;
+    border-radius: 12px;
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    cursor: grab;
+    transition: background 0.2s;
+}
+
+.step-item.dragging {
+    opacity: 0.5;
+    background: #222;
+}
+
+.step-handle {
+    color: #444;
+    font-size: 20px;
+    cursor: grab;
+}
+
+.step-info {
+    flex: 1;
+}
+
+.step-name {
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 2px;
+}
+
+.step-meta {
+    font-size: 11px;
+    color: #666;
+}
+
+.step-delete {
+    color: #666;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 5px;
+}
+
+/* Toggles & Switches */
+.step-toggle {
+    width: 40px;
+    height: 20px;
+    background: #333;
+    border-radius: 10px;
+    position: relative;
+    cursor: pointer;
+}
+
+.step-toggle.active {
+    background: #34c759;
+}
+
+.step-toggle::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 16px;
+    height: 16px;
+    background: #fff;
+    border-radius: 50%;
+    transition: 0.2s;
+}
+
+.step-toggle.active::after {
+    left: 22px;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #333;
+    transition: 0.3s;
+    border-radius: 24px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: #666;
+    transition: 0.3s;
+    border-radius: 50%;
+}
+
+input:checked+.slider {
+    background-color: #34c759;
+}
+
+input:checked+.slider:before {
+    transform: translateX(20px);
+    background-color: #fff;
+}
+
+/* Admin Buttons */
+.btn {
+    background: #007aff;
+    color: #fff;
+    border: none;
+    padding: 15px;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-bottom: 10px;
+    width: 100%;
+}
+
+.btn-secondary {
+    background: #222;
+    border: 1px solid #333;
+}
+
+/* Guide & Logs */
+#step-guide {
+    display: none;
+    background: #111;
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 15px;
+    margin-top: 10px;
+}
+
+.guide-close {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    background: transparent;
+    border: none;
+    color: #888;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    color: #ccc;
+}
+
+td {
+    padding: 6px 0;
+    border-bottom: 1px solid #222;
+}
+
+td:first-child {
+    width: 120px;
+    color: #fff;
+}
+
+#debug-log {
+    position: fixed;
+    bottom: 10px;
+    left: 10px;
+    width: 90%;
+    height: 60px;
+    pointer-events: auto;
+    overflow-y: auto;
+    z-index: 3000;
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.5);
+    font-family: monospace;
+}
+
+/* File Inputs & Ranges */
+.file-input-wrapper {
+    position: relative;
+    overflow: hidden;
+    display: inline-block;
+    width: 100%;
+}
+
+.file-input-wrapper input[type=file] {
+    font-size: 100px;
+    position: absolute;
+    left: 0;
+    top: 0;
+    opacity: 0;
+}
+
+input[type=range] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    background: transparent;
+}
+
+input[type=range]::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 4px;
+    background: #333;
+    border-radius: 2px;
+}
+
+input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 18px;
+    width: 18px;
+    border-radius: 50%;
+    background: #007aff;
+    cursor: pointer;
+    margin-top: -7px;
+}
+
+/* Hidden by default */
+#mask-overlay,
+#eye-container,
+#unlock-icon,
+#wave-overlay,
+#fire-container,
+#static-overlay,
+#puzzle-container {
+    display: none;
+}
+
+.screen.active {
+    display: flex;
+}
+
+#connect-screen {
+    z-index: 1000;
+    background: #000;
+}
+
+.mystic-wheel {
+    width: 80px;
+    height: 80px;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-top: 2px solid #fff;
+    border-radius: 50%;
+    animation: spin 2s linear infinite;
+    margin-bottom: 30px;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
+    }
+
+    70% {
+        transform: scale(1.05);
+        box-shadow: 0 0 0 12px rgba(255, 255, 255, 0);
+    }
+
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+    }
+}
+
+#start-btn {
+    animation: pulse 2s infinite;
+}
+
+/* New Connect Screen Styles */
+#connect-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    width: 100%;
+}
+
+#connect-logo {
+    width: 150px;
+    height: 150px;
+    object-fit: contain;
+    border-radius: 0;
+    margin-bottom: 20px;
+    background: transparent;
+    transition: width 0.3s ease-out, height 0.3s ease-out;
+    max-width: 80vw;
+    max-height: 50vh;
+}
+
+#welcome-text {
+    font-size: 1.2rem;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 5px;
+}
+
+#sub-text {
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 20px;
+    font-weight: 300;
+}
+
+#logo-container {
+    width: 80vw;
+    max-width: 400px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#logo-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: none;
+    transition: transform 0.2s ease-out;
+}
+
+#engine-screen {
+    z-index: 500;
+}
+
+#emoji-display {
+    font-size: 15vh;
+}
+
+#media-display {
+    width: 85%;
+    max-width: 500px;
+    height: auto;
+    border-radius: 15px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    display: none;
+}
+
+#video-display {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: none;
+}
+
+#final-screen {
+    z-index: 2000;
+    background: #fff;
+    color: #000;
+    padding: 20px;
+    text-align: center;
+}
+
+.final-btn {
+    width: 100%;
+    max-width: 300px;
+    padding: 20px;
+    margin: 10px 0;
+    border: none;
+    border-radius: 15px;
+    font-weight: 700;
+    font-size: 16px;
+    cursor: pointer;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-insta {
+    background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+    color: #fff;
+}
+
+.btn-google {
+    background: #4285F4;
+    color: #fff;
+}
+
+/* Flash Effects */
+body.flash-bg {
+    background-color: #fff !important;
+}
+
+body.flash-strobe {
+    animation: strobeEffect 0.1s infinite;
+}
+
+@keyframes strobeEffect {
+
+    0%,
+    50% {
+        background-color: #000;
+    }
+
+    51%,
+    100% {
+        background-color: #fff;
+    }
+}
+
+.red {
+    color: #f00 !important;
+}
+
+.black {
+    color: #fff !important;
+}
+
+.white-bg {
+    background-color: #fff !important;
+    color: #000 !important;
+}
+
+.flash-bg {
+    background-color: #fff !important;
+    transition: none !important;
+}
+
+.blackout-bg {
+    background-color: #000 !important;
+    transition: none !important;
+}
+
+/* Heart morphing animation */
+#heart-svg {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    display: none;
+}
+
+#heart-svg.active {
+    display: block;
+    animation: heartMorph 3s ease-in-out forwards;
+}
+
+@keyframes heartMorph {
+    0% {
+        transform: scale(0.1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(1.5);
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Countdown */
+#countdown-display {
+    position: absolute;
+    font-size: 30vh;
+    font-weight: bold;
+    color: #fff;
+    display: none;
+    animation: countdownPulse 1s infinite;
+}
+
+@keyframes countdownPulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.2);
+    }
+}
+
+/* Dice 3D */
+#dice-container {
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    perspective: 800px;
+    display: none;
+}
+
+#dice {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+    animation: diceRoll 2s ease-out forwards;
+}
+
+.dice-face {
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    background: #000;
+    border: 3px solid #333;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 80px;
+    font-weight: bold;
+}
+
+.dice-face:nth-child(1) {
+    transform: rotateY(0deg) translateZ(100px);
+}
+
+.dice-face:nth-child(2) {
+    transform: rotateY(180deg) translateZ(100px);
+}
+
+.dice-face:nth-child(3) {
+    transform: rotateY(90deg) translateZ(100px);
+}
+
+.dice-face:nth-child(4) {
+    transform: rotateY(-90deg) translateZ(100px);
+}
+
+.dice-face:nth-child(5) {
+    transform: rotateX(90deg) translateZ(100px);
+}
+
+.dice-face:nth-child(6) {
+    transform: rotateX(-90deg) translateZ(100px);
+}
+
+@keyframes diceRoll {
+    0% {
+        transform: rotate3d(1, 1, 1, 0deg);
+    }
+
+    100% {
+        transform: rotate3d(1, 1, 1, 720deg);
+    }
+}
+
+/* Ripple from logo */
+#ripple-overlay {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: 3px solid rgba(255, 255, 255, 0.8);
+    display: none;
+    pointer-events: none;
+}
+
+#ripple-overlay.active {
+    animation: rippleExpand 2s ease-out forwards;
+}
+
+@keyframes rippleExpand {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    100% {
+        transform: scale(30);
+        opacity: 0;
+    }
+}
+
+/* Audio (hidden) */
+#audio-player {
+    display: none;
+}
+
+/* Phase 2 Steps */
+/* Text */
+#text-display {
+    position: absolute;
+    font-size: 12vh;
+    font-weight: bold;
+    color: #fff;
+    text-align: center;
+    max-width: 90%;
+    display: none;
+}
+
+/* Pulse */
+body.pulse-bg {
+    animation: pulseEffect 1.5s ease-in-out infinite !important;
+}
+
+@keyframes pulseEffect {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.3;
+    }
+}
+
+/* Spiral */
+#spiral-overlay {
+    position: absolute;
+    width: 300px;
+    height: 300px;
+    border: 5px solid #fff;
+    border-radius: 50%;
+    display: none;
+}
+
+#spiral-overlay.active {
+    animation: spiralSpin 3s linear infinite;
+}
+
+@keyframes spiralSpin {
+    0% {
+        transform: rotate(0deg) scale(0.5);
+    }
+
+    50% {
+        transform: rotate(180deg) scale(1.5);
+    }
+
+    100% {
+        transform: rotate(360deg) scale(0.5);
+    }
+}
+
+/* Color overlay */
+#color-overlay {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    display: none;
+    transition: background-color 0.5s;
+}
+
+/* Number */
+#number-display {
+    position: absolute;
+    font-size: 25vh;
+    font-weight: bold;
+    color: #fff;
+    display: none;
+}
+
+/* Breathing */
+body.breathing-bg {
+    animation: breatheEffect 4s ease-in-out infinite;
+}
+
+@keyframes breatheEffect {
+
+    0%,
+    100% {
+        background-color: #000;
+        transform: scale(1);
+    }
+
+    50% {
+        background-color: var(--breathing-color, #333);
+        transform: scale(1.02);
+    }
+}
+
+/* Glitch */
+#glitch-text-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 10vh;
+    font-weight: bold;
+    color: #fff;
+    display: none;
+    text-shadow: 2px 2px #f00, -2px -2px #00f;
+    z-index: 1000;
+}
+
+body.glitch-bg {
+    animation: glitchEffect 0.3s infinite !important;
+}
+
+@keyframes glitchEffect {
+    0% {
+        transform: translate(0);
+        filter: hue-rotate(0deg);
+    }
+
+    20% {
+        transform: translate(-2px, 2px);
+        filter: hue-rotate(90deg);
+    }
+
+    40% {
+        transform: translate(2px, -2px);
+        filter: hue-rotate(180deg);
+    }
+
+    60% {
+        transform: translate(-2px, -2px);
+        filter: hue-rotate(270deg);
+    }
+
+    80% {
+        transform: translate(2px, 2px);
+        filter: hue-rotate(360deg);
+    }
+
+    100% {
+        transform: translate(0);
+        filter: hue-rotate(0deg);
+    }
+}
+
+/* Ripple center */
+#ripple-center {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 50px;
+    height: 50px;
+    margin-left: -25px;
+    margin-top: -25px;
+    border-radius: 50%;
+    border: 3px solid rgba(255, 255, 255, 0.8);
+    display: none;
+}
+
+#ripple-center.active {
+    animation: rippleCenterExpand 2s ease-out forwards;
+}
+
+@keyframes rippleCenterExpand {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    100% {
+        transform: scale(30);
+        opacity: 0;
+    }
+}
+
+/* Zoom */
+body.zoom-bg {
+    animation: zoomEffect 3s ease-in-out forwards !important;
+}
+
+@keyframes zoomEffect {
+    0% {
+        transform: scale(1);
+    }
+
+    100% {
+        transform: scale(3);
+    }
+}
+
+/* Shake */
+body.shake-bg {
+    animation: shakeEffect 0.5s infinite !important;
+}
+
+@keyframes shakeEffect {
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    10%,
+    30%,
+    50%,
+    70%,
+    90% {
+        transform: translateX(-5px);
+    }
+
+    20%,
+    40%,
+    60%,
+    80% {
+        transform: translateX(5px);
+    }
+}
+
+/* Fade */
+#fade-overlay {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    display: none;
+    transition: opacity 2s;
+}
+
+#fade-overlay.active {
+    opacity: 1;
+}
+
+/* Phase 3 Advanced Steps */
+/* CardFlip */
+#card-flip-container {
+    position: absolute;
+    width: 300px;
+    height: 450px;
+    perspective: 1000px;
+    display: none;
+}
+
+#card-flip {
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    animation: cardFlipAnim 2s ease-in-out forwards;
+}
+
+@keyframes cardFlipAnim {
+    0% {
+        transform: rotateY(0deg);
+    }
+
+    100% {
+        transform: rotateY(180deg);
+    }
+}
+
+/* Slot */
+#slot-container {
+    position: absolute;
+    display: none;
+    font-size: 15vh;
+}
+
+/* Pinpoint */
+#pinpoint-target {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    border: 5px solid #f00;
+    border-radius: 50%;
+    display: none;
+    animation: pinpointShrink 3s ease-in forwards;
+}
+
+@keyframes pinpointShrink {
+    0% {
+        transform: scale(5);
+        opacity: 0.5;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Unlock */
+#unlock-icon {
+    position: absolute;
+    font-size: 20vh;
+    display: none;
+    animation: unlockAnim 2s ease-out forwards;
+}
+
+@keyframes unlockAnim {
+    0% {
+        content: '🔒';
+    }
+
+    50% {
+        content: '🔓';
+        transform: rotate(0deg);
+    }
+
+    100% {
+        content: '🔓';
+        transform: rotate(20deg);
+    }
+}
+
+/* Mirror */
+body.mirror-h {
+    transform: scaleX(-1);
+}
+
+body.mirror-v {
+    transform: scaleY(-1);
+}
+
+/* Wave */
+#wave-overlay {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(transparent, rgba(0, 150, 255, 0.5));
+    display: none;
+    animation: waveMove 3s ease-in-out infinite;
+}
+
+@keyframes waveMove {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-30px);
+    }
+}
+
+/* Sparkle */
+.sparkle-particle {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: #fff;
+    border-radius: 50%;
+    animation: sparklefall 2s linear forwards;
+}
+
+@keyframes sparklefall {
+    0% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateY(100vh);
+    }
+}
+
+/* Fire */
+#fire-container {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 40%;
+    display: none;
+    background: linear-gradient(to top, #ff4500, #ff8c00, transparent);
+    animation: fireFlicker 0.3s infinite alternate;
+}
+
+@keyframes fireFlicker {
+    0% {
+        opacity: 0.8;
+        transform: scaleY(1);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scaleY(1.1);
+    }
+}
+
+/* Beat */
+body.beat-flash {
+    animation: beatFlash 0.3s ease-in-out !important;
+}
+
+@keyframes beatFlash {
+
+    0%,
+    100% {
+        background-color: inherit;
+    }
+
+    50% {
+        background-color: #fff;
+    }
+}
+
+/* StaticNoise */
+#static-overlay {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: repeating-linear-gradient(0deg, #000 0px, #fff 2px, #000 4px);
+    display: none;
+    animation: staticFlicker 0.1s infinite;
+}
+
+@keyframes staticFlicker {
+    0% {
+        opacity: 0.8;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+/* Eye */
+#eye-container {
+    position: absolute;
+    font-size: 20vh;
+    display: none;
+    animation: eyeBlink 3s ease-in-out infinite;
+}
+
+@keyframes eyeBlink {
+
+    0%,
+    90%,
+    100% {
+        content: '👁️';
+    }
+
+    93%,
+    97% {
+        content: '😑';
+    }
+}
+
+/* Puzzle */
+#puzzle-container {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    display: none;
+}
+
+.puzzle-piece {
+    position: absolute;
+    width: 50%;
+    height: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid #fff;
+}
+
+/* Mask */
+#mask-overlay {
+    position: absolute;
+    font-size: 30vh;
+    display: none;
+    animation: maskAppear 2s ease-out forwards;
+}
+
+@keyframes maskAppear {
+    0% {
+        opacity: 0;
+        transform: scale(0);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Crystal */
+#crystal-ball {
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.8), rgba(100, 100, 255, 0.4));
+    display: none;
+    animation: crystalGlow 2s ease-in-out infinite;
+}
+
+@keyframes crystalGlow {
+
+    0%,
+    100% {
+        box-shadow: 0 0 20px #fff, 0 0 40px #88f;
+    }
+
+    50% {
+        box-shadow: 0 0 40px #fff, 0 0 80px #88f;
+    }
+}
+
+/* Snapshot */
+#snapshot-flash {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: #fff;
+    display: none;
+}
+
+#snapshot-flash.active {
+    animation: cameraFlash 0.5s ease-out forwards;
+}
+
+@keyframes cameraFlash {
+    0% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+    }
+}
+
+/* Starfield */
+.star {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background: #fff;
+    border-radius: 50%;
+    animation: starMove 3s linear infinite;
+}
+
+@keyframes starMove {
+    0% {
+        transform: translateZ(0) scale(1);
+        opacity: 0;
+    }
+
+    50% {
+        opacity: 1;
+    }
+
+    100% {
+        transform: translateZ(100px) scale(3);
+        opacity: 0;
+    }
+}
+
+#arrow {
+    animation: arrowBounce 2s infinite;
+}
+
+@keyframes arrowBounce {
+
+    0%,
+    20%,
+    50%,
+    80%,
+    100% {
+        transform: translateX(-50%) translateY(0);
+    }
+
+    40% {
+        transform: translateX(-50%) translateY(-20px);
+    }
+
+    60% {
+        transform: translateX(-50%) translateY(-10px);
+    }
+}
+
+/* Admin Panel CSS */
+#settings-panel {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(10, 10, 10, 0.85);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    z-index: 2000;
+    display: none;
+    flex-direction: column;
+    padding: 20px;
+    overflow-y: auto;
+    text-align: left;
+}
+
+#settings-panel.open {
+    display: flex;
+}
+
+.section-title {
+    font-size: 10px;
+    color: #555;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin: 20px 0 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.add-link {
+    color: #007aff;
+    text-transform: none;
+    letter-spacing: 0;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.row {
+    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+label {
+    color: #888;
+    font-size: 11px;
+    text-transform: uppercase;
+}
+
+input,
+select {
+    background: #1a1a1a;
+    border: 1px solid #333;
+    color: #fff;
+    padding: 12px;
+    border-radius: 10px;
+    font-size: 14px;
+    width: 100%;
+}
+
+#steps-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.step-item {
+    background: #151515;
+    border: 1px solid #222;
+    border-radius: 12px;
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    cursor: grab;
+    transition: background 0.2s;
+}
+
+.step-add-form {
+    background: #0d1117;
+    border: 1px dashed #007aff;
+    border-radius: 12px;
+    padding: 15px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.step-add-form select,
+.step-add-form input {
+    background: #1a1a1a;
+    border: 1px solid #333;
+    color: #fff;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 14px;
+    flex: 1;
+    min-width: 80px;
+}
+
+.step-add-form button {
+    background: #34c759;
+    color: #fff;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.step-delete {
+    color: #666;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 5px;
+}
+
+.step-item.dragging {
+    opacity: 0.5;
+    background: #222;
+}
+
+.step-handle {
+    color: #444;
+    font-size: 20px;
+    cursor: grab;
+}
+
+.step-info {
+    flex: 1;
+}
+
+.step-name {
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 2px;
+}
+
+.step-meta {
+    font-size: 11px;
+    color: #666;
+}
+
+.step-toggle {
+    width: 40px;
+    height: 20px;
+    background: #333;
+    border-radius: 10px;
+    position: relative;
+    cursor: pointer;
+}
+
+.step-toggle.active {
+    background: #34c759;
+}
+
+.step-toggle::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 16px;
+    height: 16px;
+    background: #fff;
+    border-radius: 50%;
+    transition: 0.2s;
+}
+
+.step-toggle.active::after {
+    left: 22px;
+}
+
+.btn {
+    background: #007aff;
+    color: #fff;
+    border: none;
+    padding: 15px;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-bottom: 10px;
+    width: 100%;
+}
+
+.btn-secondary {
+    background: #222;
+    border: 1px solid #333;
+}
+
+.file-input-wrapper {
+    position: relative;
+    overflow: hidden;
+    display: inline-block;
+    width: 100%;
+}
+
+.file-input-wrapper input[type=file] {
+    font-size: 100px;
+    position: absolute;
+    left: 0;
+    top: 0;
+    opacity: 0;
+}
+
+input[type=range] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    background: transparent;
+}
+
+input[type=range]::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 4px;
+    background: #333;
+    border-radius: 2px;
+}
+
+input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 18px;
+    width: 18px;
+    border-radius: 50%;
+    background: #007aff;
+    cursor: pointer;
+    margin-top: -7px;
+}
+
+#debug-log {
+    position: fixed;
+    bottom: 10px;
+    left: 10px;
+    width: 90%;
+    height: 60px;
+    pointer-events: auto;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    z-index: 3000;
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.5);
+    font-family: monospace;
+    text-align: left;
+    line-height: 1.3;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #333;
+    transition: 0.3s;
+    border-radius: 24px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: #666;
+    transition: 0.3s;
+    border-radius: 50%;
+}
+
+input:checked+.slider {
+    background-color: #34c759;
+}
+
+#step-guide {
+    display: none;
+    background: #111;
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 15px;
+    margin-top: 10px;
+}
+
+.guide-content {
+    position: relative;
+}
+
+.guide-close {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    background: transparent;
+    border: none;
+    color: #888;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    color: #ccc;
+}
+
+td {
+    padding: 6px 0;
+    border-bottom: 1px solid #222;
+}
+
+td:first-child {
+    width: 120px;
+    color: #fff;
+}

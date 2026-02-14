@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Magic Lab - CrowdConnect Admin</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+
+<body id="main-body">
+
+    <canvas id="bg-canvas"
+        style="position:fixed;top:0;left:0;width:100%;height:100%;z-index:-1;pointer-events:none;"></canvas>
+    <div id="bg-overlay-css" style="position:fixed;top:0;left:0;width:100%;height:100%;z-index:-1;pointer-events:none;">
+    </div>
+
+    <!-- Admin Controls (Directly in Header) -->
+    <div style="position: fixed; top: 10px; right: 10px; z-index: 1001; display: flex; gap: 5px;">
+        <button onclick="socket.emit('admin-trigger')"
+            style="padding: 10px 15px; background: #34c759; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">LANCER</button>
+        <button onclick="socket.emit('admin-show-logo')"
+            style="padding: 10px 15px; background: #ff9500; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">LOGO</button>
+        <button onclick="socket.emit('admin-reset')"
+            style="padding: 10px 15px; background: #ff3b30; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">RESET</button>
+    </div>
+
+    <!-- Admin Settings Panel -->
+    <div id="settings-panel">
+        <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:20px;">
+            <h2>Magic Lab</h2>
+            <div id="connection-count"
+                style="font-size:12px; background:#222; padding:4px 10px; border-radius:20px; color:#34c759;">👤 1</div>
+        </div>
+
+        <div class="header">
+            <h1>CrowdConnect Admin</h1>
+            <div class="row"><label>Routine Active <span class="add-link" onclick="addRoutine()">+
+                        Nouvelle</span></label>
+                <select id="routine-select" onchange="switchRoutine(this.value)"></select>
+            </div>
+
+            <div class="section-title">Étapes de la séquence <span class="add-link" onclick="showAddStepForm()">+
+                    Ajouter</span><span class="guide-toggle" onclick="toggleGuide()">❓ Guide</span></div>
+            <div id="step-guide">
+                <div class="guide-content">
+                    <button class="guide-close" onclick="toggleGuide()">×</button>
+                    <h3>📋 Guide des types d'étapes</h3>
+                    <table>
+                        <tr>
+                            <td>⬇ Arrow</td>
+                            <td>Flèche rouge en bas d'écran</td>
+                        </tr>
+                        <tr>
+                            <td>🔊 Audio</td>
+                            <td>Audio avec fade volume (startVol→endVol)</td>
+                        </tr>
+                        <tr>
+                            <td>🎵 Beat</td>
+                            <td>Flash au rythme d'un BPM</td>
+                        </tr>
+                        <tr>
+                            <td>⬛ Blackout</td>
+                            <td>Écran noir total</td>
+                        </tr>
+                        <tr>
+                            <td>🫁 Breathing</td>
+                            <td>Animation respiration Zen</td>
+                        </tr>
+                        <tr>
+                            <td>🎴 CardFlip</td>
+                            <td>Carte 3D qui se retourne</td>
+                        </tr>
+                        <tr>
+                            <td>🎨 Color</td>
+                            <td>Couleur de fond personnalisée</td>
+                        </tr>
+                        <tr>
+                            <td>🔢 Countdown</td>
+                            <td>Compte à rebours (startFrom: 3-10)</td>
+                        </tr>
+                        <tr>
+                            <td>🔮 Crystal</td>
+                            <td>Boule de cristal luminescente</td>
+                        </tr>
+                        <tr>
+                            <td>🎲 Dice</td>
+                            <td>Dé 3D → face finale (finalFace: 1-6)</td>
+                        </tr>
+                        <tr>
+                            <td>🃏 Emojis</td>
+                            <td>Symboles de cartes accélérés (♠♥♣♦)</td>
+                        </tr>
+                        <tr>
+                            <td>👁️ Eye</td>
+                            <td>Œil qui cligne</td>
+                        </tr>
+                        <tr>
+                            <td>🌫️ Fade</td>
+                            <td>Fondu vers noir ou blanc</td>
+                        </tr>
+                        <tr>
+                            <td>🔥 Fire</td>
+                            <td>Flammes montantes</td>
+                        </tr>
+                        <tr>
+                            <td>⚡ Flash</td>
+                            <td>Flash blanc + vibration (500ms)</td>
+                        </tr>
+                        <tr>
+                            <td>⚡ Glitch</td>
+                            <td>Effet matrix/bug visuel</td>
+                        </tr>
+                        <tr>
+                            <td>❤️ Heart</td>
+                            <td>Animation morphing point → cœur battant</td>
+                        </tr>
+                        <tr>
+                            <td>🎆 Lottie</td>
+                            <td>Animation Lottie JSON</td>
+                        </tr>
+                        <tr>
+                            <td>🎭 Mask</td>
+                            <td>Masque qui apparaît</td>
+                        </tr>
+                        <tr>
+                            <td>🪞 Mirror</td>
+                            <td>Effet miroir horizontal/vertical</td>
+                        </tr>
+                        <tr>
+                            <td>🔢 Number</td>
+                            <td>Nombre qui défile puis s'arrête</td>
+                        </tr>
+                        <tr>
+                            <td>⏸ Pause</td>
+                            <td>Pause configurable (défaut 2s)</td>
+                        </tr>
+                        <tr>
+                            <td>🎯 Pinpoint</td>
+                            <td>Cible qui se resserre sur un point</td>
+                        </tr>
+                        <tr>
+                            <td>💓 Pulse</td>
+                            <td>Pulsation hypnotique de l'écran</td>
+                        </tr>
+                        <tr>
+                            <td>🧩 Puzzle</td>
+                            <td>Pièces de puzzle qui s'assemblent</td>
+                        </tr>
+                        <tr>
+                            <td>🎴 Reveal</td>
+                            <td>Révélation d'UNE carte (ex: 9C)</td>
+                        </tr>
+                        <tr>
+                            <td>🖼️ RevealImage</td>
+                            <td>Révélation d'une image/photo (URL)</td>
+                        </tr>
+                        <tr>
+                            <td>〰️ Ripple</td>
+                            <td>Ondulation depuis le centre</td>
+                        </tr>
+                        <tr>
+                            <td>〰️ RippleFromLogo</td>
+                            <td>Ondulation depuis le logo</td>
+                        </tr>
+                        <tr>
+                            <td>📣 Shake</td>
+                            <td>Tremblement de l'écran</td>
+                        </tr>
+                        <tr>
+                            <td>🔀 Shuffle</td>
+                            <td>Mélange rapide de cartes</td>
+                        </tr>
+                        <tr>
+                            <td>🔇 Silence</td>
+                            <td>Coupe tous les sons</td>
+                        </tr>
+                        <tr>
+                            <td>🎰 Slot</td>
+                            <td>Machine à sous (3 symboles)</td>
+                        </tr>
+                        <tr>
+                            <td>📸 Snapshot</td>
+                            <td>Flash caméra + freeze frame</td>
+                        </tr>
+                        <tr>
+                            <td>✨ Sparkle</td>
+                            <td>Paillettes qui tombent</td>
+                        </tr>
+                        <tr>
+                            <td>🌀 Spiral</td>
+                            <td>Spirale tournante hypnotique</td>
+                        </tr>
+                        <tr>
+                            <td>🌟 Starfield</td>
+                            <td>Champ d'étoiles en mouvement</td>
+                        </tr>
+                        <tr>
+                            <td>📻 StaticNoise</td>
+                            <td>Bruit blanc TV/static</td>
+                        </tr>
+                        <tr>
+                            <td>⏹ Stop</td>
+                            <td>Stoppe la séquence (reset manuel)</td>
+                        </tr>
+                        <tr>
+                            <td>📝 Text</td>
+                            <td>Texte géant personnalisable</td>
+                        </tr>
+                        <tr>
+                            <td>🔓 Unlock</td>
+                            <td>Cadenas qui s'ouvre</td>
+                        </tr>
+                        <tr>
+                            <td>🎬 Video</td>
+                            <td>Vidéo plein écran (URL)</td>
+                        </tr>
+                        <tr>
+                            <td>🌊 Wave</td>
+                            <td>Vague liquide qui traverse l'écran</td>
+                        </tr>
+                        <tr>
+                            <td>🔤 Words</td>
+                            <td>Lettres → mots → MOT FINAL</td>
+                        </tr>
+                        <tr>
+                            <td>🔍 Zoom</td>
+                            <td>Zoom progressif sur l'écran</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div id="step-add-area"></div>
+            <div id="steps-list"></div>
+
+            <div class="section-title">Configuration Globale</div>
+            <div class="row"><label>Délai d'Entrée (s)</label><input type="number" id="delay-input" value="2"
+                    step="0.5">
+            </div>
+            <div class="row">
+                <div class="setting-row">
+                    <label for="logo-zoom-input">Zoom Logo: <span id="zoom-val">100</span>%</label>
+                    <input type="range" id="zoom-range" min="10" max="500" value="100" oninput="updateZoom(this.value)"
+                        onmousedown="document.getElementById('settings-panel').style.opacity='0.3'"
+                        onmouseup="document.getElementById('settings-panel').style.opacity='1'"
+                        ontouchstart="document.getElementById('settings-panel').style.opacity='0.3'"
+                        ontouchend="document.getElementById('settings-panel').style.opacity='1'">
+                </div>
+                <div class="setting-row">
+                    <label>Image d'accueil:</label>
+                    <div style="display:flex; gap:10px; margin-bottom:5px;">
+                        <label><input type="radio" name="startImgSrc" value="logo" onchange="setStartImgSource('logo')"
+                                checked> Logo</label>
+                        <label><input type="radio" name="startImgSrc" value="custom"
+                                onchange="setStartImgSource('custom')"> Autre</label>
+                    </div>
+                    <div id="custom-start-img-container" style="display:none;">
+                        <input type="file" id="custom-start-file" onchange="handleStartImageUpload(this)">
+                        <input type="text" id="start-img-url-input" placeholder="URL Image..."
+                            onchange="updateStartImage(this.value)">
+                    </div>
+                </div>
+                <div class="setting-row">
+                    <label>Textes d'accueil:</label>
+                    <input type="text" id="welcome-text-input" placeholder="TOUCHER POUR COMMENCER"
+                        onchange="updateTexts()">
+                    <input type="text" id="sub-text-input" placeholder="Expérience Interactive" onchange="updateTexts()"
+                        style="margin-top:5px;">
+                </div>
+                <div class="setting-row">
+                    <label for="logo-url-input">URL Logo:</label>
+                    <div style="display:flex; gap:5px;">
+                        <input type="text" id="logo-url-input" placeholder="http://..."
+                            onchange="previewLogo(this.value)">
+                        <input type="file" id="logo-file" accept="image/*" style="width:110px;"
+                            onchange="handleFileUpload(this)">
+                    </div>
+                </div>
+            </div>
+            <div class="row"><label>URL Redirection Finale</label><input type="text" id="redir-url-input"
+                    placeholder="https://g.page/..."></div>
+            <div class="row"><label>Texte d'accueil</label><input type="text" id="tagline-input"
+                    placeholder="Réaliser une expérience."></div>
+            <div class="row">
+                <label for="logs-toggle">Afficher les logs de timing (Admin)</label>
+                <label class="switch" style="margin:0;">
+                    <input type="checkbox" id="logs-toggle" onchange="toggleLogs(this.checked)">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="row">
+                <label for="toggle-debug">Mode Debug (Visible sur public)</label>
+                <label class="switch" style="margin:0;">
+                    <input type="checkbox" id="toggle-debug">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="row">
+                <div class="setting-row">
+                    <label for="bg-color-input">Couleur de fond:</label>
+                    <div style="display:flex; gap:5px; align-items:center;">
+                        <input type="color" id="bg-color-input" onchange="setBgColor(this.value)">
+                        <button onclick="autoColorFromLogo()"
+                            style="font-size:12px; padding:2px 8px; border:1px solid #555; background:#333; color:#fff; border-radius:4px; cursor:pointer;"
+                            title="Extraire du logo">🎨 Auto</button>
+                    </div>
+                </div>
+                <div class="setting-row">
+                    <label for="bg-anim-select">Animation de fond:</label>
+                    <select id="bg-anim-select" onchange="setBgAnim(this.value)" style="padding:5px;border-radius:4px;">
+                        <option value="none">Aucune</option>
+                        <option value="particles">Particules</option>
+                        <option value="gradient">Dégradé</option>
+                        <option value="stars">Étoiles</option>
+                        <option value="matrix">Matrix</option>
+                        <option value="fireflies">Lucioles</option>
+                        <option value="bokeh">Bokeh</option>
+                        <option value="plasma">Plasma</option>
+                        <option value="snow">Neige</option>
+                        <option value="rain">Pluie</option>
+                        <option value="geometric">Géométrique</option>
+                    </select>
+                </div>
+                <div class="setting-row">
+                    <label for="start-anim-select">Anim. Départ:</label>
+                    <select id="start-anim-select" onchange="setStartAnim(this.value)"
+                        style="padding:5px;border-radius:4px;">
+                        <option value="fade">Fondu (Défaut)</option>
+                        <option value="zoom">Zoom</option>
+                        <option value="slide">Glisser Haut</option>
+                        <option value="none">Aucune</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="section-title">Outils</div>
+            <div class="row" style="flex-direction:column;align-items:flex-start;">
+                <label>Générateur QR Code (Vers Public)</label>
+                <div style="display:flex;gap:20px;margin-top:10px;align-items:flex-start;width:100%;">
+                    <div id="qr-container"
+                        style="background:#fff;padding:15px;border-radius:12px;min-width:200px;min-height:200px;display:flex;justify-content:center;align-items:center;">
+                        <span style="color:#ccc;font-size:12px;">QR Code ici</span>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:10px;flex:1;">
+                        <p style="font-size:12px;color:#aaa;margin-bottom:5px;">Le QR dirigera vers l'URL actuelle (sans
+                            /admin.html). Le logo actif sera incrusté.</p>
+                        <button class="btn btn-secondary" onclick="generateQR()">🔄 Générer</button>
+                        <button class="btn btn-secondary" onclick="downloadQR()"
+                            style="background:#34c759;color:#fff;">💾 Télécharger HD</button>
+                    </div>
+                </div>
+                <canvas id="qr-canvas" style="display:none;"></canvas>
+            </div>
+
+            <button class="btn" style="background:#34c759" onclick="saveAll()">SYNCHRONISER &
+                ENREGISTRER</button>
+            <button class="btn btn-secondary" onclick="closePanel()">FERMER PANNEAU</button>
+        </div>
+    </div>
+
+    <!-- Spectator View (so admin can see what's happening) -->
+    <!-- Écran 1 : Participer -->
+    <div id="connect-screen" class="screen active">
+        <div id="connect-wrapper">
+            <img id="connect-logo" src="" alt="Logo" style="display:none;">
+            <div id="welcome-text">TOUCHER POUR COMMENCER</div>
+            <div id="sub-text">Expérience Interactive</div>
+        </div>
+    </div>
+
+    <!-- Écran 2 : Logo / Attente -->
+    <div id="logo-screen" class="screen">
+        <div id="logo-container"><img id="logo-img" src="" alt="Logo"></div>
+        <p id="tagline-text"
+            style="color:#fff; font-size:0.8rem; letter-spacing:2px; text-transform:uppercase; text-align:center; padding:0 20px;">
+            Réaliser une expérience.
+        </p>
+    </div>
+
+    <!-- Écran 3 : Moteur -->
+    <div id="engine-screen" class="screen">
+        <div id="emoji-display"></div>
+        <img id="media-display" src="" alt="Media">
+        <video id="video-display" playsinline></video>
+        <img id="arrow" src="fleche.png" alt=""
+            style="position:absolute;bottom:0;left:50%;transform:translateX(-50%);display:none;width:50vw;max-width:350px;pointer-events:none;">
+        <svg id="heart-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <path id="heart-path" fill="#ff0000" d="M50,30 C50,30 50,30 50,30 C50,30 50,30 50,30 Z">
+                <animate attributeName="d" dur="2s" fill="freeze" from="M50,50 L50,50 L50,50 Z"
+                    to="M50,85 C25,70 15,55 15,40 C15,25 25,15 40,15 C45,15 50,20 50,20 C50,20 55,15 60,15 C75,15 85,25 85,40 C85,55 75,70 50,85 Z" />
+            </path>
+        </svg>
+        <div id="countdown-display"></div>
+        <div id="dice-container">
+            <div id="dice">
+                <div class="dice-face">1</div>
+                <div class="dice-face">2</div>
+                <div class="dice-face">3</div>
+                <div class="dice-face">4</div>
+                <div class="dice-face">5</div>
+                <div class="dice-face">6</div>
+            </div>
+        </div>
+        <div id="ripple-overlay"></div>
+        <audio id="audio-player"></audio>
+        <div id="text-display"></div>
+        <div id="lottie-display"
+            style="position:absolute;top:0;left:0;width:100%;height:100%;display:none;pointer-events:none;z-index:90;">
+        </div>
+        <div id="spiral-overlay"></div>
+        <div id="color-overlay"></div>
+        <div id="number-display"></div>
+        <div id="ripple-center"></div>
+        <div id="fade-overlay"></div>
+        <div id="card-flip-container">
+            <div id="card-flip"></div>
+        </div>
+        <div id="slot-container"></div>
+        <div id="pinpoint-target"></div>
+        <div id="unlock-icon">🔒</div>
+        <div id="wave-overlay"></div>
+        <div id="eye-container">👁️</div>
+        <div id="mask-overlay">🎭</div>
+        <div id="crystal-ball"></div>
+        <div id="snapshot-flash"></div>
+        <div id="glitch-text-overlay"></div>
+    </div>
+
+    <!-- Écran 4 : Final -->
+    <div id="final-screen" class="screen">
+        <h2 style="margin-bottom:20px;">MERCI !</h2>
+        <a href="https://www.instagram.com/calix_magicien/" target="_blank" class="final-btn btn-insta">S'ABONNER SUR
+            INSTAGRAM</a>
+        <a id="redirection-btn" href="#" target="_blank" class="final-btn btn-google">PARTAGER MON AVIS</a>
+        <p style="margin-top:20px; font-size:12px; color:#888;" onclick="window.location.reload()">Rejouer</p>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script src="main.js"></script>
+    <script src="admin.js"></script>
+</body>
+
+</html>
