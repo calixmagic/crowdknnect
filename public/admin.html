@@ -550,6 +550,203 @@
             }
         }
 
+        /* Background Animations Sync from public */
+        .bg-anim-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 0;
+            /* Behind screens */
+            pointer-events: none;
+        }
+
+        .anim-respiration {
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, rgba(0, 0, 0, 0) 80%);
+            animation: bgBreathe 4s ease-in-out infinite alternate;
+        }
+
+        @keyframes bgBreathe {
+            0% {
+                transform: scale(0.8);
+                opacity: 0.2;
+            }
+
+            100% {
+                transform: scale(1.5);
+                opacity: 0.8;
+            }
+        }
+
+        .anim-vague {
+            background: linear-gradient(45deg, rgba(255, 255, 255, 0.05) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.05) 50%, rgba(255, 255, 255, 0.05) 75%, transparent 75%, transparent);
+            background-size: 100px 100px;
+            animation: bgWave 4s linear infinite;
+        }
+
+        @keyframes bgWave {
+            0% {
+                background-position: 0 0;
+            }
+
+            100% {
+                background-position: 100px 100px;
+            }
+        }
+
+        .anim-hyperspace {
+            background: url('/images/hyperspace.gif') no-repeat center center;
+            background-size: cover;
+            opacity: 0.6;
+        }
+
+        .anim-pluie-matrix {
+            background: linear-gradient(to bottom, rgba(0, 255, 0, 0.1), rgba(0, 255, 0, 0.05));
+            animation: matrixRain 2s linear infinite;
+        }
+
+        @keyframes matrixRain {
+            0% {
+                background-position: 0 -100vh;
+            }
+
+            100% {
+                background-position: 0 100vh;
+            }
+        }
+
+        .anim-battement-coeur {
+            background: radial-gradient(circle, rgba(255, 0, 0, 0.1) 0%, transparent 60%);
+            animation: bgHeartbeat 1.5s infinite;
+        }
+
+        @keyframes bgHeartbeat {
+            0% {
+                transform: scale(1);
+                opacity: 0.3;
+            }
+
+            20% {
+                transform: scale(1.1);
+                opacity: 0.6;
+            }
+
+            40% {
+                transform: scale(1);
+                opacity: 0.3;
+            }
+
+            60% {
+                transform: scale(1.15);
+                opacity: 0.8;
+            }
+
+            80% {
+                transform: scale(1);
+                opacity: 0.3;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 0.3;
+            }
+        }
+
+        .anim-etoiles-filantes {
+            background: radial-gradient(circle, #fff 10%, transparent 10%), radial-gradient(circle, #fff 10%, transparent 10%);
+            background-size: 50px 50px;
+            background-position: 0 0, 25px 25px;
+            animation: shootingStars 5s linear infinite;
+            opacity: 0.1;
+        }
+
+        @keyframes shootingStars {
+            100% {
+                background-position: 500px 500px, 525px 525px;
+            }
+        }
+
+        .anim-mystique {
+            background: conic-gradient(from 0deg, rgba(255, 0, 255, 0.1), rgba(0, 255, 255, 0.1), rgba(255, 0, 255, 0.1));
+            animation: mysticSpin 10s linear infinite;
+        }
+
+        @keyframes mysticSpin {
+            100% {
+                transform: rotate(360deg) scale(2);
+            }
+        }
+
+        .anim-feu {
+            background: linear-gradient(to top, rgba(255, 100, 0, 0.3) 0%, transparent 60%);
+            animation: fireFlicker 0.1s infinite alternate;
+        }
+
+        @keyframes fireFlicker {
+            0% {
+                opacity: 0.8;
+                transform: translateY(0);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translateY(-5px);
+            }
+        }
+
+        .anim-glitch-bg {
+            background: repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.05) 0px, transparent 1px, transparent 4px, rgba(255, 255, 255, 0.05) 5px);
+            animation: glitchLines 0.2s infinite;
+        }
+
+        @keyframes glitchLines {
+            0% {
+                transform: translateY(0);
+            }
+
+            100% {
+                transform: translateY(5px);
+            }
+        }
+
+        .anim-laser {
+            background: linear-gradient(90deg, transparent 40%, rgba(255, 0, 0, 0.2) 50%, transparent 60%);
+            background-size: 200% 100%;
+            animation: laserSweep 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes laserSweep {
+            0% {
+                background-position: -100% 0;
+            }
+
+            100% {
+                background-position: 200% 0;
+            }
+        }
+
+        .anim-boussole {
+            background: repeating-radial-gradient(circle, transparent, transparent 20px, rgba(255, 255, 255, 0.05) 20px, rgba(255, 255, 255, 0.05) 21px);
+            animation: compassRotate 20s linear infinite;
+        }
+
+        @keyframes compassRotate {
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes logoPulse {
+            0% {
+                transform: scale(1);
+            }
+
+            100% {
+                transform: scale(1.1);
+            }
+        }
+
         #spiral-overlay {
             position: absolute;
             width: 300px;
@@ -1110,6 +1307,7 @@
 </head>
 
 <body>
+    <div id="bg-anim-container" class="bg-anim-container"></div>
     <div id="debug-log">Admin init...</div>
 
     <div id="logo-screen" class="screen">
@@ -1416,8 +1614,18 @@
             <label>Animation de Fond</label>
             <select id="bg-anim-select" onchange="setBgAnim(this.value)">
                 <option value="">Aucune</option>
+                <option value="anim-zoom-dezoom">Zoom Faible Logo</option>
+                <option value="anim-hyperspace">Hyperspace (GIF)</option>
                 <option value="anim-respiration">Pulse Lumineux</option>
                 <option value="anim-vague">Ondulation Lente</option>
+                <option value="anim-pluie-matrix">Pluie Matrix</option>
+                <option value="anim-battement-coeur">Battement Cœur</option>
+                <option value="anim-etoiles-filantes">Étoiles Filantes</option>
+                <option value="anim-mystique">Tourbillon Mystique</option>
+                <option value="anim-feu">Lumière Feu</option>
+                <option value="anim-glitch-bg">Glitch TV Fond</option>
+                <option value="anim-laser">Balayage Laser</option>
+                <option value="anim-boussole">Radars Boussole</option>
             </select>
         </div>
 
@@ -1509,6 +1717,19 @@
             // Background anim
             const bgAnimSelect = document.getElementById('bg-anim-select');
             if (bgAnimSelect) bgAnimSelect.value = state.bgAnim || '';
+            const bgContainer = document.getElementById('bg-anim-container');
+            const logoImg = document.getElementById('logo-img');
+
+            if (bgContainer) {
+                bgContainer.className = 'bg-anim-container ' + (state.bgAnim || '');
+            }
+            if (logoImg) {
+                if (state.bgAnim === 'anim-zoom-dezoom') {
+                    logoImg.style.animation = 'logoPulse 3s ease-in-out infinite alternate';
+                } else {
+                    logoImg.style.animation = 'none';
+                }
+            }
 
             // Sync debug toggle
             const debugToggle = document.getElementById('toggle-debug');
@@ -2246,12 +2467,20 @@
                         break;
                     case 'emojis':
                         document.body.className = '';
-                        const t = Math.min(1, elapsed / step.duration);
-                        const interval = 1200 * Math.pow(0.25, t);
-                        const emojis = ['♠️', '♥️', '♣️', '♦️'];
-                        const emoji = emojis[Math.floor(now / interval) % 4];
-                        emojiDiv.innerText = emoji;
-                        emojiDiv.className = (emoji === '♥️' || emoji === '♦️') ? 'red' : 'black';
+                        const speed = step.speed || 1200;
+                        const emojisList = ['♠️', '♥️', '♣️', '♦️'];
+                        const currentTick = Math.floor(now / speed);
+                        const emojiChar = emojisList[currentTick % 4];
+                        emojiDiv.innerText = emojiChar;
+                        emojiDiv.className = (emojiChar === '♥️' || emojiChar === '♦️') ? 'red' : 'black';
+
+                        // Apply the same random jumping logic as the public side
+                        const randX = (Math.sin(currentTick) * 10000) % 1;
+                        const randY = (Math.cos(currentTick) * 10000) % 1;
+                        emojiDiv.style.position = 'absolute';
+                        emojiDiv.style.left = (10 + Math.abs(randX) * 80) + 'vw';
+                        emojiDiv.style.top = (10 + Math.abs(randY) * 80) + 'vh';
+                        emojiDiv.style.transform = 'translate(-50%, -50%)';
                         break;
                     case 'shuffle':
                         document.body.className = 'white-bg';
