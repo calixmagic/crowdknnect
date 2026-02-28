@@ -54,7 +54,11 @@ app.post('/upload-video', uploadVideo.single('videoFile'), (req, res) => {
     res.json({ filename: req.file.originalname, path: 'videos/' + req.file.originalname });
 });
 
-// Fichier de sauvegarde
+// Configuration OVH (A remplir par l'utilisateur si besoin)
+const OVH_SYNC_URL = process.env.OVH_SYNC_URL || ''; // ex: 'https://votre-site.com/ovh_sync.php'
+const OVH_SYNC_KEY = process.env.OVH_SYNC_KEY || 'MAGIC2026';
+
+// Fichier de sauvegarde locale (fallback)
 const STATE_FILE = path.join(__dirname, 'state.json');
 
 // État initial du Laboratoire (Valeurs par défaut)
@@ -91,22 +95,62 @@ let state = {
     ]
 };
 
-// Chargement de la sauvegarde (s'il y en a une)
-if (fs.existsSync(STATE_FILE)) {
-    try {
-        const data = fs.readFileSync(STATE_FILE, 'utf8');
-        const savedState = JSON.parse(data);
-        state = { ...state, ...savedState };
-        console.log(`[SERVER] État restauré depuis state.json (Routines: ${state.routines.length})`);
-    } catch (err) {
-        console.error(`[SERVER] Erreur lors de la lecture de state.json:`, err);
+// Initialisation asynchrone pour charger l'état (OVH d'abord, sinon local)
+async function loadInitialState() {
+    if (OVH_SYNC_URL) {
+        try {
+            console.log(`[SERVER] Tentative de restauration depuis OVH...`);
+            const response = await fetch(`${OVH_SYNC_URL}?action=getstate`);
+            if (response.ok) {
+                const data = await response.json();
+                if (data && data.routines) {
+                    state = { ...state, ...data };
+                    console.log(`[SERVER] État restauré depuis OVH avec succès (Routines: ${state.routines.length})`);
+                    return; // Si OVH a marché, on s'arrête là
+                }
+            } else {
+                console.log(`[SERVER] Réponse OVH non-OK (vide ou erreur).`);
+            }
+        } catch (err) {
+            console.error(`[SERVER] Erreur lors de la lecture sur OVH:`, err.message);
+        }
+    }
+
+    // Fallback: Chargement local de la sauvegarde s'il y en a une
+    console.log(`[SERVER] Chargement depuis sauvegarde locale state.json...`);
+    if (fs.existsSync(STATE_FILE)) {
+        try {
+            const data = fs.readFileSync(STATE_FILE, 'utf8');
+            const savedState = JSON.parse(data);
+            state = { ...state, ...savedState };
+            console.log(`[SERVER] État restauré depuis state.json (Routines: ${state.routines.length})`);
+        } catch (err) {
+            console.error(`[SERVER] Erreur lors de la lecture de state.json local:`, err);
+        }
     }
 }
+// Démarrer le chargement
+loadInitialState();
 
 function saveState() {
+    // 1. Sauvegarde locale (sur Render, ça peut s'effacer après veille, mais utile)
     fs.writeFile(STATE_FILE, JSON.stringify(state, null, 2), (err) => {
-        if (err) console.error(`[SERVER] Erreur d'écriture state.json:`, err);
+        if (err) console.error(`[SERVER] Erreur d'écriture state.json local:`, err);
     });
+
+    // 2. Sauvegarde OVH (Si configuré, c'est la vraie persistance absolue)
+    if (OVH_SYNC_URL) {
+        fetch(`${OVH_SYNC_URL}?action=savestate&key=${OVH_SYNC_KEY}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(state)
+        }).then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') console.log(`[SERVER] Sauvegarde synchronisée sur OVH avec succès.`);
+                else console.log(`[SERVER] Retour inattendu de OVH:`, data);
+            })
+            .catch(err => console.error(`[SERVER] Erreur lors de l'envoi de l'état vers OVH:`, err.message));
+    }
 }
 
 io.on('connection', (socket) => {
@@ -183,6 +227,15 @@ function updateConnectionCount() {
     console.log(`[SERVER] Spectateurs connectés: ${count}`);
     io.emit('spectator-count', { count: count });
 }
+
+// Endpoint pour que l'interface admin connaisse la config OVH
+app.get('/config.js', (req, res) => {
+    res.type('application/javascript');
+    res.send(`
+        window.OVH_SYNC_URL = "${OVH_SYNC_URL}";
+        window.OVH_SYNC_KEY = "${OVH_SYNC_KEY}";
+    `);
+});
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {

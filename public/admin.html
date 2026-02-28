@@ -1862,7 +1862,8 @@
         <button class="btn btn-secondary" onclick="closePanel()">FERMER PANNEAU</button>
     </div>
 
-    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/config.js"></script>
     <script>
         const socket = io();
         let state = { routines: [], activeRoutineIndex: 0, sequenceDelay: 2, logoZoom: 100, logoUrl: '', connectLogoUrl: '', redirectionUrl: '', logoVisible: false, tagline: '', bgAnim: '' };
@@ -2596,15 +2597,43 @@
             if (url) { img.src = url; img.style.display = 'block'; } else img.style.display = 'none';
         }
 
-        function handleFileUpload(input, targetId) {
+        async function handleFileUpload(input, targetId) {
             const file = input.files[0]; if (!file) return;
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                document.getElementById(targetId).value = e.target.result;
-                if (targetId === 'logo-url-input') previewLogo(e.target.result);
-                log("Image chargée de la galerie");
-            };
-            reader.readAsDataURL(file);
+
+            // Si OVH est configuré, on upload l'image sur le serveur OVH distant
+            if (window.OVH_SYNC_URL) {
+                log(`Upload de "${file.name}" vers OVH en cours...`);
+                const formData = new FormData();
+                formData.append('image', file);
+
+                try {
+                    const response = await fetch(`${window.OVH_SYNC_URL}?action=upload&key=${window.OVH_SYNC_KEY}`, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const data = await response.json();
+
+                    if (data.status === 'success') {
+                        document.getElementById(targetId).value = data.url;
+                        if (targetId === 'logo-url-input') previewLogo(data.url);
+                        log("Image hébergée sur OVH avec succès", "#34c759");
+                    } else {
+                        throw new Error(data.error || "Erreur inconnue OVH");
+                    }
+                } catch (err) {
+                    log("Erreur OVH Sync: " + err.message, "#ff3b30");
+                    console.error("OVH Upload error:", err);
+                }
+            } else {
+                // Fallback: Méthode d'origine (Base64 local lourde)
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    document.getElementById(targetId).value = e.target.result;
+                    if (targetId === 'logo-url-input') previewLogo(e.target.result);
+                    log("Image chargée en Base64 locale (Non persistante)");
+                };
+                reader.readAsDataURL(file);
+            }
         }
 
         // Listeners for config changes
