@@ -1994,7 +1994,13 @@
             const logoImg = document.getElementById('logo-img');
 
             if (bgContainer) {
-                bgContainer.className = 'bg-anim-container ' + (state.bgAnim || '');
+                if (!hasStarted || state.bgAnimPersist) {
+                    bgContainer.className = 'bg-anim-container ' + (state.bgAnim || '');
+                    bgContainer.style.display = 'block';
+                } else {
+                    bgContainer.className = 'bg-anim-container';
+                    bgContainer.style.display = 'none';
+                }
             }
             if (logoImg) {
                 if (state.bgAnim === 'anim-zoom-dezoom') {
