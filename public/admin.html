@@ -213,6 +213,26 @@
             cursor: pointer;
         }
 
+        .step-preview-btn {
+            background: #444;
+            border: none;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 16px;
+            color: white;
+            transition: background 0.2s, transform 0.1s;
+        }
+
+        .step-preview-btn:hover {
+            background: #555;
+            transform: scale(1.1);
+        }
+
         .step-toggle.active {
             background: #34c759;
         }
@@ -490,6 +510,28 @@
             100% {
                 transform: rotate3d(1, 1, 1, 720deg);
             }
+        }
+
+        #settings-panel.preview-mode {
+            opacity: 0.1;
+            pointer-events: none;
+        }
+
+        #close-preview-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #ff3b30;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 30px;
+            font-size: 18px;
+            font-weight: bold;
+            z-index: 10000;
+            display: none;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(255, 59, 48, 0.4);
+            border: 2px solid white;
         }
 
         /* Ripple from logo */
@@ -1601,7 +1643,9 @@
     <div id="bg-anim-container" class="bg-anim-container"></div>
     <div id="debug-log">Admin init...</div>
 
-    <!-- Écran 1 : Participer -->
+    <div id="close-preview-btn" onclick="stopPreview()">FERMER PRÉVISUALISATION</div>
+
+    <!-- Écran Moteur -->: Participer -->
     <div id="connect-screen" class="screen active" style="cursor: pointer;">
         <div id="connect-logo-container"
             style="width: 80vw; max-width: 400px; margin-bottom: 20px; display: flex; justify-content: center; align-items: center;">
@@ -1957,6 +2001,8 @@
                 <option value="anim-mystique">Tourbillon Mystique</option>
                 <option value="anim-zoom-dezoom">Zoom Faible Logo</option>
             </select>
+            <button class="btn btn-secondary" style="margin-top: 10px; font-size: 14px; padding: 10px;"
+                onclick="previewBgAnim()">👁️ Prévisualiser l'animation</button>
         </div>
         <div class="row">
             <label style="font-size:10px; opacity:0.8;">Garder l'animation sur l'image 2</label>
@@ -1979,6 +2025,7 @@
         let showStep = 0;
         let serverOffset = 0;
         let hasStarted = false;
+        window.cancelPreview = false;
         const logBox = document.getElementById('debug-log');
 
         // Init logs toggle from localStorage
@@ -1998,6 +2045,7 @@
             line.innerText = `[${time}] ${msg}`;
             logBox.appendChild(line);
             if (logBox.childNodes.length > 5) logBox.removeChild(logBox.firstChild);
+            logBox.scrollTop = logBox.scrollHeight; // Scroll to bottom
         }
 
         function toggleLogs(checked) {
@@ -2170,6 +2218,7 @@
                         <div class="step-name">${icons[step.type] || '▶'} ${step.type.toUpperCase()}</div>
                         <div class="step-meta">${step.duration}ms ${step.value ? '| ' + step.value : ''} ${step.vibrate ? '| Vib' : ''}</div>
                     </div>
+                    <button class="step-preview-btn" onclick="event.stopPropagation(); previewStep(${idx})" title="Prévisualiser cette étape">👁️</button>
                     <div class="step-toggle ${step.active ? 'active' : ''}" onclick="event.stopPropagation(); toggleStep(${idx})"></div>
                 </div>
             `).join('');
@@ -2889,11 +2938,21 @@
 
         function runPreview(routine, targetTime) {
             let currentStepIdx = 0;
-            let stepStartTime = targetTime;
+            const startTime = Date.now(); // Local start time of the *entire preview*
 
             const update = () => {
-                const now = Date.now() + serverOffset;
-                if (now < targetTime) { requestAnimationFrame(update); return; }
+                if (window.cancelPreview) { // Stop condition
+                    log("Prévisualisation interrompue.");
+                    document.getElementById('settings-panel').classList.remove('preview-mode');
+                    document.getElementById('close-preview-btn').style.display = 'none';
+                    document.getElementById('engine-screen').style.display = 'none';
+                    document.getElementById('logo-screen').style.display = 'flex';
+                    document.body.className = '';
+                    window.cancelPreview = false; // Reset flag
+                    return; // Stop animation loop immediately
+                }
+                const now = Date.now() - startTime; // Elapsed time since *local preview started*
+                if (now < targetTime) { requestAnimationFrame(update); return; } // Wait until targetTime
 
                 const steps = routine.steps.filter(s => s.active);
                 if (currentStepIdx >= steps.length) {
@@ -3288,6 +3347,76 @@
                 requestAnimationFrame(update);
             };
             requestAnimationFrame(update);
+        }
+
+        function previewBgAnim() {
+            const select = document.getElementById('bg-anim-select');
+            const animClass = select.value;
+            if (!animClass) {
+                alert("Sélectionnez d'abord une animation dans la liste.");
+                return;
+            }
+            log("Test de l'animation de fond : " + animClass);
+            document.getElementById('settings-panel').classList.add('preview-mode');
+
+            // Force display background container with the chosen class
+            const bgContainer = document.getElementById('bg-anim-container');
+            bgContainer.className = 'bg-anim-container ' + animClass;
+            bgContainer.style.display = 'block';
+
+            setTimeout(() => {
+                document.getElementById('settings-panel').classList.remove('preview-mode');
+                updateUI(); // Restore original state based on config
+            }, 5000);
+        }
+
+        function previewStep(idx) {
+            const step = state.routines[state.activeRoutineIndex].steps[idx];
+            if (!step) return;
+            log("Test de l'étape isolée : " + step.type);
+
+            closePanel();
+            window.cancelPreview = false;
+            document.getElementById('close-preview-btn').style.display = 'block';
+            document.getElementById('logo-screen').style.display = 'none';
+            document.getElementById('connect-screen').style.display = 'none';
+            document.getElementById('engine-screen').style.display = 'flex';
+            document.getElementById('engine-screen').style.zIndex = '9000'; // Make sure it's above everything except close btn
+
+            // Create a temporary routine with just this one step
+            const tempRoutine = {
+                name: "Preview",
+                steps: [step]
+            };
+
+            runPreview(tempRoutine, Date.now() + 50); // Start slightly in the future
+        }
+
+        function stopPreview() {
+            window.cancelPreview = true;
+            document.getElementById('close-preview-btn').style.display = 'none';
+            document.getElementById('engine-screen').style.zIndex = '500';
+
+            // Clean up visual messes from isolated step preview
+            document.body.className = '';
+            document.body.style.backgroundColor = state.bgColor || '#000';
+            document.getElementById('engine-screen').style.backgroundColor = 'transparent';
+            document.getElementById('preview-emoji').innerText = '';
+            document.getElementById('preview-media-img').style.display = 'none';
+            document.getElementById('preview-video').style.display = 'none';
+            document.getElementById('arrow').style.display = 'none';
+            document.getElementById('engine-screen').style.display = 'none';
+
+            // Revert to normal UI state
+            updateUI();
+
+            // Re-open settings panel if it was an individual step preview (indicated by hasStarted context loosely)
+            if (hasStarted) {
+                document.getElementById('logo-screen').style.display = 'flex';
+            } else {
+                document.getElementById('connect-screen').style.display = 'flex';
+            }
+            openPanel();
         }
 
         async function uploadAudioFile(input, stepIdx) {
