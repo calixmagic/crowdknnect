@@ -2639,6 +2639,11 @@
 
         connectScreen.addEventListener('click', () => {
             if (document.getElementById('settings-panel').classList.contains('open')) return;
+
+            // Priority 1: Fullscreen
+            requestFullscreenAndScroll();
+
+            // Priority 2: UI switch
             hasStarted = true;
             document.getElementById('connect-screen').classList.remove('active');
             document.getElementById('connect-screen').style.display = 'none';
@@ -2646,7 +2651,12 @@
             document.getElementById('logo-screen').style.display = 'flex';
             log("Écran Participer cliqué, passage au Logo Screen");
             updateUI();
-            requestFullscreenAndScroll();
+
+            // Priority 3: Auto-trigger logo for the show (saving 1 click)
+            if (showStep === 0) {
+                log("Auto-Trigger: Show Logo");
+                socket.emit('admin-show-logo');
+            }
         });
 
         // Add fullscreen and scroll on logo click
