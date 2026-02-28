@@ -54,8 +54,8 @@ app.post('/upload-video', uploadVideo.single('videoFile'), (req, res) => {
     res.json({ filename: req.file.originalname, path: 'videos/' + req.file.originalname });
 });
 
-// Configuration OVH (A remplir par l'utilisateur si besoin)
-const OVH_SYNC_URL = process.env.OVH_SYNC_URL || ''; // ex: 'https://votre-site.com/ovh_sync.php'
+// Configuration OVH (Variables d'environnement ou en dur)
+const OVH_SYNC_URL = process.env.OVH_SYNC_URL || 'https://lepresti.fr/crowdconnect/ovh_sync.php';
 const OVH_SYNC_KEY = process.env.OVH_SYNC_KEY || 'MAGIC2026';
 
 // Fichier de sauvegarde locale (fallback)
