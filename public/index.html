@@ -1169,6 +1169,94 @@
                 transform: rotate(360deg);
             }
         }
+
+        .pulse-bg {
+            animation: pulseBg 1s infinite alternate;
+        }
+
+        @keyframes pulseBg {
+            0% {
+                background-color: transparent;
+            }
+
+            100% {
+                background-color: var(--pulse-color, #ff0000);
+            }
+        }
+
+        .breathing-bg {
+            animation: breathingBg 4s ease-in-out infinite alternate;
+        }
+
+        @keyframes breathingBg {
+            0% {
+                box-shadow: inset 0 0 50px var(--breathing-color, #333);
+            }
+
+            100% {
+                box-shadow: inset 0 0 200px var(--breathing-color, #333);
+            }
+        }
+
+        .glitch-bg {
+            animation: glitchBg 0.2s infinite;
+        }
+
+        @keyframes glitchBg {
+            0% {
+                transform: translate(0)
+            }
+
+            25% {
+                transform: translate(-2px, 2px)
+            }
+
+            50% {
+                transform: translate(-2px, -2px)
+            }
+
+            75% {
+                transform: translate(2px, 2px)
+            }
+
+            100% {
+                transform: translate(2px, -2px)
+            }
+        }
+
+        .zoom-bg {
+            animation: zoomBg 2s infinite alternate ease-in-out;
+        }
+
+        @keyframes zoomBg {
+            0% {
+                transform: scale(1);
+            }
+
+            100% {
+                transform: scale(var(--zoom-intensity, 1.1));
+            }
+        }
+
+        .shake-bg {
+            animation: shakeBg 0.5s infinite;
+        }
+
+        @keyframes shakeBg {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(calc(var(--shake-intensity, 5px) * -1));
+            }
+
+            75% {
+                transform: translateX(var(--shake-intensity, 5px));
+            }
+        }
     </style>
 </head>
 
@@ -1960,7 +2048,7 @@
                     const arrow = document.getElementById('arrow');
                     arrow.style.display = 'block';
                     if (step.value === 'bounce') {
-                        arrow.style.animation = 'bounceArrow 1s infinite';
+                        arrow.style.animation = 'arrowBounce 1s infinite';
                     } else {
                         arrow.style.animation = 'none';
                     }
