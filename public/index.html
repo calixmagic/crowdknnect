@@ -1352,6 +1352,14 @@
             // Priority 4: NoSleep and Logo UI
             enableNoSleep();
             updateLogoDisplay();
+
+            if (!config.bgAnimPersist) {
+                const bgContainer = document.getElementById('bg-anim-container');
+                if (bgContainer) {
+                    bgContainer.className = 'bg-anim-container';
+                    bgContainer.style.display = 'none';
+                }
+            }
         });
 
         // Add fullscreen capability to logo click just in case
@@ -1405,7 +1413,13 @@
 
             const bgContainer = document.getElementById('bg-anim-container');
             if (bgContainer) {
-                bgContainer.className = 'bg-anim-container ' + (state.bgAnim || '');
+                if (!hasStarted || state.bgAnimPersist) {
+                    bgContainer.className = 'bg-anim-container ' + (state.bgAnim || '');
+                    bgContainer.style.display = 'block';
+                } else {
+                    bgContainer.className = 'bg-anim-container';
+                    bgContainer.style.display = 'none';
+                }
             }
         });
 

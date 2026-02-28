@@ -1853,6 +1853,7 @@
             <label>Animation de Fond</label>
             <select id="bg-anim-select" onchange="setBgAnim(this.value)">
                 <option value="">Aucune</option>
+                <option value="anim-hypnose">Spirale Hypnose</option>
                 <option value="anim-zoom-dezoom">Zoom Faible Logo</option>
                 <option value="anim-hyperspace">Hyperspace (GIF)</option>
                 <option value="anim-respiration">Pulse Lumineux</option>
@@ -1865,8 +1866,14 @@
                 <option value="anim-glitch-bg">Glitch TV Fond</option>
                 <option value="anim-laser">Balayage Laser</option>
                 <option value="anim-boussole">Radars Boussole</option>
-                <option value="anim-hypnose">Spirale Hypnose</option>
             </select>
+        </div>
+        <div class="row">
+            <label style="font-size:10px; opacity:0.8;">Garder l'animation sur l'image 2</label>
+            <label class="switch" style="margin:0;">
+                <input type="checkbox" id="bg-anim-persist-toggle">
+                <span class="slider"></span>
+            </label>
         </div>
 
         <button class="btn" style="background:#34c759" onclick="saveAll()">SYNCHRONISER & ENREGISTRER</button>
@@ -1877,7 +1884,7 @@
     <script src="/config.js"></script>
     <script>
         const socket = io();
-        let state = { routines: [], activeRoutineIndex: 0, sequenceDelay: 2, logoZoom: 100, logoUrl: '', connectLogoUrl: '', adminConnectLogoUrl: '', redirectionUrl: '', logoVisible: false, tagline: '', bgAnim: '' };
+        let state = { routines: [], activeRoutineIndex: 0, sequenceDelay: 2, logoZoom: 100, logoUrl: '', connectLogoUrl: '', adminConnectLogoUrl: '', redirectionUrl: '', logoVisible: false, tagline: '', bgAnim: '', bgAnimPersist: false };
         let lpTimer = null;
         let showStep = 0;
         let serverOffset = 0;
@@ -2000,6 +2007,9 @@
             // Sync debug toggle
             const debugToggle = document.getElementById('toggle-debug');
             if (debugToggle) debugToggle.checked = !!state.debug;
+
+            const persistToggle = document.getElementById('bg-anim-persist-toggle');
+            if (persistToggle) persistToggle.checked = !!state.bgAnimPersist;
 
             const sel = document.getElementById('routine-select');
             if (state.routines && state.routines.length > 0) {
@@ -2745,6 +2755,7 @@
             state.tagline = document.getElementById('tagline-input').value;
             state.bgColor = document.getElementById('bg-color-input').value || '#000';
             state.bgAnim = document.getElementById('bg-anim-select').value || '';
+            state.bgAnimPersist = document.getElementById('bg-anim-persist-toggle').checked;
 
             socket.emit('update-state', state);
             log("Synchro OK ✓", "#34c759");
