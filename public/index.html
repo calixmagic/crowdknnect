@@ -954,12 +954,16 @@
 
 
     <!-- Écran 1 : Participer -->
-    <div id="connect-screen" class="screen active">
-        <div class="mystic-wheel"></div>
-        <p style="letter-spacing:3px; font-size:0.9rem; color:#fff; margin-bottom:40px; font-weight:300;">EXPÉRIENCE
-            INTERACTIVE</p>
-        <button id="start-btn"
-            style="background:#fff; border:none; color:#000; padding:20px 50px; border-radius:40px; font-size:16px; font-weight:700; letter-spacing:2px; cursor:pointer; text-transform:uppercase; box-shadow:0 10px 30px rgba(255,255,255,0.2);">Participer</button>
+    <div id="connect-screen" class="screen active" style="cursor: pointer;">
+        <div id="connect-logo-container"
+            style="width: 80vw; max-width: 400px; margin-bottom: 20px; display: flex; justify-content: center; align-items: center;">
+            <img id="connect-logo-img" src="" alt="Logo"
+                style="display: none; width: 100%; height: 100%; object-fit: contain; transition: transform 0.2s ease-out;">
+        </div>
+        <p id="connect-tagline-text"
+            style="color:#fff; font-size:0.8rem; letter-spacing:2px; text-transform:uppercase; text-align:center; padding:0 20px;">
+            EXPÉRIENCE INTERACTIVE
+        </p>
     </div>
 
     <!-- Écran 2 : Logo / Attente -->
@@ -1087,7 +1091,7 @@
         });
 
         // === BOUTON PARTICIPER ===
-        document.getElementById('start-btn').addEventListener('click', () => {
+        document.getElementById('connect-screen').addEventListener('click', () => {
             // Unlock Audio
             const audioEl = document.getElementById('audio-player');
             if (audioEl) {
@@ -1147,6 +1151,21 @@
         });
 
         function updateLogoDisplay() {
+            if (!hasStarted) {
+                const connectImg = document.getElementById('connect-logo-img');
+                if (connectImg) {
+                    if (config.logoUrl && config.logoVisible) {
+                        connectImg.src = config.logoUrl;
+                        connectImg.style.display = 'block';
+                        connectImg.style.transform = `scale(${(config.logoZoom || 100) / 100})`;
+                    } else {
+                        connectImg.style.display = 'none';
+                    }
+                }
+                const connectTagline = document.getElementById('connect-tagline-text');
+                if (connectTagline && config.tagline) connectTagline.innerText = config.tagline;
+            }
+
             if (!hasStarted) return;
             const img = document.getElementById('logo-img');
             if (config.logoUrl && config.logoVisible) {
@@ -1221,6 +1240,7 @@
                     } else {
                         log("  → Persist: OFF (Écran effacé)");
                         document.getElementById('emoji-display').innerText = '';
+                        document.getElementById('emoji-display').style.cssText = '';
                         document.getElementById('media-display').style.display = 'none';
                         document.getElementById('video-display').style.display = 'none';
                         document.getElementById('arrow').style.display = 'none';
@@ -1273,13 +1293,19 @@
                     }
                     break;
                 case 'emojis':
-                    const t = Math.min(1, elapsed / step.duration);
-                    const startSpeed = step.speed || 1200;
-                    const interval = startSpeed * Math.pow(0.25, t);
-                    const emojis = ['♠️', '♥️', '♣️', '♦️'];
-                    const emoji = emojis[Math.floor(now / interval) % 4];
-                    emojiDiv.innerText = emoji;
-                    emojiDiv.className = (emoji === '♥️' || emoji === '♦️') ? 'red' : 'black';
+                    const speed = step.speed || 1200;
+                    const emojisList = ['♠️', '♥️', '♣️', '♦️'];
+                    const currentTick = Math.floor(now / speed);
+                    const emojiChar = emojisList[currentTick % 4];
+                    emojiDiv.innerText = emojiChar;
+                    emojiDiv.className = (emojiChar === '♥️' || emojiChar === '♦️') ? 'red' : 'black';
+
+                    const randX = (Math.sin(currentTick) * 10000) % 1;
+                    const randY = (Math.cos(currentTick) * 10000) % 1;
+                    emojiDiv.style.position = 'absolute';
+                    emojiDiv.style.left = (10 + Math.abs(randX) * 80) + 'vw';
+                    emojiDiv.style.top = (10 + Math.abs(randY) * 80) + 'vh';
+                    emojiDiv.style.transform = 'translate(-50%, -50%)';
                     break;
                 case 'shuffle':
                     body.className = 'white-bg';
@@ -1315,6 +1341,7 @@
                     }
                     break;
                 case 'words':
+                    emojiDiv.style.cssText = '';
                     emojiDiv.style.fontSize = '8vh';
                     emojiDiv.className = '';
                     const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
