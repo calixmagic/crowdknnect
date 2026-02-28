@@ -2957,7 +2957,11 @@
                         // Apply the same random jumping logic as the public side
                         const randX = (Math.sin(currentTick) * 10000) % 1;
                         const randY = (Math.cos(currentTick) * 10000) % 1;
+                        const randSize = (Math.sin(currentTick * 2) * 10000) % 1;
+                        const scale = 1 + Math.abs(randSize) * 4; // 1x to 5x scaling
+
                         emojiDiv.style.position = 'absolute';
+                        emojiDiv.style.fontSize = (15 * scale) + 'vh';
                         emojiDiv.style.left = (10 + Math.abs(randX) * 80) + 'vw';
                         emojiDiv.style.top = (10 + Math.abs(randY) * 80) + 'vh';
                         emojiDiv.style.transform = 'translate(-50%, -50%)';
