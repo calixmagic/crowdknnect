@@ -1303,6 +1303,209 @@
             transform: scale(1.05);
             box-shadow: 0 0 10px rgba(217, 83, 79, 0.6);
         }
+
+        /* Background Animations Logo */
+        .bg-anim-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 0;
+            /* Behind screens */
+            pointer-events: none;
+        }
+
+        .anim-respiration {
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, rgba(0, 0, 0, 0) 80%);
+            animation: bgBreathe 4s ease-in-out infinite alternate;
+        }
+
+        @keyframes bgBreathe {
+            0% {
+                transform: scale(0.8);
+                opacity: 0.2;
+            }
+
+            100% {
+                transform: scale(1.5);
+                opacity: 0.8;
+            }
+        }
+
+        .anim-vague {
+            background: linear-gradient(45deg, rgba(255, 255, 255, 0.05) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.05) 50%, rgba(255, 255, 255, 0.05) 75%, transparent 75%, transparent);
+            background-size: 100px 100px;
+            animation: bgWave 4s linear infinite;
+        }
+
+        @keyframes bgWave {
+            0% {
+                background-position: 0 0;
+            }
+
+            100% {
+                background-position: 100px 100px;
+            }
+        }
+
+        /* 10 Nouvelles Animations */
+        .anim-hyperspace {
+            background: url('images/hyperspace.gif') no-repeat center center;
+            background-size: cover;
+            opacity: 0.6;
+        }
+
+        .anim-pluie-matrix {
+            background: linear-gradient(to bottom, rgba(0, 255, 0, 0.1), rgba(0, 255, 0, 0.05));
+            animation: matrixRain 2s linear infinite;
+        }
+
+        @keyframes matrixRain {
+            0% {
+                background-position: 0 -100vh;
+            }
+
+            100% {
+                background-position: 0 100vh;
+            }
+        }
+
+        .anim-battement-coeur {
+            background: radial-gradient(circle, rgba(255, 0, 0, 0.1) 0%, transparent 60%);
+            animation: bgHeartbeat 1.5s infinite;
+        }
+
+        @keyframes bgHeartbeat {
+            0% {
+                transform: scale(1);
+                opacity: 0.3;
+            }
+
+            20% {
+                transform: scale(1.1);
+                opacity: 0.6;
+            }
+
+            40% {
+                transform: scale(1);
+                opacity: 0.3;
+            }
+
+            60% {
+                transform: scale(1.15);
+                opacity: 0.8;
+            }
+
+            80% {
+                transform: scale(1);
+                opacity: 0.3;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 0.3;
+            }
+        }
+
+        .anim-etoiles-filantes {
+            background: radial-gradient(circle, #fff 10%, transparent 10%), radial-gradient(circle, #fff 10%, transparent 10%);
+            background-size: 50px 50px;
+            background-position: 0 0, 25px 25px;
+            animation: shootingStars 5s linear infinite;
+            opacity: 0.1;
+        }
+
+        @keyframes shootingStars {
+            100% {
+                background-position: 500px 500px, 525px 525px;
+            }
+        }
+
+        .anim-mystique {
+            background: conic-gradient(from 0deg, rgba(255, 0, 255, 0.1), rgba(0, 255, 255, 0.1), rgba(255, 0, 255, 0.1));
+            animation: mysticSpin 10s linear infinite;
+        }
+
+        @keyframes mysticSpin {
+            100% {
+                transform: rotate(360deg) scale(2);
+            }
+        }
+
+        .anim-feu {
+            background: linear-gradient(to top, rgba(255, 100, 0, 0.3) 0%, transparent 60%);
+            animation: fireFlicker 0.1s infinite alternate;
+        }
+
+        @keyframes fireFlicker {
+            0% {
+                opacity: 0.8;
+                transform: translateY(0);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translateY(-5px);
+            }
+        }
+
+        .anim-glitch-bg {
+            background: repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.05) 0px, transparent 1px, transparent 4px, rgba(255, 255, 255, 0.05) 5px);
+            animation: glitchLines 0.2s infinite;
+        }
+
+        @keyframes glitchLines {
+            0% {
+                transform: translateY(0);
+            }
+
+            100% {
+                transform: translateY(5px);
+            }
+        }
+
+        .anim-zoom-dezoom {
+            /* Pulsation faible du logo : applied via JS */
+            display: none;
+        }
+
+        .anim-laser {
+            background: linear-gradient(90deg, transparent 40%, rgba(255, 0, 0, 0.2) 50%, transparent 60%);
+            background-size: 200% 100%;
+            animation: laserSweep 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes laserSweep {
+            0% {
+                background-position: -100% 0;
+            }
+
+            100% {
+                background-position: 200% 0;
+            }
+        }
+
+        .anim-boussole {
+            background: repeating-radial-gradient(circle, transparent, transparent 20px, rgba(255, 255, 255, 0.05) 20px, rgba(255, 255, 255, 0.05) 21px);
+            animation: compassRotate 20s linear infinite;
+        }
+
+        @keyframes compassRotate {
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes logoPulse {
+            0% {
+                transform: scale(1);
+            }
+
+            100% {
+                transform: scale(1.1);
+            }
+        }
     </style>
 </head>
 
@@ -1578,12 +1781,20 @@
         </div>
         <div class="row"><label>Zoom Logo (<span id="zoom-val">100</span>%)</label><input type="range" id="zoom-range"
                 min="50" max="250" value="100" oninput="updateZoom(this.value)"></div>
-        <div class="row"><label>Logo : Galerie</label>
+        <div class="row"><label>Logo Principal (Spectacle) : Galerie</label>
             <div class="file-input-wrapper"><button class="btn btn-secondary">CHOISIR IMAGE</button><input type="file"
-                    id="logo-file" accept="image/*" onchange="handleFileUpload(this)"></div>
+                    id="logo-file" accept="image/*" onchange="handleFileUpload(this, 'logo-url-input')"></div>
         </div>
-        <div class="row"><label>Logo : URL</label><input type="text" id="logo-url-input" placeholder="https://..."
-                oninput="previewLogo(this.value)"></div>
+        <div class="row"><label>Logo Principal : URL</label><input type="text" id="logo-url-input"
+                placeholder="https://..." oninput="previewLogo(this.value)"></div>
+
+        <div class="row" style="margin-top: 20px;"><label>Logo Accueil (Bouton Participer) : Galerie</label>
+            <div class="file-input-wrapper"><button class="btn btn-secondary">CHOISIR IMAGE</button><input type="file"
+                    id="connect-logo-file" accept="image/*" onchange="handleFileUpload(this, 'connect-logo-url-input')">
+            </div>
+        </div>
+        <div class="row"><label>Logo Accueil : URL</label><input type="text" id="connect-logo-url-input"
+                placeholder="https://..."></div>
         <div class="row"><label>URL Redirection Finale</label><input type="text" id="redir-url-input"
                 placeholder="https://g.page/..."></div>
         <div class="row"><label>Texte d'accueil</label><input type="text" id="tagline-input"
@@ -1638,7 +1849,7 @@
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <script>
         const socket = io();
-        let state = { routines: [], activeRoutineIndex: 0, sequenceDelay: 2, logoZoom: 100, logoUrl: '', redirectionUrl: '', logoVisible: false, tagline: '', bgAnim: '' };
+        let state = { routines: [], activeRoutineIndex: 0, sequenceDelay: 2, logoZoom: 100, logoUrl: '', connectLogoUrl: '', redirectionUrl: '', logoVisible: false, tagline: '', bgAnim: '' };
         let lpTimer = null;
         let showStep = 0;
         let serverOffset = 0;
@@ -1708,6 +1919,7 @@
             document.getElementById('zoom-range').value = state.logoZoom || 100;
             document.getElementById('zoom-val').innerText = state.logoZoom || 100;
             document.getElementById('logo-url-input').value = state.logoUrl || '';
+            document.getElementById('connect-logo-url-input').value = state.connectLogoUrl || '';
             document.getElementById('redir-url-input').value = state.redirectionUrl || '';
             document.getElementById('tagline-input').value = state.tagline || '';
             const adminTagline = document.getElementById('admin-tagline');
@@ -2326,12 +2538,12 @@
             if (url) { img.src = url; img.style.display = 'block'; } else img.style.display = 'none';
         }
 
-        function handleFileUpload(input) {
+        function handleFileUpload(input, targetId) {
             const file = input.files[0]; if (!file) return;
             const reader = new FileReader();
             reader.onload = (e) => {
-                document.getElementById('logo-url-input').value = e.target.result;
-                previewLogo(e.target.result);
+                document.getElementById(targetId).value = e.target.result;
+                if (targetId === 'logo-url-input') previewLogo(e.target.result);
                 log("Image chargée de la galerie");
             };
             reader.readAsDataURL(file);
@@ -2391,6 +2603,7 @@
             state.sequenceDelay = parseFloat(document.getElementById('delay-input').value) || 2;
             state.logoZoom = parseInt(document.getElementById('zoom-range').value) || 100;
             state.logoUrl = document.getElementById('logo-url-input').value;
+            state.connectLogoUrl = document.getElementById('connect-logo-url-input').value;
             state.redirectionUrl = document.getElementById('redir-url-input').value;
             state.tagline = document.getElementById('tagline-input').value;
             state.bgColor = document.getElementById('bg-color-input').value || '#000';
@@ -2426,6 +2639,11 @@
 
                 const steps = routine.steps.filter(s => s.active);
                 if (currentStepIdx >= steps.length) {
+                    if (state.redirectionUrl) {
+                        log("Séquence terminée ✓ Redirection vers " + state.redirectionUrl, "#34c759");
+                        window.location.href = state.redirectionUrl;
+                        return;
+                    }
                     document.getElementById('engine-screen').style.display = 'none';
                     document.getElementById('engine-screen').style.backgroundColor = 'transparent';
                     document.getElementById('logo-screen').style.display = 'flex';

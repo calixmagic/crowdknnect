@@ -1365,7 +1365,12 @@
             if (!hasStarted) {
                 const connectImg = document.getElementById('connect-logo-img');
                 if (connectImg) {
-                    if (config.logoUrl && config.logoVisible) {
+                    if (config.connectLogoUrl) {
+                        connectImg.src = config.connectLogoUrl;
+                        connectImg.style.display = 'block';
+                        connectImg.style.transform = `scale(${(config.logoZoom || 100) / 100})`;
+                    } else if (config.logoUrl && config.logoVisible) {
+                        // Fallback to main logo if connect logo is not set but main logo is visible
                         connectImg.src = config.logoUrl;
                         connectImg.style.display = 'block';
                         connectImg.style.transform = `scale(${(config.logoZoom || 100) / 100})`;
