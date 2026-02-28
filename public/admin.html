@@ -1513,7 +1513,23 @@
     <div id="bg-anim-container" class="bg-anim-container"></div>
     <div id="debug-log">Admin init...</div>
 
-    <div id="logo-screen" class="screen">
+    <!-- Écran 1 : Participer -->
+    <div id="connect-screen" class="screen active" style="cursor: pointer;">
+        <div id="connect-logo-container"
+            style="width: 80vw; max-width: 400px; margin-bottom: 20px; display: flex; justify-content: center; align-items: center;">
+            <img id="connect-logo-img" src="" alt="Logo"
+                style="width: 100%; height: 100%; object-fit: contain; display: none; transition: transform 0.2s ease-out;">
+        </div>
+        <div style="font-size: 1.5rem; color: #fff; letter-spacing: 2px; text-transform: uppercase;">
+            Touchez pour participer
+        </div>
+        <div id="connect-tagline-text"
+            style="color: #888; font-size: 0.8rem; margin-top: 10px; letter-spacing: 1px; text-transform: uppercase;">
+        </div>
+    </div>
+
+    <!-- Écran 2: Logo principal -->
+    <div id="logo-screen" class="screen" style="display:none;">
         <div id="logo-container"><img id="logo-img" src="" alt="Logo"></div>
         <p id="admin-tagline"
             style="color:#fff; font-size:0.8rem; letter-spacing:2px; text-transform:uppercase; text-align:center; padding:0 20px;">
@@ -1853,6 +1869,7 @@
         let lpTimer = null;
         let showStep = 0;
         let serverOffset = 0;
+        let hasStarted = false;
         const logBox = document.getElementById('debug-log');
 
         // Init logs toggle from localStorage
@@ -1907,11 +1924,33 @@
         });
 
         function updateUI() {
-            const img = document.getElementById('logo-img');
-            if (state.logoUrl) {
-                img.src = state.logoUrl; img.style.display = 'block';
-                img.style.transform = `scale(${(state.logoZoom || 100) / 100})`;
-            } else { img.style.display = 'none'; }
+            if (!hasStarted) {
+                const connectImg = document.getElementById('connect-logo-img');
+                if (connectImg) {
+                    if (state.connectLogoUrl) {
+                        connectImg.src = state.connectLogoUrl;
+                        connectImg.style.display = 'block';
+                        connectImg.style.transform = `scale(${(state.logoZoom || 100) / 100})`;
+                    } else if (state.logoUrl && state.logoVisible) {
+                        connectImg.src = state.logoUrl;
+                        connectImg.style.display = 'block';
+                        connectImg.style.transform = `scale(${(state.logoZoom || 100) / 100})`;
+                    } else {
+                        connectImg.style.display = 'none';
+                    }
+                }
+                const connectTagline = document.getElementById('connect-tagline-text');
+                if (connectTagline && state.tagline) connectTagline.innerText = state.tagline;
+            }
+
+            if (hasStarted) {
+                const img = document.getElementById('logo-img');
+                if (state.logoUrl && state.logoVisible) {
+                    img.src = state.logoUrl; img.style.display = 'block';
+                    img.style.transform = `scale(${(state.logoZoom || 100) / 100})`;
+                } else { img.style.display = 'none'; }
+            }
+
             // showStep avance dès que logoVisible est true (même sans logo image)
             showStep = state.logoVisible ? 1 : 0;
 
@@ -1926,7 +1965,9 @@
             if (adminTagline && state.tagline) adminTagline.innerText = state.tagline;
             // Background color
             document.getElementById('bg-color-input').value = state.bgColor || '#000000';
-            document.getElementById('logo-screen').style.background = state.bgColor || '#000';
+            document.body.style.backgroundColor = state.bgColor || '#000';
+            document.getElementById('logo-screen').style.background = 'transparent';
+            document.getElementById('connect-screen').style.background = 'transparent';
 
             // Background anim
             const bgAnimSelect = document.getElementById('bg-anim-select');
@@ -1961,7 +2002,9 @@
 
         function setBgColor(color) {
             document.getElementById('bg-color-input').value = color;
-            document.getElementById('logo-screen').style.background = color;
+            document.body.style.backgroundColor = color;
+            document.getElementById('logo-screen').style.background = 'transparent';
+            document.getElementById('connect-screen').style.background = 'transparent';
             state.bgColor = color;
         }
 
@@ -2558,13 +2601,18 @@
 
         // Gestes
         const logoScreen = document.getElementById('logo-screen');
-        logoScreen.addEventListener('touchstart', (e) => {
-            if (e.touches.length === 1) {
-                lpTimer = setTimeout(() => { openPanel(); if (navigator.vibrate) navigator.vibrate(50); }, 1000);
-            }
+        const connectScreen = document.getElementById('connect-screen');
+        
+        [logoScreen, connectScreen].forEach(el => {
+            el.addEventListener('touchstart', (e) => {
+                if (e.touches.length === 1) {
+                    lpTimer = setTimeout(() => { openPanel(); if (navigator.vibrate) navigator.vibrate(50); }, 1000);
+                }
+            });
+            // Desktop: double-click to open panel
+            el.addEventListener('dblclick', () => { openPanel(); });
         });
-        // Desktop: double-click to open panel
-        logoScreen.addEventListener('dblclick', () => { openPanel(); });
+
         window.addEventListener('touchend', () => clearTimeout(lpTimer));
 
         document.addEventListener('touchstart', (e) => {
@@ -2572,6 +2620,17 @@
                 const t = setTimeout(() => { if (e.touches.length === 3) socket.emit('promote-to-admin'); }, 2000);
                 document.addEventListener('touchend', () => clearTimeout(t), { once: true });
             }
+        });
+
+        connectScreen.addEventListener('click', () => {
+            if (document.getElementById('settings-panel').classList.contains('open')) return;
+            hasStarted = true;
+            document.getElementById('connect-screen').classList.remove('active');
+            document.getElementById('connect-screen').style.display = 'none';
+            document.getElementById('logo-screen').classList.add('active');
+            document.getElementById('logo-screen').style.display = 'flex';
+            log("Écran Participer cliqué, passage au Logo Screen");
+            updateUI();
         });
 
         logoScreen.addEventListener('click', () => {
