@@ -54,13 +54,20 @@ app.post('/upload-video', uploadVideo.single('videoFile'), (req, res) => {
     res.json({ filename: req.file.originalname, path: 'videos/' + req.file.originalname });
 });
 
-// État initial du Laboratoire
+// Fichier de sauvegarde
+const STATE_FILE = path.join(__dirname, 'state.json');
+
+// État initial du Laboratoire (Valeurs par défaut)
 let state = {
     logoUrl: '',
+    connectLogoUrl: '',
     logoVisible: false,
     logoZoom: 100,
     sequenceDelay: 2,
     redirectionUrl: 'https://g.page/r/CddOBKIvn5onEBM/review',
+    tagline: 'Réaliser une expérience.',
+    bgColor: '#000000',
+    bgAnim: '',
     activeRoutineIndex: 0,
     routines: [
         {
@@ -84,6 +91,24 @@ let state = {
     ]
 };
 
+// Chargement de la sauvegarde (s'il y en a une)
+if (fs.existsSync(STATE_FILE)) {
+    try {
+        const data = fs.readFileSync(STATE_FILE, 'utf8');
+        const savedState = JSON.parse(data);
+        state = { ...state, ...savedState };
+        console.log(`[SERVER] État restauré depuis state.json (Routines: ${state.routines.length})`);
+    } catch (err) {
+        console.error(`[SERVER] Erreur lors de la lecture de state.json:`, err);
+    }
+}
+
+function saveState() {
+    fs.writeFile(STATE_FILE, JSON.stringify(state, null, 2), (err) => {
+        if (err) console.error(`[SERVER] Erreur d'écriture state.json:`, err);
+    });
+}
+
 io.on('connection', (socket) => {
     console.log('Client connected:', socket.id);
 
@@ -106,6 +131,7 @@ io.on('connection', (socket) => {
         }
         state = { ...state, ...newState };
         console.log(`[SERVER] État mis à jour par l'Admin. ActiveRoutine: ${state.activeRoutineIndex}`);
+        saveState();
         io.emit('state-update', state);
     });
 
@@ -141,6 +167,7 @@ io.on('connection', (socket) => {
     socket.on('admin-reset', () => {
         state.logoVisible = false;
         console.log("[SERVER] Reset triggered");
+        saveState();
         io.emit('reset-sequence');
         io.emit('state-update', state);
     });
