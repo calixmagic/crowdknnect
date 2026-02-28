@@ -1824,9 +1824,9 @@
         <div class="row"><label>URL Redirection Finale</label><input type="text" id="redir-url-input"
                 placeholder="https://g.page/..."></div>
         <div class="row"><label>Texte Image 1 (Accueil)</label><input type="text" id="connect-tagline-input"
-                placeholder="EXPÉRIENCE INTERACTIVE"></div>
+                placeholder="Laissez vide pour cacher le texte"></div>
         <div class="row"><label>Texte Image 2 (Logo)</label><input type="text" id="tagline-input"
-                placeholder="Réaliser une expérience."></div>
+                placeholder="Laissez vide pour cacher le texte"></div>
         <div class="row">
             <label>Afficher les logs de timing (Admin)</label>
             <label class="switch" style="margin:0;">
@@ -1960,7 +1960,7 @@
                 }
                 const connectTagline = document.getElementById('connect-tagline-text');
                 if (connectTagline) {
-                    if (state.connectTagline !== undefined && state.connectTagline !== '') {
+                    if (state.connectTagline !== undefined) {
                         connectTagline.innerText = state.connectTagline;
                     } else {
                         connectTagline.innerText = 'EXPÉRIENCE INTERACTIVE';
@@ -1990,7 +1990,7 @@
             document.getElementById('tagline-input').value = state.tagline !== undefined ? state.tagline : '';
             const adminTagline = document.getElementById('admin-tagline');
             if (adminTagline) {
-                if (state.tagline !== undefined && state.tagline !== '') {
+                if (state.tagline !== undefined) {
                     adminTagline.innerText = state.tagline;
                 } else {
                     adminTagline.innerText = 'Réaliser une expérience.';

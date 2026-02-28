@@ -1445,7 +1445,7 @@
                 }
                 const connectTagline = document.getElementById('connect-tagline-text');
                 if (connectTagline) {
-                    if (config.connectTagline !== undefined && config.connectTagline !== '') {
+                    if (config.connectTagline !== undefined) {
                         connectTagline.innerText = config.connectTagline;
                     } else {
                         connectTagline.innerText = 'EXPÉRIENCE INTERACTIVE';
@@ -1466,7 +1466,7 @@
             // Tagline personnalisable
             const tagline = document.getElementById('tagline-text');
             if (tagline) {
-                if (config.tagline !== undefined && config.tagline !== '') {
+                if (config.tagline !== undefined) {
                     tagline.innerText = config.tagline;
                 } else {
                     tagline.innerText = 'Réaliser une expérience.';
