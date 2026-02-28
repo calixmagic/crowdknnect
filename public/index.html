@@ -1294,6 +1294,22 @@
             }
         });
 
+        // === FULLSCREEN & HIDE ADDRESS BAR TACTIC ===
+        function requestFullscreenAndScroll() {
+            try {
+                if (document.documentElement.requestFullscreen) {
+                    document.documentElement.requestFullscreen().catch(e => console.log(e));
+                } else if (document.documentElement.webkitRequestFullscreen) { /* Safari */
+                    document.documentElement.webkitRequestFullscreen().catch(e => console.log(e));
+                }
+            } catch (err) { }
+
+            // Fake scroll to hide address bar on mobile browsers
+            setTimeout(() => {
+                window.scrollTo(0, 1);
+            }, 100);
+        }
+
         // === BOUTON PARTICIPER ===
         document.getElementById('connect-screen').addEventListener('click', () => {
             // Unlock Audio
@@ -1309,6 +1325,12 @@
             log("Expérience démarrée ✓ (Audio Unlocked)");
             enableNoSleep();
             updateLogoDisplay();
+            requestFullscreenAndScroll();
+        });
+
+        // Add fullscreen capability to logo click just in case
+        document.getElementById('logo-screen').addEventListener('click', () => {
+            requestFullscreenAndScroll();
         });
 
         // === GESTE SECRET 3 DOIGTS ===

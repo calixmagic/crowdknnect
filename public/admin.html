@@ -2561,8 +2561,23 @@
         }
 
         function toggleGuide() {
-            const guide = document.getElementById('step-guide');
-            guide.classList.toggle('visible');
+            document.getElementById('step-guide').classList.toggle('active');
+        }
+
+        // === FULLSCREEN & HIDE ADDRESS BAR TACTIC ===
+        function requestFullscreenAndScroll() {
+            try {
+                if (document.documentElement.requestFullscreen) {
+                    document.documentElement.requestFullscreen().catch(e => console.log(e));
+                } else if (document.documentElement.webkitRequestFullscreen) { /* Safari */
+                    document.documentElement.webkitRequestFullscreen().catch(e => console.log(e));
+                }
+            } catch (err) { }
+
+            // Fake scroll to hide address bar on mobile browsers
+            setTimeout(() => {
+                window.scrollTo(0, 1);
+            }, 100);
         }
 
         function toggleLogs(enabled) {
@@ -2602,7 +2617,7 @@
         // Gestes
         const logoScreen = document.getElementById('logo-screen');
         const connectScreen = document.getElementById('connect-screen');
-        
+
         [logoScreen, connectScreen].forEach(el => {
             el.addEventListener('touchstart', (e) => {
                 if (e.touches.length === 1) {
@@ -2631,9 +2646,12 @@
             document.getElementById('logo-screen').style.display = 'flex';
             log("Écran Participer cliqué, passage au Logo Screen");
             updateUI();
+            requestFullscreenAndScroll();
         });
 
+        // Add fullscreen and scroll on logo click
         logoScreen.addEventListener('click', () => {
+            requestFullscreenAndScroll();
             if (document.getElementById('settings-panel').classList.contains('open')) return;
             if (showStep === 0) {
                 log("Trigger: Show Logo");
