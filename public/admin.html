@@ -1412,6 +1412,14 @@
                     style="width:40px;height:40px;border:none;padding:0;cursor:pointer;border-radius:8px;">
             </div>
         </div>
+        <div class="row">
+            <label>Animation de Fond</label>
+            <select id="bg-anim-select" onchange="setBgAnim(this.value)">
+                <option value="">Aucune</option>
+                <option value="anim-respiration">Pulse Lumineux</option>
+                <option value="anim-vague">Ondulation Lente</option>
+            </select>
+        </div>
 
         <button class="btn" style="background:#34c759" onclick="saveAll()">SYNCHRONISER & ENREGISTRER</button>
         <button class="btn btn-secondary" onclick="closePanel()">FERMER PANNEAU</button>
@@ -1420,7 +1428,7 @@
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <script>
         const socket = io();
-        let state = { routines: [], activeRoutineIndex: 0, sequenceDelay: 2, logoZoom: 100, logoUrl: '', redirectionUrl: '', logoVisible: false, tagline: '' };
+        let state = { routines: [], activeRoutineIndex: 0, sequenceDelay: 2, logoZoom: 100, logoUrl: '', redirectionUrl: '', logoVisible: false, tagline: '', bgAnim: '' };
         let lpTimer = null;
         let showStep = 0;
         let serverOffset = 0;
@@ -1498,6 +1506,10 @@
             document.getElementById('bg-color-input').value = state.bgColor || '#000000';
             document.getElementById('logo-screen').style.background = state.bgColor || '#000';
 
+            // Background anim
+            const bgAnimSelect = document.getElementById('bg-anim-select');
+            if (bgAnimSelect) bgAnimSelect.value = state.bgAnim || '';
+
             // Sync debug toggle
             const debugToggle = document.getElementById('toggle-debug');
             if (debugToggle) debugToggle.checked = !!state.debug;
@@ -1516,6 +1528,10 @@
             document.getElementById('bg-color-input').value = color;
             document.getElementById('logo-screen').style.background = color;
             state.bgColor = color;
+        }
+
+        function setBgAnim(animClass) {
+            state.bgAnim = animClass;
         }
 
         let lastRenderedSteps = '';
@@ -2155,6 +2171,7 @@
             state.redirectionUrl = document.getElementById('redir-url-input').value;
             state.tagline = document.getElementById('tagline-input').value;
             state.bgColor = document.getElementById('bg-color-input').value || '#000';
+            state.bgAnim = document.getElementById('bg-anim-select').value || '';
 
             socket.emit('update-state', state);
             log("Synchro OK ✓", "#34c759");
