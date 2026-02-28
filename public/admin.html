@@ -1839,24 +1839,6 @@
                     style="width:40px;height:40px;border:none;padding:0;cursor:pointer;border-radius:8px;">
             </div>
         </div>
-        <div class="row">
-            <label>Animation de Fond</label>
-            <select id="bg-anim-select" onchange="setBgAnim(this.value)">
-                <option value="">Aucune</option>
-                <option value="anim-zoom-dezoom">Zoom Faible Logo</option>
-                <option value="anim-hyperspace">Hyperspace (GIF)</option>
-                <option value="anim-respiration">Pulse Lumineux</option>
-                <option value="anim-vague">Ondulation Lente</option>
-                <option value="anim-pluie-matrix">Pluie Matrix</option>
-                <option value="anim-battement-coeur">Battement Cœur</option>
-                <option value="anim-etoiles-filantes">Étoiles Filantes</option>
-                <option value="anim-mystique">Tourbillon Mystique</option>
-                <option value="anim-feu">Lumière Feu</option>
-                <option value="anim-glitch-bg">Glitch TV Fond</option>
-                <option value="anim-laser">Balayage Laser</option>
-                <option value="anim-boussole">Radars Boussole</option>
-            </select>
-        </div>
 
         <button class="btn" style="background:#34c759" onclick="saveAll()">SYNCHRONISER & ENREGISTRER</button>
         <button class="btn btn-secondary" onclick="closePanel()">FERMER PANNEAU</button>
@@ -1866,7 +1848,7 @@
     <script src="/config.js"></script>
     <script>
         const socket = io();
-        let state = { routines: [], activeRoutineIndex: 0, sequenceDelay: 2, logoZoom: 100, logoUrl: '', connectLogoUrl: '', redirectionUrl: '', logoVisible: false, tagline: '', bgAnim: '' };
+        let state = { routines: [], activeRoutineIndex: 0, sequenceDelay: 2, logoZoom: 100, logoUrl: '', connectLogoUrl: '', adminConnectLogoUrl: '', redirectionUrl: '', logoVisible: false, tagline: '', bgAnim: '' };
         let lpTimer = null;
         let showStep = 0;
         let serverOffset = 0;
@@ -1928,12 +1910,10 @@
             if (!hasStarted) {
                 const connectImg = document.getElementById('connect-logo-img');
                 if (connectImg) {
-                    if (state.connectLogoUrl) {
-                        connectImg.src = state.connectLogoUrl;
-                        connectImg.style.display = 'block';
-                        connectImg.style.transform = `scale(${(state.logoZoom || 100) / 100})`;
-                    } else if (state.logoUrl && state.logoVisible) {
-                        connectImg.src = state.logoUrl;
+                    // Admin uses adminConnectLogoUrl if it exists, otherwise connectLogoUrl, otherwise logoUrl
+                    const targetLogo = state.adminConnectLogoUrl || state.connectLogoUrl || (state.logoVisible ? state.logoUrl : '');
+                    if (targetLogo) {
+                        connectImg.src = targetLogo;
                         connectImg.style.display = 'block';
                         connectImg.style.transform = `scale(${(state.logoZoom || 100) / 100})`;
                     } else {
@@ -1958,8 +1938,12 @@
             document.getElementById('delay-input').value = state.sequenceDelay || 2;
             document.getElementById('zoom-range').value = state.logoZoom || 100;
             document.getElementById('zoom-val').innerText = state.logoZoom || 100;
+            document.getElementById('logo-url-input').addEventListener('change', (e) => previewLogo(e.target.value));
+            document.getElementById('connect-logo-url-input').addEventListener('change', () => { /* no preview logic required */ });
+            document.getElementById('admin-connect-logo-url-input').addEventListener('change', () => { /* no preview logic required */ });
             document.getElementById('logo-url-input').value = state.logoUrl || '';
             document.getElementById('connect-logo-url-input').value = state.connectLogoUrl || '';
+            document.getElementById('admin-connect-logo-url-input').value = state.adminConnectLogoUrl || '';
             document.getElementById('redir-url-input').value = state.redirectionUrl || '';
             document.getElementById('tagline-input').value = state.tagline || '';
             const adminTagline = document.getElementById('admin-tagline');
@@ -2600,6 +2584,16 @@
         async function handleFileUpload(input, targetId) {
             const file = input.files[0]; if (!file) return;
 
+            // Delete old file if there's an existing one to avoid storage spam
+            const currentUrl = document.getElementById(targetId).value;
+            if (currentUrl && currentUrl.includes('/uploads/') && window.OVH_SYNC_URL) {
+                try {
+                    const filename = currentUrl.split('/uploads/')[1];
+                    await fetch(`${window.OVH_SYNC_URL}?action=delete&file=${filename}&key=${window.OVH_SYNC_KEY}`, { method: 'POST' });
+                    log("Ancienne image archivée");
+                } catch (e) { }
+            }
+
             // Si OVH est configuré, on upload l'image sur le serveur OVH distant
             if (window.OVH_SYNC_URL) {
                 log(`Upload de "${file.name}" vers OVH en cours...`);
@@ -2720,6 +2714,7 @@
             state.logoZoom = parseInt(document.getElementById('zoom-range').value) || 100;
             state.logoUrl = document.getElementById('logo-url-input').value;
             state.connectLogoUrl = document.getElementById('connect-logo-url-input').value;
+            state.adminConnectLogoUrl = document.getElementById('admin-connect-logo-url-input').value;
             state.redirectionUrl = document.getElementById('redir-url-input').value;
             state.tagline = document.getElementById('tagline-input').value;
             state.bgColor = document.getElementById('bg-color-input').value || '#000';

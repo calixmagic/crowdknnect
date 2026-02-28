@@ -1148,6 +1148,27 @@
                 transform: rotate(360deg);
             }
         }
+
+        .anim-hypnose {
+            background: repeating-radial-gradient(circle,
+                    #000000 0,
+                    #000000 20px,
+                    #ffffff 20px,
+                    #ffffff 40px);
+            animation: hypnoticSpin 10s linear infinite;
+            /* Make it large enough to cover the screen while spinning */
+            width: 200vw;
+            height: 200vh;
+            left: -50vw;
+            top: -50vh;
+            position: absolute;
+        }
+
+        @keyframes hypnoticSpin {
+            100% {
+                transform: rotate(360deg);
+            }
+        }
     </style>
 </head>
 
@@ -1312,20 +1333,25 @@
 
         // === BOUTON PARTICIPER ===
         document.getElementById('connect-screen').addEventListener('click', () => {
-            // Unlock Audio
+            // Priority 1: Request Fullscreen on user gesture immediately
+            requestFullscreenAndScroll();
+
+            // Priority 2: Unlock Audio
             const audioEl = document.getElementById('audio-player');
             if (audioEl) {
                 audioEl.src = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA';
                 audioEl.play().catch(e => console.log("Audio unlock failed/blocked", e));
             }
 
+            // Priority 3: State updates and UI transition
             hasStarted = true;
             document.getElementById('connect-screen').classList.remove('active');
             document.getElementById('logo-screen').classList.add('active');
-            log("Expérience démarrée ✓ (Audio Unlocked)");
+            log("Expérience démarrée ✓ (Audio Unlocked & FS Requested)");
+
+            // Priority 4: NoSleep and Logo UI
             enableNoSleep();
             updateLogoDisplay();
-            requestFullscreenAndScroll();
         });
 
         // Add fullscreen capability to logo click just in case

@@ -31,8 +31,10 @@ $uploadsDir = __DIR__ . '/uploads';
 $stateFile = $stateDir . '/state.json';
 
 // Création des dossiers si inexistants
-if (!is_dir($stateDir)) mkdir($stateDir, 0755, true);
-if (!is_dir($uploadsDir)) mkdir($uploadsDir, 0755, true);
+if (!is_dir($stateDir))
+    mkdir($stateDir, 0755, true);
+if (!is_dir($uploadsDir))
+    mkdir($uploadsDir, 0755, true);
 
 // 1. OBTENIR L'ETAT (GET)
 // Render appelle ceci au réveil pour restaurer sa mémoire.
@@ -51,7 +53,7 @@ if ($action === 'getstate') {
 if ($action === 'savestate') {
     $json = file_get_contents('php://input');
     $data = json_decode($json, true);
-    
+
     if ($data !== null) {
         file_put_contents($stateFile, json_encode($data, JSON_PRETTY_PRINT));
         echo json_encode(["status" => "success", "message" => "Etat sauvegardé sur OVH"]);
@@ -73,7 +75,7 @@ if ($action === 'upload') {
 
     $file = $_FILES['image'];
     $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
-    
+
     // Générer un nom unique éviter les écrasements
     $filename = 'logo_' . time() . '_' . rand(1000, 9999) . '.' . $ext;
     $targetPath = $uploadsDir . '/' . $filename;
@@ -86,7 +88,7 @@ if ($action === 'upload') {
         $fileUrl = $protocol . "://" . $host . $uri . "/uploads/" . $filename;
 
         echo json_encode([
-            "status" => "success", 
+            "status" => "success",
             "url" => $fileUrl,
             "filename" => $filename
         ]);
@@ -94,6 +96,24 @@ if ($action === 'upload') {
         http_response_code(500);
         echo json_encode(["error" => "Erreur lors du déplacement du fichier."]);
     }
+    exit;
+}
+
+// 4. SUPPRIMER UNE IMAGE (POST)
+// Appelée avant un nouvel upload pour ne pas accumuler de fichiers inutiles
+if ($action === 'delete') {
+    $filename = $_GET['file'] ?? '';
+    // Sécurité basique pour empêcher de remonter l'arborescence (ex: ../../etc/passwd)
+    if ($filename && preg_match('/^[a-zA-Z0-9_\-\.]+$/', $filename)) {
+        $targetPath = $uploadsDir . '/' . $filename;
+        if (file_exists($targetPath) && is_file($targetPath)) {
+            unlink($targetPath);
+            echo json_encode(["status" => "success", "message" => "Fichier supprimé"]);
+            exit;
+        }
+    }
+    http_response_code(404);
+    echo json_encode(["error" => "Fichier introuvable ou invalide"]);
     exit;
 }
 
