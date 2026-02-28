@@ -1319,9 +1319,11 @@
     </div>
 
     <!-- Prévisualisation séquence (Admin voit ce que le public voit) -->
-    <div id="engine-screen" class="screen" style="display:none;justify-content:center;align-items:center;z-index:500;">
+    <div id="engine-screen" class="screen"
+        style="display:none;justify-content:center;align-items:center;z-index:500; background: transparent;">
         <div id="emoji-display" style="font-size:15vh;"></div>
-        <img id="media-display" src="" alt="Media">
+        <img id="media-display" src="" alt="Media"
+            style="width: 85%; max-width: 500px; height: auto; border-radius: 15px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5); display: none;">
         <video id="video-display" playsinline style="width:100%;height:100%;object-fit:cover;display:none;"></video>
         <img id="arrow" src="fleche.png" alt=""
             style="position:absolute;bottom:0;left:50%;transform:translateX(-50%);display:none;width:50vw;max-width:350px;pointer-events:none;">
@@ -2425,6 +2427,7 @@
                 const steps = routine.steps.filter(s => s.active);
                 if (currentStepIdx >= steps.length) {
                     document.getElementById('engine-screen').style.display = 'none';
+                    document.getElementById('engine-screen').style.backgroundColor = 'transparent';
                     document.getElementById('logo-screen').style.display = 'flex';
                     document.body.className = '';
                     log("Séquence terminée ✓", "#34c759");
@@ -2467,6 +2470,7 @@
                         break;
                     case 'emojis':
                         document.body.className = '';
+                        document.getElementById('engine-screen').style.background = 'transparent';
                         const speed = step.speed || 1200;
                         const emojisList = ['♠️', '♥️', '♣️', '♦️'];
                         const currentTick = Math.floor(now / speed);
@@ -2484,12 +2488,14 @@
                         break;
                     case 'shuffle':
                         document.body.className = 'white-bg';
+                        document.getElementById('engine-screen').style.backgroundColor = '#fff';
                         mediaImg.style.display = 'block';
                         const cards = ['AS', 'KH', '2J', 'QC', '7H', '3C'];
                         mediaImg.src = `cards/${cards[Math.floor(now / 150) % cards.length]}.jpg`;
                         break;
                     case 'reveal':
                         document.body.className = 'white-bg';
+                        document.getElementById('engine-screen').style.backgroundColor = '#fff';
                         mediaImg.style.display = 'block';
                         mediaImg.src = `cards/${step.value}.jpg`;
                         break;
