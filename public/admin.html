@@ -1811,6 +1811,16 @@
         </div>
         <div class="row"><label>Logo Accueil : URL</label><input type="text" id="connect-logo-url-input"
                 placeholder="https://..."></div>
+
+        <div class="row" style="margin-top: 20px;"><label style="color:#34c759;">Logo Accueil Admin (QR Code) :
+                Galerie</label>
+            <div class="file-input-wrapper"><button class="btn btn-secondary">CHOISIR IMAGE</button><input type="file"
+                    id="admin-connect-logo-file" accept="image/*"
+                    onchange="handleFileUpload(this, 'admin-connect-logo-url-input')">
+            </div>
+        </div>
+        <div class="row"><label style="color:#34c759;">Logo Accueil Admin : URL</label><input type="text"
+                id="admin-connect-logo-url-input" placeholder="https://..."></div>
         <div class="row"><label>URL Redirection Finale</label><input type="text" id="redir-url-input"
                 placeholder="https://g.page/..."></div>
         <div class="row"><label>Texte d'accueil</label><input type="text" id="tagline-input"
@@ -1838,6 +1848,25 @@
                 <input type="color" id="bg-color-input" value="#000000" onchange="setBgColor(this.value)"
                     style="width:40px;height:40px;border:none;padding:0;cursor:pointer;border-radius:8px;">
             </div>
+        </div>
+        <div class="row">
+            <label>Animation de Fond</label>
+            <select id="bg-anim-select" onchange="setBgAnim(this.value)">
+                <option value="">Aucune</option>
+                <option value="anim-zoom-dezoom">Zoom Faible Logo</option>
+                <option value="anim-hyperspace">Hyperspace (GIF)</option>
+                <option value="anim-respiration">Pulse Lumineux</option>
+                <option value="anim-vague">Ondulation Lente</option>
+                <option value="anim-pluie-matrix">Pluie Matrix</option>
+                <option value="anim-battement-coeur">Battement Cœur</option>
+                <option value="anim-etoiles-filantes">Étoiles Filantes</option>
+                <option value="anim-mystique">Tourbillon Mystique</option>
+                <option value="anim-feu">Lumière Feu</option>
+                <option value="anim-glitch-bg">Glitch TV Fond</option>
+                <option value="anim-laser">Balayage Laser</option>
+                <option value="anim-boussole">Radars Boussole</option>
+                <option value="anim-hypnose">Spirale Hypnose</option>
+            </select>
         </div>
 
         <button class="btn" style="background:#34c759" onclick="saveAll()">SYNCHRONISER & ENREGISTRER</button>
@@ -1938,9 +1967,6 @@
             document.getElementById('delay-input').value = state.sequenceDelay || 2;
             document.getElementById('zoom-range').value = state.logoZoom || 100;
             document.getElementById('zoom-val').innerText = state.logoZoom || 100;
-            document.getElementById('logo-url-input').addEventListener('change', (e) => previewLogo(e.target.value));
-            document.getElementById('connect-logo-url-input').addEventListener('change', () => { /* no preview logic required */ });
-            document.getElementById('admin-connect-logo-url-input').addEventListener('change', () => { /* no preview logic required */ });
             document.getElementById('logo-url-input').value = state.logoUrl || '';
             document.getElementById('connect-logo-url-input').value = state.connectLogoUrl || '';
             document.getElementById('admin-connect-logo-url-input').value = state.adminConnectLogoUrl || '';
