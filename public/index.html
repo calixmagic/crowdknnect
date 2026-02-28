@@ -1444,7 +1444,13 @@
                     }
                 }
                 const connectTagline = document.getElementById('connect-tagline-text');
-                if (connectTagline && config.tagline) connectTagline.innerText = config.tagline;
+                if (connectTagline) {
+                    if (config.connectTagline !== undefined && config.connectTagline !== '') {
+                        connectTagline.innerText = config.connectTagline;
+                    } else {
+                        connectTagline.innerText = 'EXPÉRIENCE INTERACTIVE';
+                    }
+                }
             }
 
             if (!hasStarted) return;
@@ -1459,7 +1465,13 @@
             }
             // Tagline personnalisable
             const tagline = document.getElementById('tagline-text');
-            if (tagline && config.tagline) tagline.innerText = config.tagline;
+            if (tagline) {
+                if (config.tagline !== undefined && config.tagline !== '') {
+                    tagline.innerText = config.tagline;
+                } else {
+                    tagline.innerText = 'Réaliser une expérience.';
+                }
+            }
         }
 
         // === SÉQUENCE ===

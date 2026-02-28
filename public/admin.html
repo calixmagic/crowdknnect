@@ -1823,7 +1823,9 @@
                 id="admin-connect-logo-url-input" placeholder="https://..."></div>
         <div class="row"><label>URL Redirection Finale</label><input type="text" id="redir-url-input"
                 placeholder="https://g.page/..."></div>
-        <div class="row"><label>Texte d'accueil</label><input type="text" id="tagline-input"
+        <div class="row"><label>Texte Image 1 (Accueil)</label><input type="text" id="connect-tagline-input"
+                placeholder="EXPÉRIENCE INTERACTIVE"></div>
+        <div class="row"><label>Texte Image 2 (Logo)</label><input type="text" id="tagline-input"
                 placeholder="Réaliser une expérience."></div>
         <div class="row">
             <label>Afficher les logs de timing (Admin)</label>
@@ -1884,7 +1886,7 @@
     <script src="/config.js"></script>
     <script>
         const socket = io();
-        let state = { routines: [], activeRoutineIndex: 0, sequenceDelay: 2, logoZoom: 100, logoUrl: '', connectLogoUrl: '', adminConnectLogoUrl: '', redirectionUrl: '', logoVisible: false, tagline: '', bgAnim: '', bgAnimPersist: false };
+        let state = { routines: [], activeRoutineIndex: 0, sequenceDelay: 2, logoZoom: 100, logoUrl: '', connectLogoUrl: '', adminConnectLogoUrl: '', redirectionUrl: '', logoVisible: false, tagline: '', connectTagline: '', bgAnim: '', bgAnimPersist: false };
         let lpTimer = null;
         let showStep = 0;
         let serverOffset = 0;
@@ -1957,7 +1959,13 @@
                     }
                 }
                 const connectTagline = document.getElementById('connect-tagline-text');
-                if (connectTagline && state.tagline) connectTagline.innerText = state.tagline;
+                if (connectTagline) {
+                    if (state.connectTagline !== undefined && state.connectTagline !== '') {
+                        connectTagline.innerText = state.connectTagline;
+                    } else {
+                        connectTagline.innerText = 'EXPÉRIENCE INTERACTIVE';
+                    }
+                }
             }
 
             if (hasStarted) {
@@ -1978,9 +1986,16 @@
             document.getElementById('connect-logo-url-input').value = state.connectLogoUrl || '';
             document.getElementById('admin-connect-logo-url-input').value = state.adminConnectLogoUrl || '';
             document.getElementById('redir-url-input').value = state.redirectionUrl || '';
-            document.getElementById('tagline-input').value = state.tagline || '';
+            document.getElementById('connect-tagline-input').value = state.connectTagline !== undefined ? state.connectTagline : '';
+            document.getElementById('tagline-input').value = state.tagline !== undefined ? state.tagline : '';
             const adminTagline = document.getElementById('admin-tagline');
-            if (adminTagline && state.tagline) adminTagline.innerText = state.tagline;
+            if (adminTagline) {
+                if (state.tagline !== undefined && state.tagline !== '') {
+                    adminTagline.innerText = state.tagline;
+                } else {
+                    adminTagline.innerText = 'Réaliser une expérience.';
+                }
+            }
             // Background color
             document.getElementById('bg-color-input').value = state.bgColor || '#000000';
             document.body.style.backgroundColor = state.bgColor || '#000';
@@ -2758,6 +2773,7 @@
             state.connectLogoUrl = document.getElementById('connect-logo-url-input').value;
             state.adminConnectLogoUrl = document.getElementById('admin-connect-logo-url-input').value;
             state.redirectionUrl = document.getElementById('redir-url-input').value;
+            state.connectTagline = document.getElementById('connect-tagline-input').value;
             state.tagline = document.getElementById('tagline-input').value;
             state.bgColor = document.getElementById('bg-color-input').value || '#000';
             state.bgAnim = document.getElementById('bg-anim-select').value || '';
