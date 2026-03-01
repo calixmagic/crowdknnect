@@ -2938,7 +2938,7 @@
 
         function runPreview(routine, targetTime) {
             let currentStepIdx = 0;
-            const startTime = Date.now(); // Local start time of the *entire preview*
+            let stepStartTime = targetTime;
 
             const update = () => {
                 if (window.cancelPreview) { // Stop condition
@@ -2951,7 +2951,7 @@
                     window.cancelPreview = false; // Reset flag
                     return; // Stop animation loop immediately
                 }
-                const now = Date.now() - startTime; // Elapsed time since *local preview started*
+                const now = Date.now() + serverOffset;
                 if (now < targetTime) { requestAnimationFrame(update); return; } // Wait until targetTime
 
                 const steps = routine.steps.filter(s => s.active);
@@ -3388,8 +3388,8 @@
                 name: "Preview",
                 steps: [step]
             };
-
-            runPreview(tempRoutine, Date.now() + 50); // Start slightly in the future
+            
+            runPreview(tempRoutine, Date.now() + serverOffset + 50); // Start slightly in the future using synced time
         }
 
         function stopPreview() {
