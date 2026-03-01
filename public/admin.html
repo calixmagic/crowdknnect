@@ -2936,9 +2936,15 @@
             document.body.className = '';
         });
 
+        // Store the animation frame ID globally so we can cancel it
+        let currentSequenceFrame = null;
+
         function runPreview(routine, targetTime) {
             let currentStepIdx = 0;
             let stepStartTime = targetTime;
+
+            // Kill any pre-existing loop
+            if (currentSequenceFrame) cancelAnimationFrame(currentSequenceFrame);
 
             const update = () => {
                 if (window.cancelPreview) { // Stop condition
@@ -2952,10 +2958,18 @@
                     return; // Stop animation loop immediately
                 }
                 const now = Date.now() + serverOffset;
-                if (now < targetTime) { requestAnimationFrame(update); return; } // Wait until targetTime
+                if (now < targetTime) {
+                    currentSequenceFrame = requestAnimationFrame(update);
+                    return;
+                } // Wait until targetTime
 
                 const steps = routine.steps.filter(s => s.active);
                 if (currentStepIdx >= steps.length) {
+                    if (routine.isPreview) {
+                        log("Fin de l'étape de prévisualisation ✓", "#34c759");
+                        stopPreview();
+                        return;
+                    }
                     if (state.redirectionUrl) {
                         log("Séquence terminée ✓ Redirection vers " + state.redirectionUrl, "#34c759");
                         window.location.href = state.redirectionUrl;
@@ -3346,6 +3360,7 @@
                 }
                 requestAnimationFrame(update);
             };
+            if (currentSequenceFrame) cancelAnimationFrame(currentSequenceFrame); // Clear any existing animation frame
             requestAnimationFrame(update);
         }
 
@@ -3383,17 +3398,20 @@
             document.getElementById('engine-screen').style.display = 'flex';
             document.getElementById('engine-screen').style.zIndex = '9000'; // Make sure it's above everything except close btn
 
-            // Create a temporary routine with just this one step
+            // Create a temporary routine with just this one step and flag it
             const tempRoutine = {
                 name: "Preview",
+                isPreview: true,
                 steps: [step]
             };
-            
+
             runPreview(tempRoutine, Date.now() + serverOffset + 50); // Start slightly in the future using synced time
         }
 
         function stopPreview() {
             window.cancelPreview = true;
+            if (currentSequenceFrame) cancelAnimationFrame(currentSequenceFrame);
+
             document.getElementById('close-preview-btn').style.display = 'none';
             document.getElementById('engine-screen').style.zIndex = '500';
 
@@ -3401,7 +3419,7 @@
             document.body.className = '';
             document.body.style.backgroundColor = state.bgColor || '#000';
             document.getElementById('engine-screen').style.backgroundColor = 'transparent';
-            document.getElementById('preview-emoji').innerText = '';
+            if (document.getElementById('emoji-display')) document.getElementById('emoji-display').innerText = '';
             document.getElementById('preview-media-img').style.display = 'none';
             document.getElementById('preview-video').style.display = 'none';
             document.getElementById('arrow').style.display = 'none';
