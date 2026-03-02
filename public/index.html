@@ -1701,10 +1701,28 @@
                         document.getElementById('main-body').style.animation = '';
                         document.getElementById('main-body').style.removeProperty('--breathing-color');
                         document.getElementById('main-body').style.removeProperty('--breathing-color');
-                        // Reset overlays and specific displays
-                        document.querySelectorAll('.screen > div[id$="-overlay"], .screen > div[id$="-container"], #countdown-display, #text-display, #number-display, #crystal-ball, #unlock-icon, #reveal-image-display, #spotlight-overlay, #scratch-canvas, #typing-display, #shatter-overlay, #iris-overlay').forEach(el => {
-                            if (el && el.id !== 'debug-log') el.style.display = 'none';
+                        // Bulletproof cleanup: hide ALL children of engine-screen and reset common inline styles
+                        document.querySelectorAll('#engine-screen > *').forEach(el => {
+                            if (el && el.id !== 'debug-log') {
+                                el.style.display = 'none';
+                                el.style.animation = 'none';
+                                el.style.transform = 'none';
+                                el.classList.remove('active');
+                            }
                         });
+
+                        // Specific resets for nested or special elements
+                        const diceEl = document.getElementById('dice');
+                        if (diceEl) { diceEl.style.animation = 'none'; diceEl.style.transform = 'none'; }
+
+                        const heartSvg = document.getElementById('heart-svg');
+                        if (heartSvg) { heartSvg.style.display = 'none'; heartSvg.classList.remove('active'); }
+
+                        const puzzleContainer = document.getElementById('puzzle-container');
+                        if (puzzleContainer) puzzleContainer.innerHTML = ''; // Clear puzzle pieces
+
+                        const slotContainer = document.getElementById('slot-container');
+                        if (slotContainer) slotContainer.innerText = '';
                     }
                 }
                 requestAnimationFrame(update);
