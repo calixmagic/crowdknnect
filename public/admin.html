@@ -1550,6 +1550,15 @@
             }
         }
 
+        .fullscreen-layer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            height: 100dvh;
+        }
+
         .pulse-bg {
             animation: pulseBg 1s infinite alternate;
         }
@@ -1663,9 +1672,8 @@
 </head>
 
 <body>
-    <div id="bg-anim-container" class="bg-anim-container"></div>
-    <div id="blur-bg-container"
-        style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; display: none;"></div>
+    <div id="bg-anim-container" class="bg-anim-container fullscreen-layer"></div>
+    <div id="blur-bg-container" class="fullscreen-layer" style="z-index: -1; display: none;"></div>
     <div id="debug-log">Admin init...</div>
 
     <div id="close-preview-btn" onclick="stopPreview()">FERMER PRÉVISUALISATION</div>
@@ -2883,12 +2891,12 @@
                         img.crossOrigin = "Anonymous";
                     }
                     img.onload = () => {
-                        const size = 150; // 30% of 500 width
+                        const size = 100; // 20% of 500 width for better readability
                         const pos = (500 - size) / 2;
-                        // Fill white background for logo
+                        // Fill white background for logo (smaller padding)
                         ctx.fillStyle = '#ffffff';
                         ctx.beginPath();
-                        ctx.roundRect(pos - 10, pos - 10, size + 20, size + 20, 15);
+                        ctx.roundRect(pos - 6, pos - 6, size + 12, size + 12, 10);
                         ctx.fill();
                         // Draw logo
                         ctx.drawImage(img, pos, pos, size, size);

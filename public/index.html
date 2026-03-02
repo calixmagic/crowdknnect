@@ -40,6 +40,16 @@
             transition: opacity 0.5s ease;
         }
 
+        .fullscreen-layer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            height: 100dvh;
+            /* Modern iOS black bar fix */
+        }
+
         /* Hidden by default */
         #mask-overlay,
         #eye-container,
@@ -1288,9 +1298,8 @@
 
 <body id="main-body" style="background-color: #000; transition: background-color 0.5s ease;">
     <!-- Background Animation Layer -->
-    <div id="bg-anim-container" class="bg-anim-container"></div>
-    <div id="blur-bg-container"
-        style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; display: none;"></div>
+    <div id="bg-anim-container" class="bg-anim-container fullscreen-layer"></div>
+    <div id="blur-bg-container" class="fullscreen-layer" style="z-index: -1; display: none;"></div>
 
     <!-- Safari Scroll Hack Spacer -->
     <div id="safari-scroll-spacer"
@@ -1298,8 +1307,7 @@
     </div>
 
     <!-- App Container wrapped -->
-    <div id="app-container"
-        style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; overflow: hidden; pointer-events: auto;">
+    <div id="app-container" class="fullscreen-layer" style="overflow: hidden; pointer-events: auto;">
 
         <!-- Écran 1 : Participer -->
         <div id="connect-screen" class="screen active" style="cursor: pointer;">
