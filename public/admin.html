@@ -1663,9 +1663,6 @@
 </head>
 
 <body>
-    <div id="pip-iframe-container">
-        <iframe id="pip-iframe" src="" allow="autoplay"></iframe>
-    </div>
     <div id="bg-anim-container" class="bg-anim-container"></div>
     <div id="blur-bg-container"
         style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; display: none;"></div>
@@ -2003,20 +2000,6 @@
             </label>
         </div>
         <div class="row">
-            <label>Afficher l'Aperçu Live (PiP en bas à droite)</label>
-            <label class="switch" style="margin:0;">
-                <input type="checkbox" id="pip-toggle" onchange="togglePiP(this.checked)">
-                <span class="slider"></span>
-            </label>
-        </div>
-        <div class="row">
-            <label>Afficher l'Aperçu Live (PiP en bas à droite)</label>
-            <label class="switch" style="margin:0;">
-                <input type="checkbox" id="pip-toggle" onchange="togglePiP(this.checked)">
-                <span class="slider"></span>
-            </label>
-        </div>
-        <div class="row">
             <label>Mode Debug (Visible sur public)</label>
             <label class="switch" style="margin:0;">
                 <input type="checkbox" id="toggle-debug">
@@ -2087,33 +2070,9 @@
             toggleLogs(savedLogState);
         }
 
-        // Init PiP toggle from localStorage
-        const savedPiPState = localStorage.getItem('adminPiPParams') === 'true';
-        const pipToggle = document.getElementById('pip-toggle');
-        if (pipToggle) {
-            pipToggle.checked = savedPiPState;
-            togglePiP(savedPiPState);
-        }
-
         function toggleLogs(show) {
             localStorage.setItem('adminLogsParams', show);
             document.getElementById('debug-log').style.display = show ? 'block' : 'none';
-        }
-
-        function togglePiP(show) {
-            localStorage.setItem('adminPiPParams', show);
-            const container = document.getElementById('pip-iframe-container');
-            const iframe = document.getElementById('pip-iframe');
-            if (show) {
-                container.style.display = 'block';
-                // Reload iframe specifically with silent param if empty
-                if (!iframe.src || iframe.src === window.location.href || iframe.src.endsWith('admin.html')) {
-                    iframe.src = '/?silent=true';
-                }
-            } else {
-                container.style.display = 'none';
-                iframe.src = ''; // Clear to save battery/resources
-            }
         }
 
         function log(msg, color) {
@@ -3132,7 +3091,7 @@
                 const arrow = document.getElementById('arrow');
                 if (arrow) arrow.style.display = 'none';
 
-                document.querySelectorAll('#engine-screen > div[id$="-overlay"], #engine-screen > div[id$="-container"], #countdown-display, #text-display, #number-display, #crystal-ball, #unlock-icon, #reveal-image-display, #spotlight-overlay, #scratch-canvas, #typing-display, #shatter-overlay, #iris-overlay, #card-flip-container, #slot-container').forEach(el => {
+                document.querySelectorAll('#engine-screen > div[id$="-overlay"], #engine-screen > div[id$="-container"], #countdown-display, #text-display, #number-display, #crystal-ball, #unlock-icon, #reveal-image-display, #spotlight-overlay, #scratch-canvas, #typing-display, #shatter-overlay, #iris-overlay, #pinpoint-target, #snapshot-flash, #ripple-center, #heart-svg').forEach(el => {
                     if (el && el.id !== 'debug-log') el.style.display = 'none';
                 });
             };
