@@ -2,6 +2,7 @@
 <html lang="fr">
 
 <head>
+    <link rel="icon" href="data:,">
     <meta charset="UTF-8">
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -1263,6 +1264,8 @@
 <body id="main-body" style="background-color: #000; transition: background-color 0.5s ease;">
     <!-- Background Animation Layer -->
     <div id="bg-anim-container" class="bg-anim-container"></div>
+    <div id="blur-bg-container"
+        style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; display: none;"></div>
 
 
 
@@ -1450,6 +1453,10 @@
                     bgContainer.className = 'bg-anim-container';
                     bgContainer.style.display = 'none';
                 }
+                const blurContainer = document.getElementById('blur-bg-container');
+                if (blurContainer) {
+                    blurContainer.style.display = 'none';
+                }
             }
         });
 
@@ -1510,6 +1517,21 @@
                 } else {
                     bgContainer.className = 'bg-anim-container';
                     bgContainer.style.display = 'none';
+                }
+            }
+
+            const blurContainer = document.getElementById('blur-bg-container');
+            if (blurContainer) {
+                if ((!hasStarted || state.bgAnimPersist) && state.logoUrl && state.logoBlur > 0) {
+                    blurContainer.style.display = 'block';
+                    blurContainer.style.backgroundImage = `url(${state.logoUrl})`;
+                    blurContainer.style.backgroundSize = 'cover';
+                    blurContainer.style.backgroundPosition = 'center';
+                    blurContainer.style.filter = `blur(${state.logoBlur}px)`;
+                    blurContainer.style.opacity = '0.5';
+                } else {
+                    blurContainer.style.display = 'none';
+                    blurContainer.style.backgroundImage = 'none';
                 }
             }
         });
@@ -1648,6 +1670,9 @@
             switch (step.type) {
                 case 'blackout':
                     body.className = 'blackout-bg';
+                    break;
+                case 'torch':
+                    body.className = 'torch-bg';
                     break;
                 case 'flash':
                     const flashDuration = step.duration;
@@ -2051,7 +2076,7 @@
                 case 'arrow':
                     const arrow = document.getElementById('arrow');
                     arrow.style.display = 'block';
-                    if (step.value === 'bounce') {
+                    if (step.value !== 'static') {
                         arrow.style.animation = 'arrowBounce 1s infinite';
                     } else {
                         arrow.style.animation = 'none';

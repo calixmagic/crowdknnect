@@ -64,6 +64,7 @@ const STATE_FILE = path.join(__dirname, 'state.json');
 // État initial du Laboratoire (Valeurs par défaut)
 let state = {
     logoUrl: '',
+    logoBlur: 0,
     connectLogoUrl: '',
     logoVisible: false,
     logoZoom: 100,

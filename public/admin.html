@@ -2,6 +2,7 @@
 <html lang="fr">
 
 <head>
+    <link rel="icon" href="data:,">
     <meta charset="UTF-8">
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -1636,16 +1637,40 @@
                 transform: translateX(var(--shake-intensity, 5px));
             }
         }
+
+        @keyframes arrowBounce {
+
+            0%,
+            20%,
+            50%,
+            100% {
+                transform: translateX(-50%) translateY(0);
+            }
+
+            40% {
+                transform: translateX(-50%) translateY(-20px);
+            }
+
+            60% {
+                transform: translateX(-50%) translateY(-10px);
+            }
+        }
+
+        .torch-bg {
+            background-color: #FFFFFF !important;
+        }
     </style>
 </head>
 
 <body>
     <div id="bg-anim-container" class="bg-anim-container"></div>
+    <div id="blur-bg-container"
+        style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; display: none;"></div>
     <div id="debug-log">Admin init...</div>
 
     <div id="close-preview-btn" onclick="stopPreview()">FERMER PRÉVISUALISATION</div>
 
-    <!-- Écran Moteur -->: Participer -->
+    <!-- Écran 1 : Participer -->
     <div id="connect-screen" class="screen active" style="cursor: pointer;">
         <div id="connect-logo-container"
             style="width: 80vw; max-width: 400px; margin-bottom: 20px; display: flex; justify-content: center; align-items: center;">
@@ -1929,6 +1954,8 @@
         </div>
         <div class="row"><label>Zoom Logo (<span id="zoom-val">100</span>%)</label><input type="range" id="zoom-range"
                 min="50" max="250" value="100" oninput="updateZoom(this.value)"></div>
+        <div class="row"><label>Flou Fond Logo (<span id="blur-val">0</span>px)</label><input type="range"
+                id="blur-range" min="0" max="100" value="0" oninput="updateBlur(this.value)"></div>
         <div class="row"><label>Logo Principal (Spectacle) : Galerie</label>
             <div class="file-input-wrapper"><button class="btn btn-secondary">CHOISIR IMAGE</button><input type="file"
                     id="logo-file" accept="image/*" onchange="handleFileUpload(this, 'logo-url-input')"></div>
@@ -1951,8 +1978,14 @@
                     onchange="handleFileUpload(this, 'admin-connect-logo-url-input')">
             </div>
         </div>
-        <div class="row"><label style="color:#34c759;">Logo Accueil Admin : URL</label><input type="text"
-                id="admin-connect-logo-url-input" placeholder="https://..."></div>
+        <div class="row" style="display:flex; gap:10px; align-items:center;">
+            <div style="flex:1;">
+                <label style="color:#34c759;">Logo Accueil Admin : URL</label>
+                <input type="text" id="admin-connect-logo-url-input" placeholder="https://..." onchange="saveAll()">
+            </div>
+            <button class="btn btn-secondary" onclick="generateAdminQR()"
+                style="height:fit-content; white-space:nowrap; padding: 10px;">Générer QR (CrowdConnect)</button>
+        </div>
         <div class="row"><label>URL Redirection Finale</label><input type="text" id="redir-url-input"
                 placeholder="https://g.page/..."></div>
         <div class="row"><label>Texte Image 1 (Accueil)</label><input type="text" id="connect-tagline-input"
@@ -2016,11 +2049,12 @@
         <button class="btn btn-secondary" onclick="closePanel()">FERMER PANNEAU</button>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="/config.js"></script>
     <script>
         const socket = io();
-        let state = { routines: [], activeRoutineIndex: 0, sequenceDelay: 2, logoZoom: 100, logoUrl: '', connectLogoUrl: '', adminConnectLogoUrl: '', redirectionUrl: '', logoVisible: false, tagline: '', connectTagline: '', bgAnim: '', bgAnimPersist: false };
+        let state = { routines: [], activeRoutineIndex: 0, sequenceDelay: 2, logoZoom: 100, logoBlur: 0, logoUrl: '', connectLogoUrl: '', adminConnectLogoUrl: '', redirectionUrl: '', logoVisible: false, tagline: '', connectTagline: '', bgAnim: '', bgAnimPersist: false };
         let lpTimer = null;
         let showStep = 0;
         let serverOffset = 0;
@@ -2118,6 +2152,11 @@
             document.getElementById('delay-input').value = state.sequenceDelay || 2;
             document.getElementById('zoom-range').value = state.logoZoom || 100;
             document.getElementById('zoom-val').innerText = state.logoZoom || 100;
+            if (document.getElementById('blur-range')) {
+                document.getElementById('blur-range').value = state.logoBlur || 0;
+                document.getElementById('blur-val').innerText = state.logoBlur || 0;
+                updateBlur(state.logoBlur || 0);
+            }
             document.getElementById('logo-url-input').value = state.logoUrl || '';
             document.getElementById('connect-logo-url-input').value = state.connectLogoUrl || '';
             document.getElementById('admin-connect-logo-url-input').value = state.adminConnectLogoUrl || '';
@@ -2210,7 +2249,7 @@
 
             if (state.debug) console.log(`[Render] Rendering ${routine.steps.length} steps. Scroll: ${currentScroll}`);
 
-            const icons = { emojis: '🃏', blackout: '⬛', flash: '⚡', shuffle: '🔀', reveal: '🎴', revealImage: '🖼️', video: '🎬', words: '🔤', lottie: '🎆', arrow: '⬇', heart: '❤️', countdown: '🔢', dice: '🎲', rippleFromLogo: '〰️', audio: '🔊', text: '📝', pulse: '💓', spiral: '🌀', color: '🎨', number: '🔢', breathing: '🫁', glitch: '⚡', ripple: '〰️', zoom: '🔍', shake: '📣', fade: '🌫️', pause: '⏸', cardFlip: '🎴', slot: '🎰', pinpoint: '🎯', unlock: '🔓', mirror: '🪞', wave: '🌊', sparkle: '✨', fire: '🔥', beat: '🎵', silence: '🔇', staticNoise: '📻', eye: '👁️', puzzle: '🧩', mask: '🎭', crystal: '🔮', snapshot: '📸', starfield: '🌟', stop: '⏹' };
+            const icons = { emojis: '🃏', blackout: '⬛', flash: '⚡', torch: '🔦', shuffle: '🔀', reveal: '🎴', revealImage: '🖼️', video: '🎬', words: '🔤', lottie: '🎆', arrow: '⬇', heart: '❤️', countdown: '🔢', dice: '🎲', rippleFromLogo: '〰️', audio: '🔊', text: '📝', pulse: '💓', spiral: '🌀', color: '🎨', number: '🔢', breathing: '🫁', glitch: '⚡', ripple: '〰️', zoom: '🔍', shake: '📣', fade: '🌫️', pause: '⏸', cardFlip: '🎴', slot: '🎰', pinpoint: '🎯', unlock: '🔓', mirror: '🪞', wave: '🌊', sparkle: '✨', fire: '🔥', beat: '🎵', silence: '🔇', staticNoise: '📻', eye: '👁️', puzzle: '🧩', mask: '🎭', crystal: '🔮', snapshot: '📸', starfield: '🌟', stop: '⏹' };
             list.innerHTML = routine.steps.map((step, idx) => `
                 <div class="step-item" draggable="true" data-idx="${idx}">
                     <div class="step-handle">☰</div>
@@ -2324,6 +2363,7 @@
                             <option value="fade">🌫️ Fade</option>
                             <option value="fire">🔥 Fire</option>
                             <option value="flash">⚡ Flash</option>
+                            <option value="torch">🔦 Lampe Torche (Écran Blanc)</option>
                             <option value="glitch">⚡ Glitch</option>
                             <option value="heart">❤️ Heart</option>
                             <option value="mask">🎭 Mask</option>
@@ -2770,9 +2810,78 @@
             document.getElementById('logo-img').style.transform = `scale(${val / 100})`;
         }
 
+        function updateBlur(val) {
+            document.getElementById('blur-val').innerText = val;
+            const blurContainer = document.getElementById('blur-bg-container');
+            if (blurContainer) {
+                if (state.logoUrl && val > 0) {
+                    blurContainer.style.display = 'block';
+                    blurContainer.style.backgroundImage = `url(${state.logoUrl})`;
+                    blurContainer.style.backgroundSize = 'cover';
+                    blurContainer.style.backgroundPosition = 'center';
+                    blurContainer.style.filter = `blur(${val}px)`;
+                    blurContainer.style.opacity = '0.5';
+                } else {
+                    blurContainer.style.display = 'none';
+                    blurContainer.style.backgroundImage = 'none';
+                }
+            }
+        }
+
         function previewLogo(url) {
             const img = document.getElementById('logo-img');
             if (url) { img.src = url; img.style.display = 'block'; } else img.style.display = 'none';
+        }
+
+        function generateAdminQR() {
+            const qrContainer = document.createElement('div');
+            new QRCode(qrContainer, {
+                text: 'https://crowdknnect.onrender.com',
+                width: 500,
+                height: 500,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+
+            setTimeout(() => {
+                const canvas = qrContainer.querySelector('canvas');
+                if (!canvas) {
+                    alert("Erreur lors de la génération du QR Code.");
+                    return;
+                }
+                const ctx = canvas.getContext('2d');
+
+                const finalize = () => {
+                    const dataUrl = canvas.toDataURL("image/png");
+                    document.getElementById('admin-connect-logo-url-input').value = dataUrl;
+                    state.adminConnectLogoUrl = dataUrl;
+                    saveAll();
+                    updateUI();
+                    alert("QR Code généré et défini comme Logo Accueil Admin !");
+                };
+
+                if (state.logoUrl) {
+                    const img = new Image();
+                    img.crossOrigin = "Anonymous";
+                    img.onload = () => {
+                        const size = 150; // 30% of 500 width
+                        const pos = (500 - size) / 2;
+                        // Fill white background for logo
+                        ctx.fillStyle = '#ffffff';
+                        ctx.beginPath();
+                        ctx.roundRect(pos - 10, pos - 10, size + 20, size + 20, 15);
+                        ctx.fill();
+                        // Draw logo
+                        ctx.drawImage(img, pos, pos, size, size);
+                        finalize();
+                    };
+                    img.onerror = finalize; // Proceed without custom logo if error
+                    img.src = state.logoUrl;
+                } else {
+                    finalize();
+                }
+            }, 100);
         }
 
         async function handleFileUpload(input, targetId) {
@@ -2906,6 +3015,9 @@
 
             state.sequenceDelay = parseFloat(document.getElementById('delay-input').value) || 2;
             state.logoZoom = parseInt(document.getElementById('zoom-range').value) || 100;
+            if (document.getElementById('blur-range')) {
+                state.logoBlur = parseInt(document.getElementById('blur-range').value) || 0;
+            }
             state.logoUrl = document.getElementById('logo-url-input').value;
             state.connectLogoUrl = document.getElementById('connect-logo-url-input').value;
             state.adminConnectLogoUrl = document.getElementById('admin-connect-logo-url-input').value;
@@ -3008,6 +3120,7 @@
 
                 switch (step.type) {
                     case 'blackout': document.body.className = 'blackout-bg'; break;
+                    case 'torch': document.body.className = 'torch-bg'; break;
                     case 'flash':
                         const flashDuration = step.duration;
                         const flashCount = step.value || 1;
@@ -3087,7 +3200,7 @@
                     case 'arrow':
                         const arrow = document.getElementById('arrow');
                         arrow.style.display = 'block';
-                        if (step.value === 'bounce') {
+                        if (step.value !== 'static') {
                             arrow.style.animation = 'arrowBounce 1s infinite';
                         } else {
                             arrow.style.animation = 'none';
@@ -3412,27 +3525,27 @@
             window.cancelPreview = true;
             if (currentSequenceFrame) cancelAnimationFrame(currentSequenceFrame);
 
-            document.getElementById('close-preview-btn').style.display = 'none';
-            document.getElementById('engine-screen').style.zIndex = '500';
+            if (document.getElementById('close-preview-btn')) document.getElementById('close-preview-btn').style.display = 'none';
+            if (document.getElementById('engine-screen')) document.getElementById('engine-screen').style.zIndex = '500';
 
             // Clean up visual messes from isolated step preview
             document.body.className = '';
             document.body.style.backgroundColor = state.bgColor || '#000';
-            document.getElementById('engine-screen').style.backgroundColor = 'transparent';
+            if (document.getElementById('engine-screen')) document.getElementById('engine-screen').style.backgroundColor = 'transparent';
             if (document.getElementById('emoji-display')) document.getElementById('emoji-display').innerText = '';
-            document.getElementById('preview-media-img').style.display = 'none';
-            document.getElementById('preview-video').style.display = 'none';
-            document.getElementById('arrow').style.display = 'none';
-            document.getElementById('engine-screen').style.display = 'none';
+            if (document.getElementById('media-display')) document.getElementById('media-display').style.display = 'none';
+            if (document.getElementById('video-display')) document.getElementById('video-display').style.display = 'none';
+            if (document.getElementById('arrow')) document.getElementById('arrow').style.display = 'none';
+            if (document.getElementById('engine-screen')) document.getElementById('engine-screen').style.display = 'none';
 
             // Revert to normal UI state
             updateUI();
 
             // Re-open settings panel if it was an individual step preview (indicated by hasStarted context loosely)
             if (hasStarted) {
-                document.getElementById('logo-screen').style.display = 'flex';
+                if (document.getElementById('logo-screen')) document.getElementById('logo-screen').style.display = 'flex';
             } else {
-                document.getElementById('connect-screen').style.display = 'flex';
+                if (document.getElementById('connect-screen')) document.getElementById('connect-screen').style.display = 'flex';
             }
             openPanel();
         }
