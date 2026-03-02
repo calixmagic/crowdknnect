@@ -3088,12 +3088,28 @@
                 if (mediaImg) mediaImg.style.display = 'none';
                 const videoVid = document.getElementById('video-display');
                 if (videoVid) { videoVid.style.display = 'none'; videoVid.pause(); }
-                const arrow = document.getElementById('arrow');
-                if (arrow) arrow.style.display = 'none';
-
-                document.querySelectorAll('#engine-screen > div[id$="-overlay"], #engine-screen > div[id$="-container"], #countdown-display, #text-display, #number-display, #crystal-ball, #unlock-icon, #reveal-image-display, #spotlight-overlay, #scratch-canvas, #typing-display, #shatter-overlay, #iris-overlay, #pinpoint-target, #snapshot-flash, #ripple-center, #heart-svg').forEach(el => {
-                    if (el && el.id !== 'debug-log') el.style.display = 'none';
+                // Bulletproof cleanup: hide ALL children of engine-screen and reset common inline styles
+                document.querySelectorAll('#engine-screen > *').forEach(el => {
+                    if (el && el.id !== 'debug-log') {
+                        el.style.display = 'none';
+                        el.style.animation = 'none';
+                        el.style.transform = 'none';
+                        el.classList.remove('active');
+                    }
                 });
+
+                // Specific resets for nested or special elements
+                const diceEl = document.getElementById('dice');
+                if (diceEl) { diceEl.style.animation = 'none'; diceEl.style.transform = 'none'; }
+
+                const heartSvg = document.getElementById('heart-svg');
+                if (heartSvg) { heartSvg.style.display = 'none'; heartSvg.classList.remove('active'); }
+
+                const puzzleContainer = document.getElementById('puzzle-container');
+                if (puzzleContainer) puzzleContainer.innerHTML = ''; // Clear puzzle pieces
+
+                const slotContainer = document.getElementById('slot-container');
+                if (slotContainer) slotContainer.innerText = '';
             };
 
             const update = () => {
