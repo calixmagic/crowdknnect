@@ -1258,6 +1258,31 @@
                 transform: translateX(var(--shake-intensity, 5px));
             }
         }
+
+        /* --- Global Touch Trails --- */
+        .touch-trail {
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0) 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            animation: trailFade 1s linear forwards;
+        }
+
+        @keyframes trailFade {
+            0% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(2);
+            }
+        }
     </style>
 </head>
 
@@ -1267,88 +1292,112 @@
     <div id="blur-bg-container"
         style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; display: none;"></div>
 
-
-
-    <!-- Écran 1 : Participer -->
-    <div id="connect-screen" class="screen active" style="cursor: pointer;">
-        <div id="connect-logo-container"
-            style="width: 80vw; max-width: 400px; margin-bottom: 20px; display: flex; justify-content: center; align-items: center;">
-            <img id="connect-logo-img" src="" alt="Logo"
-                style="display: none; width: 100%; height: 100%; object-fit: contain; transition: transform 0.2s ease-out;">
-        </div>
-        <p id="connect-tagline-text"
-            style="color:#fff; font-size:0.8rem; letter-spacing:2px; text-transform:uppercase; text-align:center; padding:0 20px;">
-            EXPÉRIENCE INTERACTIVE
-        </p>
+    <!-- Safari Scroll Hack Spacer -->
+    <div id="safari-scroll-spacer"
+        style="height: 250vh; width: 100vw; position: absolute; top: 0; left: 0; pointer-events: none; z-index: -10;">
     </div>
 
-    <!-- Écran 2 : Logo / Attente -->
-    <div id="logo-screen" class="screen">
-        <div id="logo-container"><img id="logo-img" src="" alt="Logo"></div>
-        <p id="tagline-text"
-            style="color:#fff; font-size:0.8rem; letter-spacing:2px; text-transform:uppercase; text-align:center; padding:0 20px;">
-            Réaliser une expérience.
-        </p>
-    </div>
+    <!-- App Container wrapped -->
+    <div id="app-container"
+        style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; overflow: hidden; pointer-events: auto;">
 
-    <!-- Écran 3 : Moteur -->
-    <div id="engine-screen" class="screen">
-        <div id="emoji-display"></div>
-        <img id="media-display" src="" alt="Media">
-        <video id="video-display" playsinline></video>
-        <img id="arrow" src="fleche.png" alt=""
-            style="position:absolute;bottom:0;left:50%;transform:translateX(-50%);display:none;width:50vw;max-width:350px;pointer-events:none;">
-        <svg id="heart-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-            <path id="heart-path" fill="#ff0000" d="M50,30 C50,30 50,30 50,30 C50,30 50,30 50,30 Z">
-                <animate attributeName="d" dur="2s" fill="freeze" from="M50,50 L50,50 L50,50 Z"
-                    to="M50,85 C25,70 15,55 15,40 C15,25 25,15 40,15 C45,15 50,20 50,20 C50,20 55,15 60,15 C75,15 85,25 85,40 C85,55 75,70 50,85 Z" />
-            </path>
-        </svg>
-        <div id="countdown-display"></div>
-        <div id="dice-container">
-            <div id="dice">
-                <div class="dice-face">1</div>
-                <div class="dice-face">2</div>
-                <div class="dice-face">3</div>
-                <div class="dice-face">4</div>
-                <div class="dice-face">5</div>
-                <div class="dice-face">6</div>
+        <!-- Écran 1 : Participer -->
+        <div id="connect-screen" class="screen active" style="cursor: pointer;">
+            <div id="connect-logo-container"
+                style="width: 80vw; max-width: 400px; margin-bottom: 20px; display: flex; justify-content: center; align-items: center;">
+                <img id="connect-logo-img" src="" alt="Logo"
+                    style="display: none; width: 100%; height: 100%; object-fit: contain; transition: transform 0.2s ease-out;">
             </div>
+            <p id="connect-tagline-text"
+                style="color:#fff; font-size:0.8rem; letter-spacing:2px; text-transform:uppercase; text-align:center; padding:0 20px;">
+                EXPÉRIENCE INTERACTIVE
+            </p>
         </div>
-        <div id="ripple-overlay"></div>
-        <audio id="audio-player"></audio>
-        <div id="text-display"></div>
-        <div id="spiral-overlay"></div>
-        <div id="color-overlay"></div>
-        <div id="number-display"></div>
-        <div id="ripple-center"></div>
-        <div id="fade-overlay"></div>
-        <div id="card-flip-container">
-            <div id="card-flip"></div>
+
+        <!-- Écran 2 : Logo / Attente -->
+        <div id="logo-screen" class="screen">
+            <div id="logo-container"><img id="logo-img" src="" alt="Logo"></div>
+            <p id="tagline-text"
+                style="color:#fff; font-size:0.8rem; letter-spacing:2px; text-transform:uppercase; text-align:center; padding:0 20px;">
+                Réaliser une expérience.
+            </p>
         </div>
-        <div id="slot-container"></div>
-        <div id="pinpoint-target"></div>
-        <div id="unlock-icon">🔒</div>
-        <div id="wave-overlay"></div>
-        <div id="fire-container"></div>
-        <div id="static-overlay"></div>
-        <div id="eye-container">👁️</div>
-        <div id="puzzle-container"></div>
-        <div id="mask-overlay">🎭</div>
-        <div id="crystal-ball"></div>
-        <div id="snapshot-flash"></div>
-        <div id="glitch-text-overlay"></div>
-    </div>
 
-    <!-- Écran 4 : Final -->
-    <div id="final-screen" class="screen">
-        <h2 style="margin-bottom:20px;">MERCI !</h2>
-        <a href="https://www.instagram.com/calix_magicien/" target="_blank" class="final-btn btn-insta">S'ABONNER SUR
-            INSTAGRAM</a>
-        <a id="redirection-btn" href="#" target="_blank" class="final-btn btn-google">PARTAGER MON AVIS</a>
-        <p style="margin-top:20px; font-size:12px; color:#888;" onclick="window.location.reload()">Rejouer</p>
-    </div>
+        <!-- Écran 3 : Moteur -->
+        <div id="engine-screen" class="screen">
+            <div id="emoji-display"></div>
+            <img id="media-display" src="" alt="Media">
+            <video id="video-display" playsinline></video>
+            <img id="arrow" src="fleche.png" alt=""
+                style="position:absolute;bottom:0;left:50%;transform:translateX(-50%);display:none;width:50vw;max-width:350px;pointer-events:none;">
+            <svg id="heart-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <path id="heart-path" fill="#ff0000" d="M50,30 C50,30 50,30 50,30 C50,30 50,30 50,30 Z">
+                    <animate attributeName="d" dur="2s" fill="freeze" from="M50,50 L50,50 L50,50 Z"
+                        to="M50,85 C25,70 15,55 15,40 C15,25 25,15 40,15 C45,15 50,20 50,20 C50,20 55,15 60,15 C75,15 85,25 85,40 C85,55 75,70 50,85 Z" />
+                </path>
+            </svg>
+            <div id="countdown-display"></div>
+            <div id="dice-container">
+                <div id="dice">
+                    <div class="dice-face">1</div>
+                    <div class="dice-face">2</div>
+                    <div class="dice-face">3</div>
+                    <div class="dice-face">4</div>
+                    <div class="dice-face">5</div>
+                    <div class="dice-face">6</div>
+                </div>
+            </div>
+            <div id="ripple-overlay"></div>
+            <audio id="audio-player"></audio>
+            <div id="text-display"></div>
+            <div id="spiral-overlay"></div>
+            <div id="color-overlay"></div>
+            <div id="number-display"></div>
+            <div id="ripple-center"></div>
+            <div id="fade-overlay"></div>
+            <div id="card-flip-container">
+                <div id="card-flip"></div>
+            </div>
+            <div id="slot-container"></div>
+            <div id="pinpoint-target"></div>
+            <div id="unlock-icon">🔒</div>
+            <div id="wave-overlay"></div>
+            <div id="fire-container"></div>
+            <div id="static-overlay"></div>
+            <div id="eye-container">👁️</div>
+            <div id="puzzle-container"></div>
+            <div id="mask-overlay">🎭</div>
+            <div id="crystal-ball"></div>
+            <div id="snapshot-flash"></div>
+            <div id="glitch-text-overlay"></div>
+        </div>
 
+        <!-- Écran 4 : Final -->
+        <div id="final-screen" class="screen">
+            <h2 style="margin-bottom:20px;">MERCI !</h2>
+            <a href="https://www.instagram.com/calix_magicien/" target="_blank" class="final-btn btn-insta">S'ABONNER
+                SUR
+                INSTAGRAM</a>
+            <a id="redirection-btn" href="#" target="_blank" class="final-btn btn-google">PARTAGER MON AVIS</a>
+            <p style="margin-top:20px; font-size:12px; color:#888;" onclick="window.location.reload()">Rejouer</p>
+        </div>
+
+        <!-- Nouveaux Effets Sensoriaux -->
+        <div id="spotlight-overlay"
+            style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.95);display:none;pointer-events:auto;z-index:900;">
+        </div>
+        <canvas id="scratch-canvas"
+            style="position:fixed;top:0;left:0;width:100%;height:100%;display:none;pointer-events:auto;z-index:901;"></canvas>
+        <div id="typing-display"
+            style="font-size:8vw;color:#fff;text-align:center;padding:20px;display:none;z-index:902;"></div>
+        <div id="shatter-overlay"
+            style="position:fixed;top:0;left:0;width:100%;height:100%;display:none;pointer-events:none;z-index:903;">
+        </div>
+        <div id="iris-overlay"
+            style="position:fixed;top:0;left:0;width:100%;height:100%;background:#000;display:none;z-index:904;clip-path:circle(150% at 50% 50%);transition:clip-path 1s ease-in-out;">
+        </div>
+
+    </div> <!-- End Admin App Container -->
 
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <script>
@@ -1421,7 +1470,7 @@
 
             // Fake scroll to hide address bar on mobile browsers
             setTimeout(() => {
-                window.scrollTo(0, 1);
+                window.scrollTo(0, 100);
             }, 100);
         }
 
@@ -1429,6 +1478,7 @@
         document.getElementById('connect-screen').addEventListener('click', () => {
             // Priority 1: Request Fullscreen on user gesture immediately
             requestFullscreenAndScroll();
+            initGyroParallax();
 
             // Priority 2: Unlock Audio
             const audioEl = document.getElementById('audio-player');
@@ -1650,9 +1700,10 @@
                         document.getElementById('main-body').className = '';
                         document.getElementById('main-body').style.animation = '';
                         document.getElementById('main-body').style.removeProperty('--breathing-color');
+                        document.getElementById('main-body').style.removeProperty('--breathing-color');
                         // Reset overlays and specific displays
-                        document.querySelectorAll('.screen > div[id$="-overlay"], .screen > div[id$="-container"], #countdown-display, #text-display, #number-display, #crystal-ball, #unlock-icon, #reveal-image-display').forEach(el => {
-                            if (el.id !== 'debug-log') el.style.display = 'none';
+                        document.querySelectorAll('.screen > div[id$="-overlay"], .screen > div[id$="-container"], #countdown-display, #text-display, #number-display, #crystal-ball, #unlock-icon, #reveal-image-display, #spotlight-overlay, #scratch-canvas, #typing-display, #shatter-overlay, #iris-overlay').forEach(el => {
+                            if (el && el.id !== 'debug-log') el.style.display = 'none';
                         });
                     }
                 }
@@ -2103,9 +2154,185 @@
                         revealImgDiv.innerHTML = `<img src="${finalImg}" style="max-width:90%;max-height:90%;object-fit:contain;border-radius:12px;box-shadow:0 0 40px rgba(255,255,255,0.5);">`;
                     }
                     break;
+                case 'spotlight':
+                    const spotOverlay = document.getElementById('spotlight-overlay');
+                    spotOverlay.style.display = 'block';
+                    if (!spotOverlay.hasListener) {
+                        spotOverlay.hasListener = true;
+                        spotOverlay.addEventListener('touchmove', (e) => {
+                            e.preventDefault(); // Prevent scrolling
+                            const t = e.touches[0];
+                            const size = window.innerHeight * 0.15; // 15vh radius
+                            spotOverlay.style.background = `radial-gradient(circle ${size}px at ${t.clientX}px ${t.clientY}px, transparent 0%, rgba(0,0,0,0.95) 100%)`;
+                        });
+                        spotOverlay.addEventListener('touchstart', (e) => {
+                            const t = e.touches[0];
+                            const size = window.innerHeight * 0.15;
+                            spotOverlay.style.background = `radial-gradient(circle ${size}px at ${t.clientX}px ${t.clientY}px, transparent 0%, rgba(0,0,0,0.95) 100%)`;
+                        });
+                    }
+                    if (elapsed === 0) spotOverlay.style.background = 'rgba(0,0,0,0.95)'; // Reset
+                    break;
+                case 'scratch':
+                    const canvas = document.getElementById('scratch-canvas');
+                    canvas.style.display = 'block';
+                    if (elapsed === 0) {
+                        const ctx = canvas.getContext('2d');
+                        canvas.width = window.innerWidth;
+                        canvas.height = window.innerHeight;
+                        ctx.fillStyle = step.color || '#cccccc';
+                        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                        // Text instruction if no image
+                        ctx.fillStyle = '#000000';
+                        ctx.font = '24px sans-serif';
+                        ctx.textAlign = 'center';
+                        ctx.fillText('Grattez ici', canvas.width / 2, canvas.height / 2);
+
+                        if (!canvas.hasListener) {
+                            canvas.hasListener = true;
+                            canvas.addEventListener('touchmove', (e) => {
+                                e.preventDefault();
+                                const rect = canvas.getBoundingClientRect();
+                                const x = e.touches[0].clientX - rect.left;
+                                const y = e.touches[0].clientY - rect.top;
+
+                                ctx.globalCompositeOperation = 'destination-out';
+                                ctx.beginPath();
+                                ctx.arc(x, y, 40, 0, Math.PI * 2);
+                                ctx.fill();
+                            });
+                        }
+                    }
+                    if (step.value) {
+                        body.style.backgroundColor = step.value; // Background color underneath
+                    }
+                    break;
+                case 'typing':
+                    const tDisplay = document.getElementById('typing-display');
+                    tDisplay.style.display = 'block';
+                    const fullText = String(step.value || '');
+                    const charCount = fullText.length;
+                    const msPerChar = step.duration / Math.max(charCount, 1);
+                    const charsToShow = Math.floor(elapsed / msPerChar);
+
+                    if (tDisplay._lastCharsToShow !== charsToShow && charsToShow <= charCount) {
+                        tDisplay._lastCharsToShow = charsToShow;
+                        tDisplay.innerText = fullText.substring(0, charsToShow);
+                        if (charsToShow > 0 && navigator.vibrate) {
+                            navigator.vibrate(10); // Haptic feedback on each letter
+                        }
+                    }
+                    break;
+                case 'shatter':
+                    const shatterOv = document.getElementById('shatter-overlay');
+                    shatterOv.style.display = 'block';
+                    if (elapsed === 0) {
+                        shatterOv.innerHTML = '';
+                        // Create shards
+                        for (let i = 0; i < 10; i++) {
+                            const shard = document.createElement('div');
+                            shard.style.position = 'absolute';
+                            shard.style.width = '100px';
+                            shard.style.height = '100px';
+                            shard.style.background = 'url("images/glass-shard.png") no-repeat center/contain';
+                            // OR fallback CSS polygon
+                            shard.style.clipPath = `polygon(${Math.random() * 100}% 0, 100% ${Math.random() * 100}%, ${Math.random() * 100}% 100%, 0 ${Math.random() * 100}%)`;
+                            shard.style.backgroundColor = 'rgba(255,255,255,0.8)';
+
+                            shard.style.left = (Math.random() * 80) + '%';
+                            shard.style.top = (Math.random() * 80) + '%';
+
+                            const tx = (Math.random() - 0.5) * 500;
+                            const ty = (Math.random() - 0.5) * 500 + 500;
+                            const rot = (Math.random() - 0.5) * 720;
+
+                            shard.style.transition = `transform ${step.duration}ms cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity ${step.duration}ms ease`;
+
+                            shatterOv.appendChild(shard);
+
+                            // Trigger layout -> animate
+                            requestAnimationFrame(() => {
+                                shard.style.transform = `translate(${tx}px, ${ty}px) rotate(${rot}deg)`;
+                                shard.style.opacity = '0';
+                            });
+                        }
+                        if (navigator.vibrate) navigator.vibrate([50, 20, 150]); // Crack then shatter haptics
+                    }
+                    break;
+                case 'blow':
+                    // We only init the microphone ONCE when elapsed === 0
+                    if (elapsed === 0 && !window._audioContextInited) {
+                        window._audioContextInited = true;
+                        body.style.backgroundColor = '#1a1a1a'; // Dimmed waiting state
+
+                        navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+                            .then(stream => {
+                                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                                const analyser = audioCtx.createAnalyser();
+                                const microphone = audioCtx.createMediaStreamSource(stream);
+                                microphone.connect(analyser);
+
+                                analyser.fftSize = 256;
+                                const bufferLength = analyser.frequencyBinCount;
+                                const dataArray = new Uint8Array(bufferLength);
+
+                                window._blowInterval = setInterval(() => {
+                                    analyser.getByteFrequencyData(dataArray);
+                                    // Calculate average volume
+                                    let sum = 0;
+                                    for (let i = 0; i < bufferLength; i++) { sum += dataArray[i]; }
+                                    let average = sum / bufferLength;
+
+                                    // VERY high volume threshold usually corresponds to blowing directly into the mic
+                                    if (average > 100) {
+                                        // Blow Detected!
+                                        body.style.transition = 'background-color 0.2s ease';
+                                        body.style.backgroundColor = step.color || '#ffffff';
+                                        if (navigator.vibrate) navigator.vibrate(20);
+                                    } else {
+                                        body.style.backgroundColor = '#1a1a1a';
+                                    }
+                                }, 50);
+                            })
+                            .catch(err => {
+                                console.log("Mic access denied or error:", err);
+                            });
+                    }
+                    // Cleanup when step ends
+                    if (elapsed >= step.duration - 100) {
+                        if (window._blowInterval) {
+                            clearInterval(window._blowInterval);
+                            window._blowInterval = null;
+                        }
+                        window._audioContextInited = false;
+                    }
+                    break;
+                case 'iris':
+                    const irisOv = document.getElementById('iris-overlay');
+                    irisOv.style.display = 'block';
+                    // We interpret 'value' as 'out' or 'in', defaulting to 'in'
+                    const mode = step.value === 'out' ? 'out' : 'in';
+                    irisOv.style.transitionDuration = `${step.duration}ms`;
+
+                    if (elapsed === 0) {
+                        if (mode === 'in') {
+                            // Iris closes in on the screen (circle shrinks to 0)
+                            irisOv.style.clipPath = 'circle(150% at 50% 50%)';
+                            requestAnimationFrame(() => {
+                                irisOv.style.clipPath = 'circle(0% at 50% 50%)';
+                            });
+                        } else {
+                            // Iris opens up to reveal the screen (circle grows from 0)
+                            irisOv.style.clipPath = 'circle(0% at 50% 50%)';
+                            requestAnimationFrame(() => {
+                                irisOv.style.clipPath = 'circle(150% at 50% 50%)';
+                            });
+                        }
+                    }
+                    break;
                 case 'stop':
                     body.className = '';
-                    emojiDiv.innerText = '';
                     mediaImg.style.display = 'none';
                     videoVid.style.display = 'none';
                     document.getElementById('arrow').style.display = 'none';
@@ -2124,6 +2351,61 @@
                 document.getElementById('final-screen').classList.add('active'); // Fallback only if no URL
             }
         }
+
+        // === GLOBAL TOUCH TRAILS ===
+        document.addEventListener('touchmove', (e) => {
+            if (!hasStarted) return;
+            const t = e.touches[0];
+            const trail = document.createElement('div');
+            trail.className = 'touch-trail';
+            trail.style.left = t.clientX + 'px';
+            trail.style.top = t.clientY + 'px';
+            document.body.appendChild(trail);
+            setTimeout(() => trail.remove(), 1000);
+        });
+
+        // === GYRO PARALLAX (BLUR BACKGROUND) ===
+        // To enable device orientation, user must have clicked the Participate button first.
+        // The effect translates the blurred background based on the device's tilt.
+        function initGyroParallax() {
+            if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+                // iOS 13+ requires explicit permission for device orientation
+                DeviceOrientationEvent.requestPermission()
+                    .then(permissionState => {
+                        if (permissionState === 'granted') {
+                            window.addEventListener('deviceorientation', handleOrientation);
+                        }
+                    })
+                    .catch(console.error);
+            } else {
+                // Non-iOS 13+ devices
+                window.addEventListener('deviceorientation', handleOrientation);
+            }
+        }
+
+        function handleOrientation(event) {
+            const blurBg = document.getElementById('blur-bg-container');
+            if (!blurBg || blurBg.style.display === 'none') return;
+
+            // event.beta: front-to-back tilt [-180, 180] 
+            // event.gamma: left-to-right tilt [-90, 90]
+            let y = event.beta;
+            let x = event.gamma;
+
+            if (x > 90) x = 90;
+            if (x < -90) x = -90;
+            // Limit beta to roughly a 90 deg range for practical phone usage
+            if (y > 90) y = 90;
+            if (y < -90) y = -90;
+
+            // Map orientation to pixel shifts (adjust multiplier for intensity)
+            const shiftX = (x / 90) * 40;
+            const shiftY = (y / 90) * 40;
+
+            // Apply translation with a slight overscale so we don't see edges
+            blurBg.style.transform = `scale(1.1) translate(${-shiftX}px, ${-shiftY}px)`;
+        }
+
     </script>
 </body>
 

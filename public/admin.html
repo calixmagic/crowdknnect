@@ -1663,6 +1663,9 @@
 </head>
 
 <body>
+    <div id="pip-iframe-container">
+        <iframe id="pip-iframe" src="" allow="autoplay"></iframe>
+    </div>
     <div id="bg-anim-container" class="bg-anim-container"></div>
     <div id="blur-bg-container"
         style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; display: none;"></div>
@@ -2000,6 +2003,20 @@
             </label>
         </div>
         <div class="row">
+            <label>Afficher l'Aperçu Live (PiP en bas à droite)</label>
+            <label class="switch" style="margin:0;">
+                <input type="checkbox" id="pip-toggle" onchange="togglePiP(this.checked)">
+                <span class="slider"></span>
+            </label>
+        </div>
+        <div class="row">
+            <label>Afficher l'Aperçu Live (PiP en bas à droite)</label>
+            <label class="switch" style="margin:0;">
+                <input type="checkbox" id="pip-toggle" onchange="togglePiP(this.checked)">
+                <span class="slider"></span>
+            </label>
+        </div>
+        <div class="row">
             <label>Mode Debug (Visible sur public)</label>
             <label class="switch" style="margin:0;">
                 <input type="checkbox" id="toggle-debug">
@@ -2068,6 +2085,35 @@
         if (logToggle) {
             logToggle.checked = savedLogState;
             toggleLogs(savedLogState);
+        }
+
+        // Init PiP toggle from localStorage
+        const savedPiPState = localStorage.getItem('adminPiPParams') === 'true';
+        const pipToggle = document.getElementById('pip-toggle');
+        if (pipToggle) {
+            pipToggle.checked = savedPiPState;
+            togglePiP(savedPiPState);
+        }
+
+        function toggleLogs(show) {
+            localStorage.setItem('adminLogsParams', show);
+            document.getElementById('debug-log').style.display = show ? 'block' : 'none';
+        }
+
+        function togglePiP(show) {
+            localStorage.setItem('adminPiPParams', show);
+            const container = document.getElementById('pip-iframe-container');
+            const iframe = document.getElementById('pip-iframe');
+            if (show) {
+                container.style.display = 'block';
+                // Reload iframe specifically with silent param if empty
+                if (!iframe.src || iframe.src === window.location.href || iframe.src.endsWith('admin.html')) {
+                    iframe.src = '/?silent=true';
+                }
+            } else {
+                container.style.display = 'none';
+                iframe.src = ''; // Clear to save battery/resources
+            }
         }
 
         function log(msg, color) {
@@ -2249,7 +2295,7 @@
 
             if (state.debug) console.log(`[Render] Rendering ${routine.steps.length} steps. Scroll: ${currentScroll}`);
 
-            const icons = { emojis: '🃏', blackout: '⬛', flash: '⚡', torch: '🔦', shuffle: '🔀', reveal: '🎴', revealImage: '🖼️', video: '🎬', words: '🔤', lottie: '🎆', arrow: '⬇', heart: '❤️', countdown: '🔢', dice: '🎲', rippleFromLogo: '〰️', audio: '🔊', text: '📝', pulse: '💓', spiral: '🌀', color: '🎨', number: '🔢', breathing: '🫁', glitch: '⚡', ripple: '〰️', zoom: '🔍', shake: '📣', fade: '🌫️', pause: '⏸', cardFlip: '🎴', slot: '🎰', pinpoint: '🎯', unlock: '🔓', mirror: '🪞', wave: '🌊', sparkle: '✨', fire: '🔥', beat: '🎵', silence: '🔇', staticNoise: '📻', eye: '👁️', puzzle: '🧩', mask: '🎭', crystal: '🔮', snapshot: '📸', starfield: '🌟', stop: '⏹' };
+            const icons = { emojis: '🃏', blackout: '⬛', flash: '⚡', torch: '🔦', spotlight: '🔦', scratch: '🪙', blow: '🌬️', typing: '⌨️', shatter: '🔨', iris: '👁️‍🗨️', shuffle: '🔀', reveal: '🎴', revealImage: '🖼️', video: '🎬', words: '🔤', lottie: '🎆', arrow: '⬇', heart: '❤️', countdown: '🔢', dice: '🎲', rippleFromLogo: '〰️', audio: '🔊', text: '📝', pulse: '💓', spiral: '🌀', color: '🎨', number: '🔢', breathing: '🫁', glitch: '⚡', ripple: '〰️', zoom: '🔍', shake: '📣', fade: '🌫️', pause: '⏸', cardFlip: '🎴', slot: '🎰', pinpoint: '🎯', unlock: '🔓', mirror: '🪞', wave: '🌊', sparkle: '✨', fire: '🔥', beat: '🎵', silence: '🔇', staticNoise: '📻', eye: '👁️', puzzle: '🧩', mask: '🎭', crystal: '🔮', snapshot: '📸', starfield: '🌟', stop: '⏹' };
             list.innerHTML = routine.steps.map((step, idx) => `
                 <div class="step-item" draggable="true" data-idx="${idx}">
                     <div class="step-handle">☰</div>
@@ -2364,8 +2410,14 @@
                             <option value="fire">🔥 Fire</option>
                             <option value="flash">⚡ Flash</option>
                             <option value="torch">🔦 Lampe Torche (Écran Blanc)</option>
+                            <option value="spotlight">🔦 Spotlight (Doigt)</option>
+                            <option value="blow">🌬️ Blow (Souffle Micro)</option>
+                            <option value="scratch">🪙 Scratch (Carte à gratter)</option>
+                            <option value="typing">⌨️ Typing (Haptique)</option>
+                            <option value="shatter">🔨 Shatter (Verre Brisé)</option>
                             <option value="glitch">⚡ Glitch</option>
                             <option value="heart">❤️ Heart</option>
+                            <option value="iris">👁️‍🗨️ Iris (Transition)</option>
                             <option value="mask">🎭 Mask</option>
                             <option value="mirror">🪞 Mirror</option>
                             <option value="number">🔢 Number</option>
