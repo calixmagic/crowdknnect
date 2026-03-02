@@ -2887,8 +2887,12 @@
 
         function generateAdminQR() {
             const qrContainer = document.createElement('div');
+
+            // Generate QR Code dynamically pointing to the CURRENT host, not hardcoded
+            const targetUrl = 'https://' + window.location.host;
+
             new QRCode(qrContainer, {
-                text: 'https://crowdknnect.onrender.com',
+                text: targetUrl,
                 width: 500,
                 height: 500,
                 colorDark: "#000000",
@@ -2896,6 +2900,7 @@
                 correctLevel: QRCode.CorrectLevel.H
             });
 
+            // Need to wait slightly longer for qrcode.js to append the canvas
             setTimeout(() => {
                 const canvas = qrContainer.querySelector('canvas');
                 if (!canvas) {
@@ -2910,12 +2915,14 @@
                     state.adminConnectLogoUrl = dataUrl;
                     saveAll();
                     updateUI();
-                    alert("QR Code généré et défini comme Logo Accueil Admin !");
+                    alert("QR Code généré avec succès pour : " + targetUrl);
                 };
 
                 if (state.logoUrl) {
                     const img = new Image();
-                    img.crossOrigin = "Anonymous";
+                    if (!state.logoUrl.startsWith('data:')) {
+                        img.crossOrigin = "Anonymous";
+                    }
                     img.onload = () => {
                         const size = 150; // 30% of 500 width
                         const pos = (500 - size) / 2;
@@ -2928,12 +2935,15 @@
                         ctx.drawImage(img, pos, pos, size, size);
                         finalize();
                     };
-                    img.onerror = finalize; // Proceed without custom logo if error
+                    img.onerror = () => {
+                        log("Erreur de chargement du logo pour le QR Code (CORS).");
+                        finalize(); // Proceed without custom logo if error
+                    }
                     img.src = state.logoUrl;
                 } else {
                     finalize();
                 }
-            }, 100);
+            }, 500); // Increased timeout to ensure QRCode lib finishes rendering
         }
 
         async function handleFileUpload(input, targetId) {
