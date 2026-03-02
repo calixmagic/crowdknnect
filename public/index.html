@@ -2391,45 +2391,9 @@
         });
 
         // === GYRO PARALLAX (BLUR BACKGROUND) ===
-        // To enable device orientation, user must have clicked the Participate button first.
-        // The effect translates the blurred background based on the device's tilt.
+        // Removed per user request to avoid DeviceOrientationEvent permission popups on iOS.
         function initGyroParallax() {
-            if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-                // iOS 13+ requires explicit permission for device orientation
-                DeviceOrientationEvent.requestPermission()
-                    .then(permissionState => {
-                        if (permissionState === 'granted') {
-                            window.addEventListener('deviceorientation', handleOrientation);
-                        }
-                    })
-                    .catch(console.error);
-            } else {
-                // Non-iOS 13+ devices
-                window.addEventListener('deviceorientation', handleOrientation);
-            }
-        }
-
-        function handleOrientation(event) {
-            const blurBg = document.getElementById('blur-bg-container');
-            if (!blurBg || blurBg.style.display === 'none') return;
-
-            // event.beta: front-to-back tilt [-180, 180] 
-            // event.gamma: left-to-right tilt [-90, 90]
-            let y = event.beta;
-            let x = event.gamma;
-
-            if (x > 90) x = 90;
-            if (x < -90) x = -90;
-            // Limit beta to roughly a 90 deg range for practical phone usage
-            if (y > 90) y = 90;
-            if (y < -90) y = -90;
-
-            // Map orientation to pixel shifts (adjust multiplier for intensity)
-            const shiftX = (x / 90) * 40;
-            const shiftY = (y / 90) * 40;
-
-            // Apply translation with a slight overscale so we don't see edges
-            blurBg.style.transform = `scale(1.1) translate(${-shiftX}px, ${-shiftY}px)`;
+            // Feature disabled.
         }
 
     </script>
