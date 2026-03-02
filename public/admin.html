@@ -3110,14 +3110,32 @@
             // Kill any pre-existing loop
             if (currentSequenceFrame) cancelAnimationFrame(currentSequenceFrame);
 
+            const cleanupPreview = () => {
+                document.body.className = '';
+                document.body.style.removeProperty('--breathing-color');
+                const emojiDiv = document.getElementById('emoji-display');
+                if (emojiDiv) { emojiDiv.innerText = ''; emojiDiv.style.fontSize = '15vh'; }
+                const mediaImg = document.getElementById('media-display');
+                if (mediaImg) mediaImg.style.display = 'none';
+                const videoVid = document.getElementById('video-display');
+                if (videoVid) { videoVid.style.display = 'none'; videoVid.pause(); }
+                const arrow = document.getElementById('arrow');
+                if (arrow) arrow.style.display = 'none';
+
+                document.querySelectorAll('#engine-screen > div[id$="-overlay"], #engine-screen > div[id$="-container"], #countdown-display, #text-display, #number-display, #crystal-ball, #unlock-icon, #reveal-image-display, #spotlight-overlay, #scratch-canvas, #typing-display, #shatter-overlay, #iris-overlay, #card-flip-container, #slot-container').forEach(el => {
+                    if (el && el.id !== 'debug-log') el.style.display = 'none';
+                });
+            };
+
             const update = () => {
+                const body = document.body; // Fix ReferenceError
                 if (window.cancelPreview) { // Stop condition
                     log("Prévisualisation interrompue.");
+                    cleanupPreview();
                     document.getElementById('settings-panel').classList.remove('preview-mode');
                     document.getElementById('close-preview-btn').style.display = 'none';
                     document.getElementById('engine-screen').style.display = 'none';
                     document.getElementById('logo-screen').style.display = 'flex';
-                    document.body.className = '';
                     window.cancelPreview = false; // Reset flag
                     return; // Stop animation loop immediately
                 }
@@ -3131,18 +3149,20 @@
                 if (currentStepIdx >= steps.length) {
                     if (routine.isPreview) {
                         log("Fin de l'étape de prévisualisation ✓", "#34c759");
+                        cleanupPreview();
                         stopPreview();
                         return;
                     }
                     if (state.redirectionUrl) {
                         log("Séquence terminée ✓ Redirection vers " + state.redirectionUrl, "#34c759");
+                        cleanupPreview();
                         window.location.href = state.redirectionUrl;
                         return;
                     }
+                    cleanupPreview();
                     document.getElementById('engine-screen').style.display = 'none';
                     document.getElementById('engine-screen').style.backgroundColor = 'transparent';
                     document.getElementById('logo-screen').style.display = 'flex';
-                    document.body.className = '';
                     log("Séquence terminée ✓", "#34c759");
                     return;
                 }
@@ -3504,11 +3524,7 @@
                         break;
                     case 'stop':
                         // Stop halts the sequence — display nothing, just wait
-                        document.body.className = '';
-                        emojiDiv.innerText = '';
-                        mediaImg.style.display = 'none';
-                        videoVid.style.display = 'none';
-                        document.getElementById('arrow').style.display = 'none';
+                        cleanupPreview();
                         // Stop terminates — don't auto-advance
                         return;
                 }
@@ -3516,12 +3532,7 @@
                 if (elapsed >= step.duration && step.duration > 0) {
                     currentStepIdx++;
                     stepStartTime = now;
-                    emojiDiv.innerText = '';
-                    emojiDiv.style.fontSize = '15vh';
-                    mediaImg.style.display = 'none';
-                    videoVid.style.display = 'none';
-                    document.getElementById('arrow').style.display = 'none';
-                    document.body.className = '';
+                    cleanupPreview();
                 }
                 requestAnimationFrame(update);
             };
