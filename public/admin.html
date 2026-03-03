@@ -2910,17 +2910,31 @@
                     let proxyAttempts = 0;
 
                     img.onload = () => {
-                        const logoSize = 120; // Proportional size
-                        const pos = (finalSize - logoSize) / 2;
+                        const maxLogoSize = 120;
+                        let drawWidth = maxLogoSize;
+                        let drawHeight = maxLogoSize;
+
+                        // Maintain aspect ratio to avoid distortion
+                        if (img.width && img.height) {
+                            const ratio = img.width / img.height;
+                            if (ratio > 1) { // Landscape or square
+                                drawHeight = maxLogoSize / ratio;
+                            } else { // Portrait
+                                drawWidth = maxLogoSize * ratio;
+                            }
+                        }
+
+                        const posX = (finalSize - drawWidth) / 2;
+                        const posY = (finalSize - drawHeight) / 2;
 
                         // Fill white background for logo (with inner padding)
                         ctx.fillStyle = '#ffffff';
                         ctx.beginPath();
-                        ctx.roundRect(pos - 6, pos - 6, logoSize + 12, logoSize + 12, 10);
+                        ctx.roundRect(posX - 8, posY - 8, drawWidth + 16, drawHeight + 16, 10);
                         ctx.fill();
 
                         // Draw logo
-                        ctx.drawImage(img, pos, pos, logoSize, logoSize);
+                        ctx.drawImage(img, posX, posY, drawWidth, drawHeight);
                         finalize();
                     };
 
