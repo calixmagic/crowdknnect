@@ -1659,6 +1659,7 @@
 
             let currentStepIdx = 0;
             let stepStartTime = targetTime;
+            let lastLoggedStepIdx = -1;
             const update = () => {
                 const now = Date.now() + serverOffset;
                 if (now < targetTime) {
@@ -1681,8 +1682,9 @@
                 const step = steps[currentStepIdx];
                 const elapsedInStep = now - stepStartTime;
 
-                if (elapsedInStep === 0 || (currentStepIdx > 0 && elapsedInStep < 100)) {
+                if (lastLoggedStepIdx !== currentStepIdx) {
                     log("Step " + (currentStepIdx + 1) + "/" + steps.length + ": " + step.type + " (" + step.duration + "ms)");
+                    lastLoggedStepIdx = currentStepIdx;
                 }
                 // Log timing every second
                 if (elapsedInStep > 0 && elapsedInStep % 1000 < 20) {
@@ -1777,6 +1779,7 @@
                     }
                     break;
                 case 'emojis':
+                    emojiDiv.style.display = 'block';
                     const speed = step.speed || 1200;
                     const emojisList = ['♠️', '♥️', '♣️', '♦️'];
                     const currentTick = Math.floor(now / speed);

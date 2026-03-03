@@ -2907,7 +2907,7 @@
                 if (state.logoUrl) {
                     const img = new Image();
                     img.crossOrigin = "Anonymous";
-                    let isProxyAttempt = false;
+                    let proxyAttempts = 0;
 
                     img.onload = () => {
                         const logoSize = 120; // Proportional size
@@ -2925,14 +2925,22 @@
                     };
 
                     img.onerror = () => {
-                        if (!isProxyAttempt && !state.logoUrl.startsWith('data:')) {
-                            isProxyAttempt = true;
-                            log("CORS bloqué : Tentative de récupération via Proxy...");
-                            // Use public proxy to circumvent strict OVH headers
-                            img.src = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(state.logoUrl);
+                        if (!state.logoUrl.startsWith('data:')) {
+                            if (proxyAttempts === 0) {
+                                proxyAttempts++;
+                                log("CORS bloqué : Tentative via corsproxy.io...");
+                                img.src = 'https://corsproxy.io/?' + encodeURIComponent(state.logoUrl);
+                            } else if (proxyAttempts === 1) {
+                                proxyAttempts++;
+                                log("CORS toujours bloqué : Tentative 2 via codetabs...");
+                                img.src = 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(state.logoUrl);
+                            } else {
+                                log("Échec total du chargement du logo pour le QR Code.");
+                                finalize(); // Proceed without custom logo if all proxies fail
+                            }
                         } else {
-                            log("Erreur inévitable de chargement du logo pour le QR Code.");
-                            finalize(); // Proceed without custom logo if proxy also fails
+                            log("Erreur inévitable de chargement Base64.");
+                            finalize();
                         }
                     }
 
@@ -3113,6 +3121,7 @@
         function runPreview(routine, targetTime) {
             let currentStepIdx = 0;
             let stepStartTime = targetTime;
+            let lastLoggedStepIdx = -1;
 
             // Kill any pre-existing loop
             if (currentSequenceFrame) cancelAnimationFrame(currentSequenceFrame);
@@ -3193,8 +3202,9 @@
                 const step = steps[currentStepIdx];
                 const elapsed = now - stepStartTime;
 
-                if (elapsed === 0 || (currentStepIdx > 0 && elapsed < 100)) {
+                if (lastLoggedStepIdx !== currentStepIdx) {
                     log("Step " + (currentStepIdx + 1) + "/" + steps.length + ": " + step.type + " (" + step.duration + "ms)", "#007aff");
+                    lastLoggedStepIdx = currentStepIdx;
                 }
                 // Log timing every second
                 if (elapsed > 0 && elapsed % 1000 < 20) {
@@ -3228,6 +3238,7 @@
                     case 'emojis':
                         document.body.className = '';
                         document.getElementById('engine-screen').style.background = 'transparent';
+                        emojiDiv.style.display = 'block';
                         const speed = step.speed || 1200;
                         const emojisList = ['♠️', '♥️', '♣️', '♦️'];
                         const currentTick = Math.floor(now / speed);
