@@ -3380,15 +3380,24 @@
                         break;
                     case 'audio':
                         const audioEl = document.getElementById('audio-player');
+
+                        const parseVol = (val, defaultVal) => {
+                            if (val === undefined || val === "") return defaultVal;
+                            const num = parseFloat(val);
+                            return num > 1 ? num / 100 : num; // Backwards compatible with legacy 0-100 scale
+                        };
+
+                        const startVol = parseVol(step.startVol, 0.5);
+                        const endVol = parseVol(step.endVol, 1.0);
+
                         if (elapsed === 0) {
                             audioEl.src = step.url || '';
-                            audioEl.volume = (step.startVol || 50) / 100;
+                            audioEl.volume = startVol;
                             audioEl.play().catch(e => log('Audio error: ' + e.message));
                         }
-                        const startVol = (step.startVol || 50) / 100;
-                        const endVol = (step.endVol || 100) / 100;
-                        const fadeMs = step.fadeMs || step.duration;
-                        const volProgress = Math.min(elapsed / fadeMs, 1);
+
+                        const fadeMs = step.fadeMs !== undefined ? step.fadeMs : step.duration;
+                        const volProgress = fadeMs > 0 ? Math.min(elapsed / fadeMs, 1) : 1;
                         audioEl.volume = startVol + (endVol - startVol) * volProgress;
                         break;
                     case 'text':
