@@ -2861,10 +2861,14 @@
             // Generate QR Code dynamically pointing to the CURRENT host, not hardcoded
             const targetUrl = 'https://' + window.location.host;
 
+            const rawSize = 500;
+            const padding = 40;
+            const finalSize = rawSize + (padding * 2);
+
             new QRCode(qrContainer, {
                 text: targetUrl,
-                width: 500,
-                height: 500,
+                width: rawSize,
+                height: rawSize,
                 colorDark: "#000000",
                 colorLight: "#ffffff",
                 correctLevel: QRCode.CorrectLevel.H
@@ -2872,15 +2876,27 @@
 
             // Need to wait slightly longer for qrcode.js to append the canvas
             setTimeout(() => {
-                const canvas = qrContainer.querySelector('canvas');
-                if (!canvas) {
+                const rawCanvas = qrContainer.querySelector('canvas');
+                if (!rawCanvas) {
                     alert("Erreur lors de la génération du QR Code.");
                     return;
                 }
-                const ctx = canvas.getContext('2d');
+
+                // Add quiet zone (padding) around QR code for maximum scannability
+                const paddedCanvas = document.createElement('canvas');
+                paddedCanvas.width = finalSize;
+                paddedCanvas.height = finalSize;
+                const ctx = paddedCanvas.getContext('2d');
+
+                // Fill white background for the padded area
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, finalSize, finalSize);
+
+                // Draw raw QR code in the middle
+                ctx.drawImage(rawCanvas, padding, padding);
 
                 const finalize = () => {
-                    const dataUrl = canvas.toDataURL("image/png");
+                    const dataUrl = paddedCanvas.toDataURL("image/png");
                     document.getElementById('admin-connect-logo-url-input').value = dataUrl;
                     state.adminConnectLogoUrl = dataUrl;
                     saveAll();
@@ -2890,25 +2906,36 @@
 
                 if (state.logoUrl) {
                     const img = new Image();
-                    if (!state.logoUrl.startsWith('data:')) {
-                        img.crossOrigin = "Anonymous";
-                    }
+                    img.crossOrigin = "Anonymous";
+                    let isProxyAttempt = false;
+
                     img.onload = () => {
-                        const size = 100; // 20% of 500 width for better readability
-                        const pos = (500 - size) / 2;
-                        // Fill white background for logo (smaller padding)
+                        const logoSize = 120; // Proportional size
+                        const pos = (finalSize - logoSize) / 2;
+
+                        // Fill white background for logo (with inner padding)
                         ctx.fillStyle = '#ffffff';
                         ctx.beginPath();
-                        ctx.roundRect(pos - 6, pos - 6, size + 12, size + 12, 10);
+                        ctx.roundRect(pos - 6, pos - 6, logoSize + 12, logoSize + 12, 10);
                         ctx.fill();
+
                         // Draw logo
-                        ctx.drawImage(img, pos, pos, size, size);
+                        ctx.drawImage(img, pos, pos, logoSize, logoSize);
                         finalize();
                     };
+
                     img.onerror = () => {
-                        log("Erreur de chargement du logo pour le QR Code (CORS).");
-                        finalize(); // Proceed without custom logo if error
+                        if (!isProxyAttempt && !state.logoUrl.startsWith('data:')) {
+                            isProxyAttempt = true;
+                            log("CORS bloqué : Tentative de récupération via Proxy...");
+                            // Use public proxy to circumvent strict OVH headers
+                            img.src = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(state.logoUrl);
+                        } else {
+                            log("Erreur inévitable de chargement du logo pour le QR Code.");
+                            finalize(); // Proceed without custom logo if proxy also fails
+                        }
                     }
+
                     img.src = state.logoUrl;
                 } else {
                     finalize();
