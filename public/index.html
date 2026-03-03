@@ -107,6 +107,69 @@
             }
         }
 
+        .fingerprint-btn {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 35px;
+            margin: 30px auto 20px auto;
+            position: relative;
+            overflow: hidden;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: none;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.2s;
+        }
+
+        .fingerprint-btn:active {
+            transform: scale(0.95);
+        }
+
+        .fingerprint-fill {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 0%;
+            background: rgba(255, 255, 255, 0.2);
+            transition: height 0.1s linear;
+            z-index: 1;
+        }
+
+        .fingerprint-icon {
+            z-index: 2;
+            position: relative;
+            opacity: 0.8;
+            filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.3));
+        }
+
+        .instruction-text {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.75rem;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            animation: pulseFade 2s infinite;
+        }
+
+        @keyframes pulseFade {
+
+            0%,
+            100% {
+                opacity: 0.3;
+            }
+
+            50% {
+                opacity: 0.8;
+            }
+        }
+
         #start-btn {
             animation: pulse 2s infinite;
         }
@@ -1310,16 +1373,18 @@
     <div id="app-container" class="fullscreen-layer" style="overflow: hidden; pointer-events: auto;">
 
         <!-- Écran 1 : Participer -->
-        <div id="connect-screen" class="screen active" style="cursor: pointer;">
+        <div id="connect-screen" class="screen active">
             <div id="connect-logo-container"
                 style="width: 80vw; max-width: 400px; margin-bottom: 20px; display: flex; justify-content: center; align-items: center;">
                 <img id="connect-logo-img" src="" alt="Logo"
                     style="display: none; width: 100%; height: 100%; object-fit: contain; transition: transform 0.2s ease-out;">
             </div>
-            <p id="connect-tagline-text"
-                style="color:#fff; font-size:0.8rem; letter-spacing:2px; text-transform:uppercase; text-align:center; padding:0 20px;">
-                EXPÉRIENCE INTERACTIVE
-            </p>
+
+            <div class="fingerprint-btn" id="participate-btn">
+                <div class="fingerprint-fill" id="participate-fill"></div>
+                <div class="fingerprint-icon">👆</div>
+            </div>
+            <p class="instruction-text">MAINTENEZ POUR COMMENCER</p>
         </div>
 
         <!-- Écran 2 : Logo / Attente -->
@@ -1415,6 +1480,27 @@
         let hasStarted = false;
         const logBox = null; // Désactivé
 
+        // === WEB AUDIO API SYNTHESIZER (Machine à écrire sonore) ===
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playTickSound() {
+            if (audioCtx.state === 'suspended') return; // Mute if not unlocked yet
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.05);
+
+            // Subliminal volume (5%)
+            gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+
+            osc.start(audioCtx.currentTime);
+            osc.stop(audioCtx.currentTime + 0.05);
+        }
+
         function log(msg) {
             const time = new Date().toLocaleTimeString();
             console.log(`[PUBLIC ${time}] ${msg}`);
@@ -1483,12 +1569,53 @@
         }
 
         // === BOUTON PARTICIPER ===
-        document.getElementById('connect-screen').addEventListener('click', () => {
+        // === BOUTON PARTICIPER (PRESS & HOLD 3 SECONDES) ===
+        const btn = document.getElementById('participate-btn');
+        const fill = document.getElementById('participate-fill');
+        let holdTimer = null;
+        let isHolding = false;
+        let progressInterval = null;
+
+        function startHold(e) {
+            e.preventDefault();
+            if (isHolding) return;
+            isHolding = true;
+            if (navigator.vibrate) navigator.vibrate(15);
+
+            let progress = 0;
+            fill.style.height = '0%';
+
+            progressInterval = setInterval(() => {
+                progress += 3.33; // 100% in 3000ms (100ms intervals)
+                fill.style.height = Math.min(progress, 100) + '%';
+            }, 100);
+
+            holdTimer = setTimeout(() => {
+                completeHold();
+            }, 3000);
+        }
+
+        function cancelHold(e) {
+            if (e && e.type !== 'mouseleave') e.preventDefault();
+            if (!isHolding) return;
+            isHolding = false;
+
+            clearTimeout(holdTimer);
+            clearInterval(progressInterval);
+            fill.style.height = '0%';
+            if (navigator.vibrate) navigator.vibrate(10);
+        }
+
+        function completeHold() {
+            cancelHold(); // Cleanup timers
+            if (navigator.vibrate) navigator.vibrate([100, 50, 100]); // Success haptics
+
             // Priority 1: Request Fullscreen on user gesture immediately
             requestFullscreenAndScroll();
             initGyroParallax();
 
             // Priority 2: Unlock Audio
+            try { if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume(); } catch (e) { }
             const audioEl = document.getElementById('audio-player');
             if (audioEl) {
                 audioEl.src = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA';
@@ -1516,7 +1643,15 @@
                     blurContainer.style.display = 'none';
                 }
             }
-        });
+        }
+
+        btn.addEventListener('mousedown', startHold);
+        btn.addEventListener('touchstart', startHold, { passive: false });
+
+        window.addEventListener('mouseup', cancelHold);
+        window.addEventListener('touchend', cancelHold);
+        btn.addEventListener('mouseleave', cancelHold);
+        btn.addEventListener('touchcancel', cancelHold);
 
         // Add fullscreen capability to logo click just in case
         document.getElementById('logo-screen').addEventListener('click', () => {
@@ -1753,6 +1888,24 @@
                     break;
                 case 'torch':
                     body.className = 'torch-bg';
+                    break;
+                case 'heartbeat':
+                    if (step.active === false) break;
+
+                    const startSpeed = step.startSpeed || 1000;
+                    const endSpeed = step.endSpeed || 200;
+                    const hpProgress = Math.min(1, Math.max(0, elapsed / step.duration));
+
+                    // Accelerate interval
+                    const currentInterval = startSpeed - ((startSpeed - endSpeed) * hpProgress);
+
+                    if (!step._lastBeatTime || (elapsed - step._lastBeatTime >= currentInterval)) {
+                        step._lastBeatTime = elapsed;
+                        if (navigator.vibrate) navigator.vibrate([50, 100, 50]);
+
+                        body.style.transform = 'scale(1.02)';
+                        setTimeout(() => body.style.transform = 'scale(1)', 100);
+                    }
                     break;
                 case 'flash':
                     const flashDuration = step.duration;
@@ -2258,8 +2411,9 @@
                     if (tDisplay._lastCharsToShow !== charsToShow && charsToShow <= charCount) {
                         tDisplay._lastCharsToShow = charsToShow;
                         tDisplay.innerText = fullText.substring(0, charsToShow);
-                        if (charsToShow > 0 && navigator.vibrate) {
-                            navigator.vibrate(10); // Haptic feedback on each letter
+                        if (charsToShow > 0) {
+                            if (navigator.vibrate) navigator.vibrate(10); // Haptic feedback
+                            playTickSound(); // Subliminal sonic feedback
                         }
                     }
                     break;
