@@ -107,44 +107,7 @@
             }
         }
 
-        #start-btn {
-            background-color: transparent;
-            color: #fff;
-            border: 2px solid #fff;
-            padding: 15px 40px;
-            font-size: 20px;
-            font-weight: 600;
-            border-radius: 50px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin: 30px auto;
-            display: block;
-            -webkit-tap-highlight-color: transparent;
-        }
 
-        #start-btn:active {
-            background-color: #fff;
-            color: #000;
-            transform: scale(0.95);
-        }
-
-        @keyframes pulseFade {
-
-            0%,
-            100% {
-                opacity: 0.3;
-            }
-
-            50% {
-                opacity: 0.8;
-            }
-        }
-
-        #start-btn {
-            animation: pulse 2s infinite;
-        }
 
         #logo-container {
             width: 80vw;
@@ -1345,16 +1308,11 @@
     <div id="app-container" class="fullscreen-layer" style="overflow: hidden; pointer-events: auto;">
 
         <!-- Écran 1 : Participer -->
-        <div id="connect-screen" class="screen active">
+        <div id="connect-screen" class="screen active" style="cursor: pointer;">
             <div id="connect-logo-container"
                 style="width: 80vw; max-width: 400px; margin-bottom: 20px; display: flex; justify-content: center; align-items: center;">
                 <img id="connect-logo-img" src="" alt="Logo"
                     style="display: none; width: 100%; height: 100%; object-fit: contain; transition: transform 0.2s ease-out;">
-            </div>
-
-            <div
-                style="flex:1; display:flex; flex-direction:column; justify-content:flex-end; padding-bottom:50px; width:100%; align-items:center;">
-                <button id="start-btn">Participer</button>
             </div>
         </div>
 
@@ -1540,7 +1498,7 @@
         }
 
         // === BOUTON PARTICIPER ===
-        const btn = document.getElementById('start-btn');
+        const connectScreen = document.getElementById('connect-screen');
 
         function startExperience(e) {
             if (e) e.preventDefault();
@@ -1582,8 +1540,8 @@
             }
         }
 
-        btn.addEventListener('click', startExperience);
-        btn.addEventListener('touchstart', startExperience, { passive: false });
+        connectScreen.addEventListener('click', startExperience);
+        connectScreen.addEventListener('touchstart', startExperience, { passive: false });
 
         // Add fullscreen capability to logo click just in case
         document.getElementById('logo-screen').addEventListener('click', () => {
