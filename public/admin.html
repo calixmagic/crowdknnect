@@ -1772,8 +1772,19 @@
         </div>
 
         <div class="row">
-            <label>Routine Active <span class="add-link" onclick="addRoutine()">+ Nouvelle</span></label>
+            <label>Routine Active <span class="add-link" onclick="addRoutine()">+ Nouvelle</span> <span class="add-link"
+                    onclick="openAIModal()" style="color:#0f0; margin-left: 10px;">✨ IA</span></label>
             <select id="routine-select" onchange="switchRoutine(this.value)"></select>
+        </div>
+
+        <div class="row" id="routine-tags-row" style="display:none;">
+            <label>Tags (séparés par virgules)</label>
+            <input type="text" id="routine-tags-input" placeholder="ex: cartes, mentalisme, intro"
+                onchange="saveRoutineTags()">
+        </div>
+
+        <div id="routine-timeline"
+            style="display:none; height:12px; background:#222; border-radius:10px; overflow:hidden; margin-bottom:15px; border:1px solid #333;">
         </div>
 
         <div class="section-title">Étapes de la séquence <span class="add-link" onclick="showAddStepForm()">+
@@ -2026,6 +2037,19 @@
                 <span class="slider"></span>
             </label>
         </div>
+        <div class="row">
+            <label>Thèmes Rapides</label>
+            <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:5px;">
+                <button class="btn btn-secondary" onclick="applyTheme('sombre')"
+                    style="padding: 5px 10px; font-size: 12px; height:auto; background: #222; color:#fff; border-color:#555;">Sombre</button>
+                <button class="btn btn-secondary" onclick="applyTheme('epure')"
+                    style="padding: 5px 10px; font-size: 12px; height:auto; background: #fff; color:#000; border-color:#ccc;">Épuré</button>
+                <button class="btn btn-secondary" onclick="applyTheme('hacker')"
+                    style="padding: 5px 10px; font-size: 12px; height:auto; background: #0a0a0a; color:#0f0; border-color:#0f0;">Hacker</button>
+                <button class="btn btn-secondary" onclick="applyTheme('sang')"
+                    style="padding: 5px 10px; font-size: 12px; height:auto; background: #3a0000; color:#ff4444; border-color:#ff4444;">Sang</button>
+            </div>
+        </div>
         <div class="row"><label>Couleur de fond</label>
             <div style="display:flex;gap:8px;">
                 <button id="bg-black" onclick="setBgColor('#000')"
@@ -2067,6 +2091,32 @@
 
         <button class="btn" style="background:#34c759" onclick="saveAll()">SYNCHRONISER & ENREGISTRER</button>
         <button class="btn btn-secondary" onclick="closePanel()">FERMER PANNEAU</button>
+    </div>
+
+    <!-- Modal IA -->
+    <div id="ai-modal"
+        style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); background:#1a1a1a; padding:20px; border-radius:12px; z-index:9000; width:90%; max-width:500px; box-shadow:0 10px 30px rgba(0,0,0,0.8); border:1px solid #333;">
+        <h3 style="margin-top:0; color:#0f0;">✨ Générateur de Routines IA</h3>
+        <p style="font-size:12px; color:#aaa; margin-bottom:15px;">Demandez à ChatGPT de créer une séquence pour vous.
+            Il suffit de lui fournir le prompt maître, vos envies, et de coller son résultat JSON ci-dessous.</p>
+
+        <button class="btn btn-secondary" onclick="copyAIPrompt()"
+            style="margin-bottom:15px; background:#222; border-color:#0f0; color:#0f0;">1. COPIER LE PROMPT
+            MAÎTRE</button>
+
+        <label style="font-size:12px; color:#ccc;">2. Coller la réponse JSON de ChatGPT :</label>
+        <textarea id="ai-json-input" rows="8"
+            style="width:100%; box-sizing:border-box; background:#000; color:#fff; border:1px solid #444; border-radius:8px; padding:10px; font-family:monospace; margin-bottom:15px;"
+            placeholder='{ "name": "Hack System", "steps": [ ... ] }'></textarea>
+
+        <div style="display:flex; justify-content:space-between; gap:10px;">
+            <button class="btn btn-secondary" onclick="closeAIModal()">Annuler</button>
+            <button class="btn" style="background:#34c759;" onclick="importRoutineFromAI()">IMPORTER ROUTINE</button>
+        </div>
+    </div>
+
+    <div id="ai-modal-backdrop" onclick="closeAIModal()"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:8999;">
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -2233,11 +2283,22 @@
             if (persistToggle) persistToggle.checked = !!state.bgAnimPersist;
 
             const sel = document.getElementById('routine-select');
+            const tagsRow = document.getElementById('routine-tags-row');
+            const tagsInput = document.getElementById('routine-tags-input');
+
             if (state.routines && state.routines.length > 0) {
-                sel.innerHTML = state.routines.map((r, i) => `<option value="${i}" ${i == state.activeRoutineIndex ? 'selected' : ''}>${r.name}</option>`).join('');
+                sel.innerHTML = state.routines.map((r, i) => {
+                    const tagDisplay = (r.tags && r.tags.length > 0) ? ` [${r.tags.join(', ')}]` : '';
+                    return `<option value="${i}" ${i == state.activeRoutineIndex ? 'selected' : ''}>${r.name}${tagDisplay}</option>`;
+                }).join('');
+
+                tagsRow.style.display = 'block';
+                tagsInput.value = state.routines[state.activeRoutineIndex].tags ? state.routines[state.activeRoutineIndex].tags.join(', ') : '';
+
                 renderSteps();
             } else {
                 sel.innerHTML = '<option>Aucune routine</option>';
+                tagsRow.style.display = 'none';
                 document.getElementById('steps-list').innerHTML = '<p style="color:#444;font-size:12px;">Aucune routine. Cliquez "+ Nouvelle".</p>';
             }
         }
@@ -2252,6 +2313,40 @@
 
         function setBgAnim(animClass) {
             state.bgAnim = animClass;
+        }
+
+        function applyTheme(themeName) {
+            const themes = {
+                'sombre': { bgColor: '#000000', bgAnim: 'anim-vague' },
+                'epure': { bgColor: '#ffffff', bgAnim: '' },
+                'hacker': { bgColor: '#000000', bgAnim: 'anim-pluie-matrix' },
+                'sang': { bgColor: '#1a0000', bgAnim: 'anim-battement-coeur' }
+            };
+
+            const t = themes[themeName];
+            if (!t) return;
+
+            setBgColor(t.bgColor);
+            setBgAnim(t.bgAnim);
+
+            // Sync UI inputs if they exist
+            if (document.getElementById('bg-anim-select')) document.getElementById('bg-anim-select').value = t.bgAnim;
+            if (document.getElementById('bg-color-input')) document.getElementById('bg-color-input').value = t.bgColor;
+
+            saveAll();
+
+            // Re-render UI to show changes
+            updateSettingsUI();
+
+            // Show brief non-intrusive notification instead of alert!
+            const logEl = document.getElementById('debug-log');
+            if (logEl) {
+                const msg = document.createElement('div');
+                msg.style.color = '#34c759';
+                msg.textContent = `[ADMIN] Thème appliqué : ${themeName.toUpperCase()}`;
+                logEl.appendChild(msg);
+                logEl.scrollTop = logEl.scrollHeight;
+            }
         }
 
         let lastRenderedSteps = '';
@@ -2273,6 +2368,33 @@
             lastRenderedSteps = newStepsJSON;
 
             if (state.debug) console.log(`[Render] Rendering ${routine.steps.length} steps. Scroll: ${currentScroll}`);
+
+            // --- TIMELINE LOGIC ---
+            let totalDuration = 0;
+            routine.steps.forEach(s => totalDuration += (parseInt(s.duration) || 0));
+            const timelineEl = document.getElementById('routine-timeline');
+            if (timelineEl) {
+                if (totalDuration > 0 && routine.steps.length > 0) {
+                    const colors = {
+                        'audio': '#34c759', 'video': '#ff453a', 'blackout': '#000', 'torch': '#fff',
+                        'flash': '#fff', 'heartbeat': '#ff2d55', 'shatter': '#af52de', 'typing': '#ff9f0a',
+                        'words': '#ff9f0a', 'reveal': '#ff9f0a', 'iris': '#5e5ce6', 'blow': '#32ade6',
+                        'scratch': '#8a8a8e', 'color': '#ffcc00'
+                    };
+                    const defaultColor = '#0a84ff';
+
+                    timelineEl.innerHTML = routine.steps.map(s => {
+                        const dur = parseInt(s.duration) || 0;
+                        if (dur <= 0) return '';
+                        const pct = (dur / totalDuration) * 100;
+                        const bgColor = colors[s.type] || defaultColor;
+                        return `<div style="width:${pct}%; background:${bgColor}; height:100%; border-right:1px solid #111;" title="${s.type.toUpperCase()}: ${dur}ms"></div>`;
+                    }).join('');
+                    timelineEl.style.display = 'flex';
+                } else {
+                    timelineEl.style.display = 'none';
+                }
+            }
 
             const icons = { emojis: '🃏', blackout: '⬛', flash: '⚡', torch: '🔦', spotlight: '🔦', scratch: '🪙', blow: '🌬️', typing: '⌨️', shatter: '🔨', iris: '👁️‍🗨️', shuffle: '🔀', reveal: '🎴', revealImage: '🖼️', video: '🎬', words: '🔤', lottie: '🎆', arrow: '⬇', heart: '❤️', countdown: '🔢', dice: '🎲', rippleFromLogo: '〰️', audio: '🔊', text: '📝', pulse: '💓', spiral: '🌀', color: '🎨', number: '🔢', breathing: '🫁', glitch: '⚡', ripple: '〰️', zoom: '🔍', shake: '📣', fade: '🌫️', pause: '⏸', cardFlip: '🎴', slot: '🎰', pinpoint: '🎯', unlock: '🔓', mirror: '🪞', wave: '🌊', sparkle: '✨', fire: '🔥', beat: '🎵', silence: '🔇', staticNoise: '📻', eye: '👁️', puzzle: '🧩', mask: '🎭', crystal: '🔮', snapshot: '📸', starfield: '🌟', stop: '⏹' };
             list.innerHTML = routine.steps.map((step, idx) => `
@@ -2353,6 +2475,74 @@
                 if (offset < 0 && offset > closest.offset) return { offset, element: child };
                 return closest;
             }, { offset: Number.NEGATIVE_INFINITY }).element;
+        }
+
+        // --- LOGIQUE IA ---
+        function openAIModal() {
+            document.getElementById('ai-modal').style.display = 'block';
+            document.getElementById('ai-modal-backdrop').style.display = 'block';
+        }
+
+        function closeAIModal() {
+            document.getElementById('ai-modal').style.display = 'none';
+            document.getElementById('ai-modal-backdrop').style.display = 'none';
+            document.getElementById('ai-json-input').value = '';
+        }
+
+        function copyAIPrompt() {
+            const prompt = `Je suis magicien digital humain utilisant un outil appelé CrowdConnect. Je veux que tu me génères une routine sous format JSON STRICT (sans markdown, juste le JSON brut valide).
+
+Une routine est un objet avec un "name" et un tableau de "steps".
+Voici les types de steps possibles expliqués:
+- "blackout" : écran noir
+- "torch" : écran full blanc
+- "flash" : éclat blanc très court (besoin de duration: 100)
+- "emojis" : affiche des emojis qui grossissent (besoin de "value" avec les emojis séparés par un espace)
+- "shuffle" : fait défiler très vite des valeurs (besoin de "value" avec les textes séparés par virgule, ou "images" un tableau d'urls) et un "duration".
+- "reveal" : affiche un texte gros au centre (besoin de "value" : le texte).
+- "shatter" : brise l'écran avec un choc haptique
+- "typing" : tape un texte comme une machine à écrire (besoin de "value": le texte, "duration": le temps de frappe haptique)
+- "heartbeat" : fait vibrer le téléphone comme un coeur (besoin de "duration", "startSpeed" ex: 1000, "endSpeed" ex: 200).
+- "audio" : joue un son mp3 (besoin "url", "duration" et fade in via "startVol" et fade out via "endVol")
+
+Crée moi une routine de suspense qui s'appelle "Hacking du cerveau".
+Donne moi juste l'objet JSON valide encadré par des {}.`;
+            navigator.clipboard.writeText(prompt).then(() => {
+                alert("Le prompt maître a été copié. Collez-le dans ChatGPT, modifiez votre demande, puis copiez sa réponse ici !");
+            });
+        }
+
+        function importRoutineFromAI() {
+            try {
+                const raw = document.getElementById('ai-json-input').value.trim();
+                const cleanJson = raw.replace(/^```json\s*/i, '').replace(/```\s*$/, '').trim();
+                const routine = JSON.parse(cleanJson);
+
+                if (!routine.name || !Array.isArray(routine.steps)) {
+                    alert("Erreur: Le JSON n'est pas au format attendu (Il faut 'name' et le tableau 'steps').");
+                    return;
+                }
+
+                routine.id = Date.now().toString(36);
+                state.routines.push(routine);
+                state.activeRoutineIndex = state.routines.length - 1;
+                saveAll();
+                closeAIModal();
+                updateSettingsUI();
+                log("Routine générée par IA importée avec succès.", "#0f0");
+            } catch (e) {
+                alert("Erreur de lecture du JSON: " + e.message);
+                console.error(e);
+            }
+        }
+
+        function saveRoutineTags() {
+            if (state.routines.length === 0) return;
+            const rawTags = document.getElementById('routine-tags-input').value;
+            const tags = rawTags.split(',').map(t => t.trim()).filter(t => t.length > 0);
+            state.routines[state.activeRoutineIndex].tags = tags;
+            saveAll();
+            updateSettingsUI(); // Refresh the select list to show the new tags
         }
 
         function addRoutine() {

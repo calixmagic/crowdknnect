@@ -1,0 +1,3218 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Magic Lab Admin</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body,
+        html {
+            width: 100%;
+            height: 100%;
+            background: #000;
+            color: #fff;
+            font-family: -apple-system, system-ui, sans-serif;
+            overflow: hidden;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #logo-container {
+            width: 80vw;
+            max-width: 400px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #logo-img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: none;
+            transition: transform 0.2s ease-out;
+        }
+
+        #settings-panel {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 10, 10, 0.85);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            z-index: 2000;
+            display: none;
+            flex-direction: column;
+            padding: 20px;
+            overflow-y: auto;
+            text-align: left;
+        }
+
+        #settings-panel.open {
+            display: flex;
+        }
+
+        .section-title {
+            font-size: 10px;
+            color: #555;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin: 20px 0 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .add-link {
+            color: #007aff;
+            text-transform: none;
+            letter-spacing: 0;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .row {
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        label {
+            color: #888;
+            font-size: 11px;
+            text-transform: uppercase;
+        }
+
+        input,
+        select {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            color: #fff;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 14px;
+            width: 100%;
+        }
+
+        #steps-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .step-item {
+            background: #151515;
+            border: 1px solid #222;
+            border-radius: 12px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            cursor: grab;
+            transition: background 0.2s;
+        }
+
+        .step-add-form {
+            background: #0d1117;
+            border: 1px dashed #007aff;
+            border-radius: 12px;
+            padding: 15px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .step-add-form select,
+        .step-add-form input {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            color: #fff;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 14px;
+            flex: 1;
+            min-width: 80px;
+        }
+
+        .step-add-form button {
+            background: #34c759;
+            color: #fff;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .step-delete {
+            color: #666;
+            font-size: 16px;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .step-item.dragging {
+            opacity: 0.5;
+            background: #222;
+        }
+
+        .step-handle {
+            color: #444;
+            font-size: 20px;
+            cursor: grab;
+        }
+
+        .step-info {
+            flex: 1;
+        }
+
+        .step-name {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 2px;
+        }
+
+        .step-meta {
+            font-size: 11px;
+            color: #666;
+        }
+
+        .step-toggle {
+            width: 40px;
+            height: 20px;
+            background: #333;
+            border-radius: 10px;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .step-toggle.active {
+            background: #34c759;
+        }
+
+        .step-toggle::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 16px;
+            height: 16px;
+            background: #fff;
+            border-radius: 50%;
+            transition: 0.2s;
+        }
+
+        .step-toggle.active::after {
+            left: 22px;
+        }
+
+        .btn {
+            background: #007aff;
+            color: #fff;
+            border: none;
+            padding: 15px;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 10px;
+            width: 100%;
+        }
+
+        .btn-secondary {
+            background: #222;
+            border: 1px solid #333;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-input-wrapper input[type=file] {
+            font-size: 100px;
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+        }
+
+        input[type=range] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            background: #333;
+            border-radius: 2px;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            height: 18px;
+            width: 18px;
+            border-radius: 50%;
+            background: #007aff;
+            cursor: pointer;
+            margin-top: -7px;
+        }
+
+        #debug-log {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            width: 90%;
+            height: 60px;
+            pointer-events: auto;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            z-index: 3000;
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.5);
+            font-family: monospace;
+            text-align: left;
+            line-height: 1.3;
+        }
+
+        /* Toggle switch */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #333;
+            transition: 0.3s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: #666;
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+
+        input:checked+.slider {
+            background-color: #34c759;
+        }
+
+        input:checked+.slider:before {
+            background-color: white;
+            transform: translateX(20px);
+        }
+
+        #media-display {
+            width: 85%;
+            max-width: 500px;
+            height: auto;
+            border-radius: 15px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            display: none;
+        }
+
+        .white-bg {
+            background-color: #fff !important;
+            color: #000 !important;
+        }
+
+        .flash-bg {
+            background-color: #fff !important;
+        }
+
+        .blackout-bg {
+            background-color: #000 !important;
+        }
+
+        /* Heart morphing animation */
+        #heart-svg {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            display: none;
+        }
+
+        #heart-svg.active {
+            display: block;
+            animation: heartMorph 3s ease-in-out forwards;
+        }
+
+        @keyframes heartMorph {
+            0% {
+                transform: scale(0.1);
+                opacity: 1;
+            }
+
+            50% {
+                transform: scale(1.5);
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* Countdown */
+        #countdown-display {
+            position: absolute;
+            font-size: 30vh;
+            font-weight: bold;
+            color: #fff;
+            display: none;
+            animation: countdownPulse 1s infinite;
+        }
+
+        @keyframes countdownPulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.2);
+            }
+        }
+
+        /* Dice 3D */
+        #dice-container {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            perspective: 800px;
+            display: none;
+        }
+
+        #dice {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            animation: diceRoll 2s ease-out forwards;
+        }
+
+        .dice-face {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            background: #fff;
+            border: 3px solid #333;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 80px;
+            font-weight: bold;
+        }
+
+        .dice-face:nth-child(1) {
+            transform: rotateY(0deg) translateZ(100px);
+        }
+
+        .dice-face:nth-child(2) {
+            transform: rotateY(180deg) translateZ(100px);
+        }
+
+        .dice-face:nth-child(3) {
+            transform: rotateY(90deg) translateZ(100px);
+        }
+
+        .dice-face:nth-child(4) {
+            transform: rotateY(-90deg) translateZ(100px);
+        }
+
+        .dice-face:nth-child(5) {
+            transform: rotateX(90deg) translateZ(100px);
+        }
+
+        .dice-face:nth-child(6) {
+            transform: rotateX(-90deg) translateZ(100px);
+        }
+
+        @keyframes diceRoll {
+            0% {
+                transform: rotate3d(1, 1, 1, 0deg);
+            }
+
+            100% {
+                transform: rotate3d(1, 1, 1, 720deg);
+            }
+        }
+
+        /* Ripple from logo */
+        #ripple-overlay {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 3px solid rgba(255, 255, 255, 0.8);
+            display: none;
+            pointer-events: none;
+        }
+
+        #ripple-overlay.active {
+            animation: rippleExpand 2s ease-out forwards;
+        }
+
+        @keyframes rippleExpand {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+
+            100% {
+                transform: scale(30);
+                opacity: 0;
+            }
+        }
+
+        #audio-player {
+            display: none;
+        }
+
+        /* Phase 2 Steps */
+        #text-display {
+            position: absolute;
+            font-size: 12vh;
+            font-weight: bold;
+            color: #fff;
+            text-align: center;
+            max-width: 90%;
+            display: none;
+        }
+
+        body.pulse-bg {
+            animation: pulseEffect 1.5s ease-in-out infinite !important;
+        }
+
+        @keyframes pulseEffect {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.3;
+            }
+        }
+
+        /* Background Animations Sync from public */
+        .bg-anim-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 0;
+            /* Behind screens */
+            pointer-events: none;
+        }
+
+        .anim-respiration {
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, rgba(0, 0, 0, 0) 80%);
+            animation: bgBreathe 4s ease-in-out infinite alternate;
+        }
+
+        @keyframes bgBreathe {
+            0% {
+                transform: scale(0.8);
+                opacity: 0.2;
+            }
+
+            100% {
+                transform: scale(1.5);
+                opacity: 0.8;
+            }
+        }
+
+        .anim-vague {
+            background: linear-gradient(45deg, rgba(255, 255, 255, 0.05) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.05) 50%, rgba(255, 255, 255, 0.05) 75%, transparent 75%, transparent);
+            background-size: 100px 100px;
+            animation: bgWave 4s linear infinite;
+        }
+
+        @keyframes bgWave {
+            0% {
+                background-position: 0 0;
+            }
+
+            100% {
+                background-position: 100px 100px;
+            }
+        }
+
+        .anim-hyperspace {
+            background: url('/images/hyperspace.gif') no-repeat center center;
+            background-size: cover;
+            opacity: 0.6;
+        }
+
+        .anim-pluie-matrix {
+            background: linear-gradient(to bottom, rgba(0, 255, 0, 0.1), rgba(0, 255, 0, 0.05));
+            animation: matrixRain 2s linear infinite;
+        }
+
+        @keyframes matrixRain {
+            0% {
+                background-position: 0 -100vh;
+            }
+
+            100% {
+                background-position: 0 100vh;
+            }
+        }
+
+        .anim-battement-coeur {
+            background: radial-gradient(circle, rgba(255, 0, 0, 0.1) 0%, transparent 60%);
+            animation: bgHeartbeat 1.5s infinite;
+        }
+
+        @keyframes bgHeartbeat {
+            0% {
+                transform: scale(1);
+                opacity: 0.3;
+            }
+
+            20% {
+                transform: scale(1.1);
+                opacity: 0.6;
+            }
+
+            40% {
+                transform: scale(1);
+                opacity: 0.3;
+            }
+
+            60% {
+                transform: scale(1.15);
+                opacity: 0.8;
+            }
+
+            80% {
+                transform: scale(1);
+                opacity: 0.3;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 0.3;
+            }
+        }
+
+        .anim-etoiles-filantes {
+            background: radial-gradient(circle, #fff 10%, transparent 10%), radial-gradient(circle, #fff 10%, transparent 10%);
+            background-size: 50px 50px;
+            background-position: 0 0, 25px 25px;
+            animation: shootingStars 5s linear infinite;
+            opacity: 0.1;
+        }
+
+        @keyframes shootingStars {
+            100% {
+                background-position: 500px 500px, 525px 525px;
+            }
+        }
+
+        .anim-mystique {
+            background: conic-gradient(from 0deg, rgba(255, 0, 255, 0.1), rgba(0, 255, 255, 0.1), rgba(255, 0, 255, 0.1));
+            animation: mysticSpin 10s linear infinite;
+        }
+
+        @keyframes mysticSpin {
+            100% {
+                transform: rotate(360deg) scale(2);
+            }
+        }
+
+        .anim-feu {
+            background: linear-gradient(to top, rgba(255, 100, 0, 0.3) 0%, transparent 60%);
+            animation: fireFlicker 0.1s infinite alternate;
+        }
+
+        @keyframes fireFlicker {
+            0% {
+                opacity: 0.8;
+                transform: translateY(0);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translateY(-5px);
+            }
+        }
+
+        .anim-glitch-bg {
+            background: repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.05) 0px, transparent 1px, transparent 4px, rgba(255, 255, 255, 0.05) 5px);
+            animation: glitchLines 0.2s infinite;
+        }
+
+        @keyframes glitchLines {
+            0% {
+                transform: translateY(0);
+            }
+
+            100% {
+                transform: translateY(5px);
+            }
+        }
+
+        .anim-laser {
+            background: linear-gradient(90deg, transparent 40%, rgba(255, 0, 0, 0.2) 50%, transparent 60%);
+            background-size: 200% 100%;
+            animation: laserSweep 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes laserSweep {
+            0% {
+                background-position: -100% 0;
+            }
+
+            100% {
+                background-position: 200% 0;
+            }
+        }
+
+        .anim-boussole {
+            background: repeating-radial-gradient(circle, transparent, transparent 20px, rgba(255, 255, 255, 0.05) 20px, rgba(255, 255, 255, 0.05) 21px);
+            animation: compassRotate 20s linear infinite;
+        }
+
+        @keyframes compassRotate {
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes logoPulse {
+            0% {
+                transform: scale(1);
+            }
+
+            100% {
+                transform: scale(1.1);
+            }
+        }
+
+        #spiral-overlay {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            border: 5px solid #fff;
+            border-radius: 50%;
+            display: none;
+        }
+
+        #spiral-overlay.active {
+            animation: spiralSpin 3s linear infinite;
+        }
+
+        @keyframes spiralSpin {
+            0% {
+                transform: rotate(0deg) scale(0.5);
+            }
+
+            50% {
+                transform: rotate(180deg) scale(1.5);
+            }
+
+            100% {
+                transform: rotate(360deg) scale(0.5);
+            }
+        }
+
+        #color-overlay {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: none;
+            transition: background-color 0.5s;
+        }
+
+        #number-display {
+            position: absolute;
+            font-size: 25vh;
+            font-weight: bold;
+            color: #fff;
+            display: none;
+        }
+
+        body.breathing-bg {
+            animation: breatheEffect 4s ease-in-out infinite !important;
+        }
+
+        @keyframes breatheEffect {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.7;
+                transform: scale(1.05);
+            }
+        }
+
+        body.glitch-bg {
+            animation: glitchEffect 0.3s infinite !important;
+        }
+
+        @keyframes glitchEffect {
+            0% {
+                transform: translate(0);
+                filter: hue-rotate(0deg);
+            }
+
+            20% {
+                transform: translate(-2px, 2px);
+                filter: hue-rotate(90deg);
+            }
+
+            40% {
+                transform: translate(2px, -2px);
+                filter: hue-rotate(180deg);
+            }
+
+            60% {
+                transform: translate(-2px, -2px);
+                filter: hue-rotate(270deg);
+            }
+
+            80% {
+                transform: translate(2px, 2px);
+                filter: hue-rotate(360deg);
+            }
+
+            100% {
+                transform: translate(0);
+                filter: hue-rotate(0deg);
+            }
+        }
+
+        #ripple-center {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 50px;
+            height: 50px;
+            margin-left: -25px;
+            margin-top: -25px;
+            border-radius: 50%;
+            border: 3px solid rgba(255, 255, 255, 0.8);
+            display: none;
+        }
+
+        #ripple-center.active {
+            animation: rippleCenterExpand 2s ease-out forwards;
+        }
+
+        @keyframes rippleCenterExpand {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+
+            100% {
+                transform: scale(30);
+                opacity: 0;
+            }
+        }
+
+        body.zoom-bg {
+            animation: zoomEffect 3s ease-in-out forwards !important;
+        }
+
+        @keyframes zoomEffect {
+            0% {
+                transform: scale(1);
+            }
+
+            100% {
+                transform: scale(3);
+            }
+        }
+
+        body.shake-bg {
+            animation: shakeEffect 0.5s infinite !important;
+        }
+
+        @keyframes shakeEffect {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            10%,
+            30%,
+            50%,
+            70%,
+            90% {
+                transform: translateX(-5px);
+            }
+
+            20%,
+            40%,
+            60%,
+            80% {
+                transform: translateX(5px);
+            }
+        }
+
+        #fade-overlay {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: none;
+            transition: opacity 2s;
+        }
+
+        #fade-overlay.active {
+            opacity: 1;
+        }
+
+        /* Phase 3 Advanced */
+        #card-flip-container {
+            position: absolute;
+            width: 300px;
+            height: 450px;
+            perspective: 1000px;
+            display: none;
+        }
+
+        #card-flip {
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            animation: cardFlipAnim 2s ease-in-out forwards;
+        }
+
+        @keyframes cardFlipAnim {
+            0% {
+                transform: rotateY(0deg);
+            }
+
+            100% {
+                transform: rotateY(180deg);
+            }
+        }
+
+        #slot-container {
+            position: absolute;
+            display: none;
+            font-size: 15vh;
+        }
+
+        #pinpoint-target {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            border: 5px solid #f00;
+            border-radius: 50%;
+            display: none;
+            animation: pinpointShrink 3s ease-in forwards;
+        }
+
+        @keyframes pinpointShrink {
+            0% {
+                transform: scale(5);
+                opacity: 0.5;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        #unlock-icon {
+            position: absolute;
+            font-size: 20vh;
+            display: none;
+            animation: unlockAnim 2s ease-out forwards;
+        }
+
+        body.mirror-h {
+            transform: scaleX(-1);
+        }
+
+        body.mirror-v {
+            transform: scaleY(-1);
+        }
+
+        #wave-overlay {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(transparent, rgba(0, 150, 255, 0.5));
+            display: none;
+            animation: waveMove 3s ease-in-out infinite;
+        }
+
+        @keyframes waveMove {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-30px);
+            }
+        }
+
+        .sparkle-particle {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #fff;
+            border-radius: 50%;
+            animation: sparklefall 2s linear forwards;
+        }
+
+        @keyframes sparklefall {
+            0% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+            100% {
+                opacity: 0;
+                transform: translateY(100vh);
+            }
+        }
+
+        #fire-container {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 40%;
+            display: none;
+            background: linear-gradient(to top, #ff4500, #ff8c00, transparent);
+            animation: fireFlicker 0.3s infinite alternate;
+        }
+
+        @keyframes fireFlicker {
+            0% {
+                opacity: 0.8;
+                transform: scaleY(1);
+            }
+
+            100% {
+                opacity: 1;
+                transform: scaleY(1.1);
+            }
+        }
+
+        body.beat-flash {
+            animation: beatFlash 0.3s ease-in-out !important;
+        }
+
+        @keyframes beatFlash {
+
+            0%,
+            100% {
+                background-color: inherit;
+            }
+
+            50% {
+                background-color: #fff;
+            }
+        }
+
+        #static-overlay {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(0deg, #000 0px, #fff 2px, #000 4px);
+            display: none;
+            animation: staticFlicker 0.1s infinite;
+        }
+
+        @keyframes staticFlicker {
+            0% {
+                opacity: 0.8;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        #eye-container {
+            position: absolute;
+            font-size: 20vh;
+            display: none;
+        }
+
+        #puzzle-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: none;
+        }
+
+        .puzzle-piece {
+            position: absolute;
+            width: 50%;
+            height: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid #fff;
+        }
+
+        #mask-overlay {
+            position: absolute;
+            font-size: 30vh;
+            display: none;
+            animation: maskAppear 2s ease-out forwards;
+        }
+
+        @keyframes maskAppear {
+            0% {
+                opacity: 0;
+                transform: scale(0);
+            }
+
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        #crystal-ball {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.8), rgba(100, 100, 255, 0.4));
+            display: none;
+            animation: crystalGlow 2s ease-in-out infinite;
+        }
+
+        @keyframes crystalGlow {
+
+            0%,
+            100% {
+                box-shadow: 0 0 20px #fff, 0 0 40px #88f;
+            }
+
+            50% {
+                box-shadow: 0 0 40px #fff, 0 0 80px #88f;
+            }
+        }
+
+        #snapshot-flash {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: #fff;
+            display: none;
+        }
+
+        #snapshot-flash.active {
+            animation: cameraFlash 0.5s ease-out forwards;
+        }
+
+        @keyframes cameraFlash {
+            0% {
+                opacity: 1;
+            }
+
+            100% {
+                opacity: 0;
+            }
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: #fff;
+            border-radius: 50%;
+            animation: starMove 3s linear infinite;
+        }
+
+        @keyframes starMove {
+            0% {
+                transform: translateZ(0) scale(1);
+                opacity: 0;
+            }
+
+            50% {
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateZ(100px) scale(3);
+                opacity: 0;
+            }
+        }
+
+        .red {
+            color: #f00 !important;
+        }
+
+        .black {
+            color: #fff !important;
+        }
+
+        #step-guide {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 10000;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        #step-guide.visible {
+            display: block;
+        }
+
+        #step-guide .guide-content {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #2a2a2a;
+            border: 2px solid #d9534f;
+            border-radius: 12px;
+            padding: 30px;
+            position: relative;
+        }
+
+        #step-guide .guide-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #d9534f;
+            color: #fff;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 24px;
+            cursor: pointer;
+            font-weight: bold;
+            line-height: 1;
+        }
+
+        #step-guide .guide-close:hover {
+            background: #c9302c;
+            transform: scale(1.1);
+        }
+
+        #step-guide h3 {
+            color: #d9534f;
+            margin: 0 0 15px 0;
+            font-size: 18px;
+            border-bottom: 2px solid #d9534f;
+            padding-bottom: 10px;
+        }
+
+        #step-guide table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        #step-guide td {
+            padding: 6px 8px;
+            border-bottom: 1px solid #2a2a2a;
+        }
+
+        #step-guide td:first-child {
+            width: 80px;
+            font-weight: bold;
+            color: #888;
+        }
+
+        .guide-toggle {
+            cursor: pointer;
+            color: #fff;
+            background: #d9534f;
+            font-size: 16px;
+            font-weight: bold;
+            padding: 8px 16px;
+            border-radius: 6px;
+            margin-left: 12px;
+            user-select: none;
+            border: 2px solid #c9302c;
+            transition: all 0.2s;
+            display: inline-block;
+        }
+
+        .guide-toggle:hover {
+            background: #c9302c;
+            transform: scale(1.05);
+            box-shadow: 0 0 10px rgba(217, 83, 79, 0.6);
+        }
+
+        /* Background Animations Logo */
+        .bg-anim-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 0;
+            /* Behind screens */
+            pointer-events: none;
+        }
+
+        .anim-respiration {
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, rgba(0, 0, 0, 0) 80%);
+            animation: bgBreathe 4s ease-in-out infinite alternate;
+        }
+
+        @keyframes bgBreathe {
+            0% {
+                transform: scale(0.8);
+                opacity: 0.2;
+            }
+
+            100% {
+                transform: scale(1.5);
+                opacity: 0.8;
+            }
+        }
+
+        .anim-vague {
+            background: linear-gradient(45deg, rgba(255, 255, 255, 0.05) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.05) 50%, rgba(255, 255, 255, 0.05) 75%, transparent 75%, transparent);
+            background-size: 100px 100px;
+            animation: bgWave 4s linear infinite;
+        }
+
+        @keyframes bgWave {
+            0% {
+                background-position: 0 0;
+            }
+
+            100% {
+                background-position: 100px 100px;
+            }
+        }
+
+        /* 10 Nouvelles Animations */
+        .anim-hyperspace {
+            background: url('images/hyperspace.gif') no-repeat center center;
+            background-size: cover;
+            opacity: 0.6;
+        }
+
+        .anim-pluie-matrix {
+            background: linear-gradient(to bottom, rgba(0, 255, 0, 0.1), rgba(0, 255, 0, 0.05));
+            animation: matrixRain 2s linear infinite;
+        }
+
+        @keyframes matrixRain {
+            0% {
+                background-position: 0 -100vh;
+            }
+
+            100% {
+                background-position: 0 100vh;
+            }
+        }
+
+        .anim-battement-coeur {
+            background: radial-gradient(circle, rgba(255, 0, 0, 0.1) 0%, transparent 60%);
+            animation: bgHeartbeat 1.5s infinite;
+        }
+
+        @keyframes bgHeartbeat {
+            0% {
+                transform: scale(1);
+                opacity: 0.3;
+            }
+
+            20% {
+                transform: scale(1.1);
+                opacity: 0.6;
+            }
+
+            40% {
+                transform: scale(1);
+                opacity: 0.3;
+            }
+
+            60% {
+                transform: scale(1.15);
+                opacity: 0.8;
+            }
+
+            80% {
+                transform: scale(1);
+                opacity: 0.3;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 0.3;
+            }
+        }
+
+        .anim-etoiles-filantes {
+            background: radial-gradient(circle, #fff 10%, transparent 10%), radial-gradient(circle, #fff 10%, transparent 10%);
+            background-size: 50px 50px;
+            background-position: 0 0, 25px 25px;
+            animation: shootingStars 5s linear infinite;
+            opacity: 0.1;
+        }
+
+        @keyframes shootingStars {
+            100% {
+                background-position: 500px 500px, 525px 525px;
+            }
+        }
+
+        .anim-mystique {
+            background: conic-gradient(from 0deg, rgba(255, 0, 255, 0.1), rgba(0, 255, 255, 0.1), rgba(255, 0, 255, 0.1));
+            animation: mysticSpin 10s linear infinite;
+        }
+
+        @keyframes mysticSpin {
+            100% {
+                transform: rotate(360deg) scale(2);
+            }
+        }
+
+        .anim-feu {
+            background: linear-gradient(to top, rgba(255, 100, 0, 0.3) 0%, transparent 60%);
+            animation: fireFlicker 0.1s infinite alternate;
+        }
+
+        @keyframes fireFlicker {
+            0% {
+                opacity: 0.8;
+                transform: translateY(0);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translateY(-5px);
+            }
+        }
+
+        .anim-glitch-bg {
+            background: repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.05) 0px, transparent 1px, transparent 4px, rgba(255, 255, 255, 0.05) 5px);
+            animation: glitchLines 0.2s infinite;
+        }
+
+        @keyframes glitchLines {
+            0% {
+                transform: translateY(0);
+            }
+
+            100% {
+                transform: translateY(5px);
+            }
+        }
+
+        .anim-zoom-dezoom {
+            /* Pulsation faible du logo : applied via JS */
+            display: none;
+        }
+
+        .anim-laser {
+            background: linear-gradient(90deg, transparent 40%, rgba(255, 0, 0, 0.2) 50%, transparent 60%);
+            background-size: 200% 100%;
+            animation: laserSweep 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes laserSweep {
+            0% {
+                background-position: -100% 0;
+            }
+
+            100% {
+                background-position: 200% 0;
+            }
+        }
+
+        .anim-boussole {
+            background: repeating-radial-gradient(circle, transparent, transparent 20px, rgba(255, 255, 255, 0.05) 20px, rgba(255, 255, 255, 0.05) 21px);
+            animation: compassRotate 20s linear infinite;
+        }
+
+        @keyframes compassRotate {
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes logoPulse {
+            0% {
+                transform: scale(1);
+            }
+
+            100% {
+                transform: scale(1.1);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="bg-anim-container" class="bg-anim-container"></div>
+    <div id="debug-log">Admin init...</div>
+
+    <!-- Écran 1 : Participer -->
+    <div id="connect-screen" class="screen active" style="cursor: pointer;">
+        <div id="connect-logo-container"
+            style="width: 80vw; max-width: 400px; margin-bottom: 20px; display: flex; justify-content: center; align-items: center;">
+            <img id="connect-logo-img" src="" alt="Logo"
+                style="width: 100%; height: 100%; object-fit: contain; display: none; transition: transform 0.2s ease-out;">
+        </div>
+        <div style="font-size: 1.5rem; color: #fff; letter-spacing: 2px; text-transform: uppercase;">
+            Touchez pour participer
+        </div>
+        <div id="connect-tagline-text"
+            style="color: #888; font-size: 0.8rem; margin-top: 10px; letter-spacing: 1px; text-transform: uppercase;">
+        </div>
+    </div>
+
+    <!-- Écran 2: Logo principal -->
+    <div id="logo-screen" class="screen" style="display:none;">
+        <div id="logo-container"><img id="logo-img" src="" alt="Logo"></div>
+        <p id="admin-tagline"
+            style="color:#fff; font-size:0.8rem; letter-spacing:2px; text-transform:uppercase; text-align:center; padding:0 20px;">
+            Réaliser une expérience.
+        </p>
+    </div>
+
+    <!-- Prévisualisation séquence (Admin voit ce que le public voit) -->
+    <div id="engine-screen" class="screen"
+        style="display:none;justify-content:center;align-items:center;z-index:500; background: transparent;">
+        <div id="emoji-display" style="font-size:15vh;"></div>
+        <img id="media-display" src="" alt="Media"
+            style="width: 85%; max-width: 500px; height: auto; border-radius: 15px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5); display: none;">
+        <video id="video-display" playsinline style="width:100%;height:100%;object-fit:cover;display:none;"></video>
+        <img id="arrow" src="fleche.png" alt=""
+            style="position:absolute;bottom:0;left:50%;transform:translateX(-50%);display:none;width:50vw;max-width:350px;pointer-events:none;">
+        <svg id="heart-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <path fill="#ff0000" d="M50,30 C50,30 50,30 50,30 C50,30 50,30 50,30 Z">
+                <animate attributeName="d" dur="2s" fill="freeze" from="M50,50 L50,50 L50,50 Z"
+                    to="M50,85 C25,70 15,55 15,40 C15,25 25,15 40,15 C45,15 50,20 50,20 C50,20 55,15 60,15 C75,15 85,25 85,40 C85,55 75,70 50,85 Z" />
+            </path>
+        </svg>
+        <div id="countdown-display"></div>
+        <div id="dice-container">
+            <div id="dice">
+                <div class="dice-face">1</div>
+                <div class="dice-face">2</div>
+                <div class="dice-face">3</div>
+                <div class="dice-face">4</div>
+                <div class="dice-face">5</div>
+                <div class="dice-face">6</div>
+            </div>
+        </div>
+        <div id="ripple-overlay"></div>
+        <audio id="audio-player"></audio>
+        <div id="text-display"></div>
+        <div id="spiral-overlay"></div>
+        <div id="color-overlay"></div>
+        <div id="number-display"></div>
+        <div id="ripple-center"></div>
+        <div id="fade-overlay"></div>
+        <div id="card-flip-container">
+            <div id="card-flip"></div>
+        </div>
+        <div id="slot-container"></div>
+        <div id="pinpoint-target"></div>
+        <div id="unlock-icon">🔒</div>
+        <div id="wave-overlay"></div>
+        <div id="fire-container"></div>
+        <div id="static-overlay"></div>
+        <div id="eye-container">👁️</div>
+        <div id="puzzle-container"></div>
+        <div id="mask-overlay">🎭</div>
+        <div id="crystal-ball"></div>
+        <div id="snapshot-flash"></div>
+    </div>
+
+    <div id="settings-panel">
+        <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:20px;">
+            <h2>Magic Lab</h2>
+            <div id="connection-count"
+                style="font-size:12px; background:#222; padding:4px 10px; border-radius:20px; color:#34c759;">👤 1</div>
+        </div>
+
+        <div class="row">
+            <label>Routine Active <span class="add-link" onclick="addRoutine()">+ Nouvelle</span></label>
+            <select id="routine-select" onchange="switchRoutine(this.value)"></select>
+        </div>
+
+        <div class="section-title">Étapes de la séquence <span class="add-link" onclick="showAddStepForm()">+
+                Ajouter</span><span class="guide-toggle" onclick="toggleGuide()">❓ Guide</span></div>
+        <div id="step-guide">
+            <div class="guide-content">
+                <button class="guide-close" onclick="toggleGuide()">×</button>
+                <h3>📋 Guide des types d'étapes</h3>
+                <table>
+                    <tr>
+                        <td>⬇ Arrow</td>
+                        <td>Flèche rouge en bas d'écran</td>
+                    </tr>
+                    <tr>
+                        <td>🔊 Audio</td>
+                        <td>Audio avec fade volume (startVol→endVol)</td>
+                    </tr>
+                    <tr>
+                        <td>🎵 Beat</td>
+                        <td>Flash au rythme d'un BPM</td>
+                    </tr>
+                    <tr>
+                        <td>⬛ Blackout</td>
+                        <td>Écran noir total</td>
+                    </tr>
+                    <tr>
+                        <td>🫁 Breathing</td>
+                        <td>Animation respiration Zen</td>
+                    </tr>
+                    <tr>
+                        <td>🎴 CardFlip</td>
+                        <td>Carte 3D qui se retourne</td>
+                    </tr>
+                    <tr>
+                        <td>🎨 Color</td>
+                        <td>Couleur de fond personnalisée</td>
+                    </tr>
+                    <tr>
+                        <td>🔢 Countdown</td>
+                        <td>Compte à rebours (startFrom: 3-10)</td>
+                    </tr>
+                    <tr>
+                        <td>🔮 Crystal</td>
+                        <td>Boule de cristal luminescente</td>
+                    </tr>
+                    <tr>
+                        <td>🎲 Dice</td>
+                        <td>Dé 3D → face finale (finalFace: 1-6)</td>
+                    </tr>
+                    <tr>
+                        <td>🃏 Emojis</td>
+                        <td>Symboles de cartes accélérés (♠♥♣♦)</td>
+                    </tr>
+                    <tr>
+                        <td>👁️ Eye</td>
+                        <td>Œil qui cligne</td>
+                    </tr>
+                    <tr>
+                        <td>🌫️ Fade</td>
+                        <td>Fondu vers noir ou blanc</td>
+                    </tr>
+                    <tr>
+                        <td>🔥 Fire</td>
+                        <td>Flammes montantes</td>
+                    </tr>
+                    <tr>
+                        <td>⚡ Flash</td>
+                        <td>Flash blanc + vibration (500ms)</td>
+                    </tr>
+                    <tr>
+                        <td>⚡ Glitch</td>
+                        <td>Effet matrix/bug visuel</td>
+                    </tr>
+                    <tr>
+                        <td>❤️ Heart</td>
+                        <td>Animation morphing point → cœur battant</td>
+                    </tr>
+                    <tr>
+                        <td>🎆 Lottie</td>
+                        <td>Animation Lottie JSON</td>
+                    </tr>
+                    <tr>
+                        <td>🎭 Mask</td>
+                        <td>Masque qui apparaît</td>
+                    </tr>
+                    <tr>
+                        <td>🪞 Mirror</td>
+                        <td>Effet miroir horizontal/vertical</td>
+                    </tr>
+                    <tr>
+                        <td>🔢 Number</td>
+                        <td>Nombre qui défile puis s'arrête</td>
+                    </tr>
+                    <tr>
+                        <td>⏸ Pause</td>
+                        <td>Pause configurable (défaut 2s)</td>
+                    </tr>
+                    <tr>
+                        <td>🎯 Pinpoint</td>
+                        <td>Cible qui se resserre sur un point</td>
+                    </tr>
+                    <tr>
+                        <td>💓 Pulse</td>
+                        <td>Pulsation hypnotique de l'écran</td>
+                    </tr>
+                    <tr>
+                        <td>🧩 Puzzle</td>
+                        <td>Pièces de puzzle qui s'assemblent</td>
+                    </tr>
+                    <tr>
+                        <td>🎴 Reveal</td>
+                        <td>Révélation d'UNE carte (ex: 9C)</td>
+                    </tr>
+                    <tr>
+                        <td>🖼️ RevealImage</td>
+                        <td>Révélation d'une image/photo (URL)</td>
+                    </tr>
+                    <tr>
+                        <td>〰️ Ripple</td>
+                        <td>Ondulation depuis le centre</td>
+                    </tr>
+                    <tr>
+                        <td>〰️ RippleFromLogo</td>
+                        <td>Ondulation depuis le logo</td>
+                    </tr>
+                    <tr>
+                        <td>📣 Shake</td>
+                        <td>Tremblement de l'écran</td>
+                    </tr>
+                    <tr>
+                        <td>🔀 Shuffle</td>
+                        <td>Mélange rapide de cartes</td>
+                    </tr>
+                    <tr>
+                        <td>🔇 Silence</td>
+                        <td>Coupe tous les sons</td>
+                    </tr>
+                    <tr>
+                        <td>🎰 Slot</td>
+                        <td>Machine à sous (3 symboles)</td>
+                    </tr>
+                    <tr>
+                        <td>📸 Snapshot</td>
+                        <td>Flash caméra + freeze frame</td>
+                    </tr>
+                    <tr>
+                        <td>✨ Sparkle</td>
+                        <td>Paillettes qui tombent</td>
+                    </tr>
+                    <tr>
+                        <td>🌀 Spiral</td>
+                        <td>Spirale tournante hypnotique</td>
+                    </tr>
+                    <tr>
+                        <td>🌟 Starfield</td>
+                        <td>Champ d'étoiles en mouvement</td>
+                    </tr>
+                    <tr>
+                        <td>📻 StaticNoise</td>
+                        <td>Bruit blanc TV/static</td>
+                    </tr>
+                    <tr>
+                        <td>⏹ Stop</td>
+                        <td>Stoppe la séquence (reset manuel)</td>
+                    </tr>
+                    <tr>
+                        <td>📝 Text</td>
+                        <td>Texte géant personnalisable</td>
+                    </tr>
+                    <tr>
+                        <td>🔓 Unlock</td>
+                        <td>Cadenas qui s'ouvre</td>
+                    </tr>
+                    <tr>
+                        <td>🎬 Video</td>
+                        <td>Vidéo plein écran (URL)</td>
+                    </tr>
+                    <tr>
+                        <td>🌊 Wave</td>
+                        <td>Vague liquide qui traverse l'écran</td>
+                    </tr>
+                    <tr>
+                        <td>🔤 Words</td>
+                        <td>Lettres → mots → MOT FINAL</td>
+                    </tr>
+                    <tr>
+                        <td>🔍 Zoom</td>
+                        <td>Zoom progressif sur l'écran</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <div id="step-add-area"></div>
+        <div id="steps-list"></div>
+
+        <div class="section-title">Configuration Globale</div>
+        <div class="row"><label>Délai d'Entrée (s)</label><input type="number" id="delay-input" value="2" step="0.5">
+        </div>
+        <div class="row"><label>Zoom Logo (<span id="zoom-val">100</span>%)</label><input type="range" id="zoom-range"
+                min="50" max="250" value="100" oninput="updateZoom(this.value)"></div>
+        <div class="row"><label>Logo Principal (Spectacle) : Galerie</label>
+            <div class="file-input-wrapper"><button class="btn btn-secondary">CHOISIR IMAGE</button><input type="file"
+                    id="logo-file" accept="image/*" onchange="handleFileUpload(this, 'logo-url-input')"></div>
+        </div>
+        <div class="row"><label>Logo Principal : URL</label><input type="text" id="logo-url-input"
+                placeholder="https://..." oninput="previewLogo(this.value)"></div>
+
+        <div class="row" style="margin-top: 20px;"><label>Logo Accueil (Bouton Participer) : Galerie</label>
+            <div class="file-input-wrapper"><button class="btn btn-secondary">CHOISIR IMAGE</button><input type="file"
+                    id="connect-logo-file" accept="image/*" onchange="handleFileUpload(this, 'connect-logo-url-input')">
+            </div>
+        </div>
+        <div class="row"><label>Logo Accueil : URL</label><input type="text" id="connect-logo-url-input"
+                placeholder="https://..."></div>
+        <div class="row"><label>URL Redirection Finale</label><input type="text" id="redir-url-input"
+                placeholder="https://g.page/..."></div>
+        <div class="row"><label>Texte d'accueil</label><input type="text" id="tagline-input"
+                placeholder="Réaliser une expérience."></div>
+        <div class="row">
+            <label>Afficher les logs de timing (Admin)</label>
+            <label class="switch" style="margin:0;">
+                <input type="checkbox" id="logs-toggle" onchange="toggleLogs(this.checked)">
+                <span class="slider"></span>
+            </label>
+        </div>
+        <div class="row">
+            <label>Mode Debug (Visible sur public)</label>
+            <label class="switch" style="margin:0;">
+                <input type="checkbox" id="toggle-debug">
+                <span class="slider"></span>
+            </label>
+        </div>
+        <div class="row"><label>Couleur de fond</label>
+            <div style="display:flex;gap:8px;">
+                <button id="bg-black" onclick="setBgColor('#000')"
+                    style="width:40px;height:40px;background:#000;border:2px solid #555;border-radius:8px;cursor:pointer;"></button>
+                <button id="bg-white" onclick="setBgColor('#ffffff')"
+                    style="width:40px;height:40px;background:#fff;border:2px solid #555;border-radius:8px;cursor:pointer;"></button>
+                <input type="color" id="bg-color-input" value="#000000" onchange="setBgColor(this.value)"
+                    style="width:40px;height:40px;border:none;padding:0;cursor:pointer;border-radius:8px;">
+            </div>
+        </div>
+
+        <button class="btn" style="background:#34c759" onclick="saveAll()">SYNCHRONISER & ENREGISTRER</button>
+        <button class="btn btn-secondary" onclick="closePanel()">FERMER PANNEAU</button>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/config.js"></script>
+    <script>
+        const socket = io();
+        let state = { routines: [], activeRoutineIndex: 0, sequenceDelay: 2, logoZoom: 100, logoUrl: '', connectLogoUrl: '', adminConnectLogoUrl: '', redirectionUrl: '', logoVisible: false, tagline: '', bgAnim: '' };
+        let lpTimer = null;
+        let showStep = 0;
+        let serverOffset = 0;
+        let hasStarted = false;
+        const logBox = document.getElementById('debug-log');
+
+        // Init logs toggle from localStorage
+        const savedLogState = localStorage.getItem('adminLogsParams') === 'true';
+        const logToggle = document.getElementById('logs-toggle');
+        if (logToggle) {
+            logToggle.checked = savedLogState;
+            toggleLogs(savedLogState);
+        }
+
+        function log(msg, color) {
+            const time = new Date().toLocaleTimeString();
+            console.log(`[ADMIN ${time}] ${msg}`);
+            if (!logBox) return;
+            const line = document.createElement('div');
+            line.style.color = color || "rgba(255,255,255,0.5)";
+            line.innerText = `[${time}] ${msg}`;
+            logBox.appendChild(line);
+            if (logBox.childNodes.length > 5) logBox.removeChild(logBox.firstChild);
+        }
+
+        function toggleLogs(checked) {
+            if (logBox) logBox.style.display = checked ? 'block' : 'none';
+            localStorage.setItem('adminLogsParams', checked);
+        }
+
+        socket.on('connect', () => {
+            log("Socket connecté: " + socket.id, "#34c759");
+            const now = Date.now();
+            socket.emit('sync-time', now, (serverTime) => {
+                const latency = (Date.now() - now) / 2;
+                serverOffset = serverTime - (Date.now() - latency);
+            });
+        });
+        socket.on('disconnect', () => log("Socket déconnecté!", "#f00"));
+
+        socket.on('state-update', (serverState) => {
+            log("Sync: " + (serverState.routines ? serverState.routines.length : 0) + " routines reçues");
+            state = serverState;
+            updateUI();
+        });
+
+        socket.on('spectator-count', (data) => {
+            const el = document.getElementById('connection-count');
+            if (el) el.innerText = "👤 " + data.count;
+            log("Spectateurs: " + data.count);
+        });
+
+        socket.on('admin-granted', () => {
+            log("Admin accordé!", "#34c759");
+            if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+        });
+
+        function updateUI() {
+            if (!hasStarted) {
+                const connectImg = document.getElementById('connect-logo-img');
+                if (connectImg) {
+                    // Admin uses adminConnectLogoUrl if it exists, otherwise connectLogoUrl, otherwise logoUrl
+                    const targetLogo = state.adminConnectLogoUrl || state.connectLogoUrl || (state.logoVisible ? state.logoUrl : '');
+                    if (targetLogo) {
+                        connectImg.src = targetLogo;
+                        connectImg.style.display = 'block';
+                        connectImg.style.transform = `scale(${(state.logoZoom || 100) / 100})`;
+                    } else {
+                        connectImg.style.display = 'none';
+                    }
+                }
+                const connectTagline = document.getElementById('connect-tagline-text');
+                if (connectTagline && state.tagline) connectTagline.innerText = state.tagline;
+            }
+
+            if (hasStarted) {
+                const img = document.getElementById('logo-img');
+                if (state.logoUrl && state.logoVisible) {
+                    img.src = state.logoUrl; img.style.display = 'block';
+                    img.style.transform = `scale(${(state.logoZoom || 100) / 100})`;
+                } else { img.style.display = 'none'; }
+            }
+
+            // showStep avance dès que logoVisible est true (même sans logo image)
+            showStep = state.logoVisible ? 1 : 0;
+
+            document.getElementById('delay-input').value = state.sequenceDelay || 2;
+            document.getElementById('zoom-range').value = state.logoZoom || 100;
+            document.getElementById('zoom-val').innerText = state.logoZoom || 100;
+            document.getElementById('logo-url-input').addEventListener('change', (e) => previewLogo(e.target.value));
+            document.getElementById('connect-logo-url-input').addEventListener('change', () => { /* no preview logic required */ });
+            document.getElementById('admin-connect-logo-url-input').addEventListener('change', () => { /* no preview logic required */ });
+            document.getElementById('logo-url-input').value = state.logoUrl || '';
+            document.getElementById('connect-logo-url-input').value = state.connectLogoUrl || '';
+            document.getElementById('admin-connect-logo-url-input').value = state.adminConnectLogoUrl || '';
+            document.getElementById('redir-url-input').value = state.redirectionUrl || '';
+            document.getElementById('tagline-input').value = state.tagline || '';
+            const adminTagline = document.getElementById('admin-tagline');
+            if (adminTagline && state.tagline) adminTagline.innerText = state.tagline;
+            // Background color
+            document.getElementById('bg-color-input').value = state.bgColor || '#000000';
+            document.body.style.backgroundColor = state.bgColor || '#000';
+            document.getElementById('logo-screen').style.background = 'transparent';
+            document.getElementById('connect-screen').style.background = 'transparent';
+
+            // Background anim
+            const bgAnimSelect = document.getElementById('bg-anim-select');
+            if (bgAnimSelect) bgAnimSelect.value = state.bgAnim || '';
+            const bgContainer = document.getElementById('bg-anim-container');
+            const logoImg = document.getElementById('logo-img');
+
+            if (bgContainer) {
+                bgContainer.className = 'bg-anim-container ' + (state.bgAnim || '');
+            }
+            if (logoImg) {
+                if (state.bgAnim === 'anim-zoom-dezoom') {
+                    logoImg.style.animation = 'logoPulse 3s ease-in-out infinite alternate';
+                } else {
+                    logoImg.style.animation = 'none';
+                }
+            }
+
+            // Sync debug toggle
+            const debugToggle = document.getElementById('toggle-debug');
+            if (debugToggle) debugToggle.checked = !!state.debug;
+
+            const sel = document.getElementById('routine-select');
+            if (state.routines && state.routines.length > 0) {
+                sel.innerHTML = state.routines.map((r, i) => `<option value="${i}" ${i == state.activeRoutineIndex ? 'selected' : ''}>${r.name}</option>`).join('');
+                renderSteps();
+            } else {
+                sel.innerHTML = '<option>Aucune routine</option>';
+                document.getElementById('steps-list').innerHTML = '<p style="color:#444;font-size:12px;">Aucune routine. Cliquez "+ Nouvelle".</p>';
+            }
+        }
+
+        function setBgColor(color) {
+            document.getElementById('bg-color-input').value = color;
+            document.body.style.backgroundColor = color;
+            document.getElementById('logo-screen').style.background = 'transparent';
+            document.getElementById('connect-screen').style.background = 'transparent';
+            state.bgColor = color;
+        }
+
+        function setBgAnim(animClass) {
+            state.bgAnim = animClass;
+        }
+
+        let lastRenderedSteps = '';
+
+        function renderSteps() {
+            const list = document.getElementById('steps-list');
+            const currentScroll = list.scrollTop; // Save scroll position
+            const routine = state.routines[state.activeRoutineIndex];
+
+            if (!routine) { list.innerHTML = '<p style="color:#444;font-size:12px;">Routine invalide.</p>'; return; }
+
+            // Optimization: Skip render if steps haven't changed
+            const newStepsJSON = JSON.stringify(routine.steps);
+            if (newStepsJSON === lastRenderedSteps) {
+                // Determine if we should log verbose info (every 5s or something? No, let's just log "Skipped" if debug is on)
+                if (state.debug) console.log("Render skipped: No changes");
+                return;
+            }
+            lastRenderedSteps = newStepsJSON;
+
+            if (state.debug) console.log(`[Render] Rendering ${routine.steps.length} steps. Scroll: ${currentScroll}`);
+
+            const icons = { emojis: '🃏', blackout: '⬛', flash: '⚡', shuffle: '🔀', reveal: '🎴', revealImage: '🖼️', video: '🎬', words: '🔤', lottie: '🎆', arrow: '⬇', heart: '❤️', countdown: '🔢', dice: '🎲', rippleFromLogo: '〰️', audio: '🔊', text: '📝', pulse: '💓', spiral: '🌀', color: '🎨', number: '🔢', breathing: '🫁', glitch: '⚡', ripple: '〰️', zoom: '🔍', shake: '📣', fade: '🌫️', pause: '⏸', cardFlip: '🎴', slot: '🎰', pinpoint: '🎯', unlock: '🔓', mirror: '🪞', wave: '🌊', sparkle: '✨', fire: '🔥', beat: '🎵', silence: '🔇', staticNoise: '📻', eye: '👁️', puzzle: '🧩', mask: '🎭', crystal: '🔮', snapshot: '📸', starfield: '🌟', stop: '⏹' };
+            list.innerHTML = routine.steps.map((step, idx) => `
+                <div class="step-item" draggable="true" data-idx="${idx}">
+                    <div class="step-handle">☰</div>
+                    <div class="step-info" onclick="editStep(${idx})">
+                        <div class="step-name">${icons[step.type] || '▶'} ${step.type.toUpperCase()}</div>
+                        <div class="step-meta">${step.duration}ms ${step.value ? '| ' + step.value : ''} ${step.vibrate ? '| Vib' : ''}</div>
+                    </div>
+                    <div class="step-toggle ${step.active ? 'active' : ''}" onclick="event.stopPropagation(); toggleStep(${idx})"></div>
+                </div>
+            `).join('');
+
+            // Touch drag for mobile
+            list.querySelectorAll('.step-item').forEach(item => {
+                const handle = item.querySelector('.step-handle');
+                let startY = 0, currentItem = null;
+
+                handle.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    currentItem = item;
+                    startY = e.touches[0].clientY;
+                    item.classList.add('dragging');
+                    item.style.zIndex = '100';
+                }, { passive: false });
+
+                handle.addEventListener('touchmove', (e) => {
+                    e.preventDefault();
+                    if (!currentItem) return;
+                    const y = e.touches[0].clientY;
+                    const after = getDragAfter(list, y);
+                    if (!after) list.appendChild(currentItem);
+                    else list.insertBefore(currentItem, after);
+                }, { passive: false });
+
+                handle.addEventListener('touchend', () => {
+                    if (!currentItem) return;
+                    currentItem.classList.remove('dragging');
+                    currentItem.style.zIndex = '';
+                    currentItem = null;
+                });
+
+                // Desktop drag fallback
+                item.addEventListener('dragstart', () => item.classList.add('dragging'));
+                item.addEventListener('dragend', () => {
+                    item.classList.remove('dragging');
+                    // Persist new order to state
+                    const newOrder = [...list.querySelectorAll('.step-item')].map(el => parseInt(el.dataset.idx));
+                    const steps = state.routines[state.activeRoutineIndex].steps;
+                    const reordered = newOrder.map(i => steps[i]);
+                    state.routines[state.activeRoutineIndex].steps = reordered;
+                    syncState();
+                    renderSteps();
+                });
+            });
+            list.addEventListener('dragover', e => {
+                e.preventDefault();
+                const dragging = list.querySelector('.dragging');
+                const after = getDragAfter(list, e.clientX); // Was clientY, but flex might be tricky? No, list is column.
+                // Wait, getDragAfter uses clientY.
+                const afterY = getDragAfter(list, e.clientY);
+                if (!afterY) list.appendChild(dragging); else list.insertBefore(dragging, afterY);
+            });
+
+            // Restore scroll position
+            requestAnimationFrame(() => {
+                list.scrollTop = currentScroll;
+                if (state.debug) console.log(`[Render] Scroll restored to ${currentScroll}`);
+            });
+        }
+
+        function getDragAfter(container, y) {
+            const els = [...container.querySelectorAll('.step-item:not(.dragging)')];
+            return els.reduce((closest, child) => {
+                const box = child.getBoundingClientRect();
+                const offset = y - box.top - box.height / 2;
+                if (offset < 0 && offset > closest.offset) return { offset, element: child };
+                return closest;
+            }, { offset: Number.NEGATIVE_INFINITY }).element;
+        }
+
+        function addRoutine() {
+            const name = prompt("Nom de la routine ?", "Nouveau Spectacle");
+            if (!name) return;
+            state.routines.push({ id: Date.now(), name, steps: [] });
+            state.activeRoutineIndex = state.routines.length - 1;
+            socket.emit('update-state', state);
+            log("Routine créée: " + name);
+            updateUI();
+        }
+
+        function showAddStepForm() {
+            if (!state.routines || !state.routines[state.activeRoutineIndex]) {
+                log("Erreur: Créez une routine d'abord", "#f00"); return;
+            }
+            document.getElementById('step-add-area').innerHTML = `
+                <div class="step-add-form" style="display:flex; flex-direction:column; gap:8px; padding:10px; background:rgba(0,122,255,0.1); border-radius:8px;">
+                    <div style="display:flex; gap:5px;">
+                        <select id="new-step-type" style="flex:1;" onchange="updateNewStepPlaceholder()">
+                            <option value="arrow">⬇ Arrow</option>
+                            <option value="audio">🔊 Audio</option>
+                            <option value="beat">🎵 Beat</option>
+                            <option value="blackout">⬛ Blackout</option>
+                            <option value="breathing">🫁 Breathing</option>
+                            <option value="cardFlip">🎴 CardFlip</option>
+                            <option value="color">🎨 Color</option>
+                            <option value="countdown">🔢 Countdown</option>
+                            <option value="crystal">🔮 Crystal</option>
+                            <option value="dice">🎲 Dice</option>
+                            <option value="emojis">🃏 Emojis</option>
+                            <option value="eye">👁️ Eye</option>
+                            <option value="fade">🌫️ Fade</option>
+                            <option value="fire">🔥 Fire</option>
+                            <option value="flash">⚡ Flash</option>
+                            <option value="glitch">⚡ Glitch</option>
+                            <option value="heart">❤️ Heart</option>
+                            <option value="mask">🎭 Mask</option>
+                            <option value="mirror">🪞 Mirror</option>
+                            <option value="number">🔢 Number</option>
+                            <option value="pause">⏸ Pause</option>
+                            <option value="pinpoint">🎯 Pinpoint</option>
+                            <option value="pulse">💓 Pulse</option>
+                            <option value="puzzle">🧩 Puzzle</option>
+                            <option value="reveal">🎴 Reveal</option>
+                            <option value="revealImage">🖼️ RevealImage</option>
+                            <option value="ripple">〰️ Ripple</option>
+                            <option value="rippleFromLogo">〰️ RippleFromLogo</option>
+                            <option value="shake">📣 Shake</option>
+                            <option value="shuffle">🔀 Shuffle</option>
+                            <option value="silence">🔇 Silence</option>
+                            <option value="slot">🎰 Slot</option>
+                            <option value="snapshot">📸 Snapshot</option>
+                            <option value="sparkle">✨ Sparkle</option>
+                            <option value="spiral">🌀 Spiral</option>
+                            <option value="starfield">🌟 Starfield</option>
+                            <option value="staticNoise">📻 StaticNoise</option>
+                            <option value="text">📝 Text</option>
+                            <option value="unlock">🔓 Unlock</option>
+                            <option value="video">🎬 Video</option>
+                            <option value="wave">🌊 Wave</option>
+                            <option value="words">🔤 Words</option>
+                            <option value="zoom">🔍 Zoom</option>
+                            <option value="stop">⏹ Stop</option>
+                        </select>
+                    </div>
+                    <div style="display:flex; gap:5px;">
+                        <input type="text" id="new-step-value" placeholder="Valeur / URL (Optionnel)" style="flex:2;">
+                        <input type="number" id="new-step-duration" value="2000" placeholder="ms" style="width:70px;">
+                        <button onclick="confirmAddStep()" style="background:#007aff;color:white;border:none;border-radius:4px;width:40px;font-weight:bold;">OK</button>
+                    </div>
+                </div>
+            `;
+            updateNewStepPlaceholder();
+        }
+
+        function updateNewStepPlaceholder() {
+            const type = document.getElementById('new-step-type').value;
+            const valInput = document.getElementById('new-step-value');
+            if (!valInput) return;
+
+            const placeholders = {
+                text: "Texte à afficher",
+                audio: "URL audio (audio/file.mp3)",
+                video: "URL vidéo (videos/file.mp4)",
+                color: "Code couleur (#ff0000)",
+                countdown: "Départ (ex: 3)",
+                number: "Nombre final",
+                reveal: "Carte (ex: KH, AS)",
+                revealImage: "URL image",
+                words: "Mot final",
+                pinpoint: "X,Y (ex: 50,50)",
+                glitch: "Message glitch",
+                slot: "Résultat (⭐⭐⭐)"
+            };
+            valInput.placeholder = placeholders[type] || "Valeur (Optionnel)";
+        }
+
+        function confirmAddStep() {
+            const type = document.getElementById('new-step-type').value;
+            const duration = parseInt(document.getElementById('new-step-duration').value) || 2000;
+            const value = document.getElementById('new-step-value').value;
+
+            const newStep = { id: Date.now(), type, duration, active: true };
+            if (value) {
+                // Special handling for some types if needed, but generic assignment is usually fine
+                // For audio/video/lottie, map value to 'url' if it looks like a url, or just value if simple
+                if (['audio', 'video', 'lottie'].includes(type)) {
+                    newStep.url = value;
+                } else if (type === 'pinpoint') {
+                    // Try to parse "50,50"
+                    const parts = value.split(',');
+                    if (parts.length === 2) {
+                        newStep.x = parseInt(parts[0].trim());
+                        newStep.y = parseInt(parts[1].trim());
+                    }
+                } else {
+                    newStep.value = value;
+                }
+            }
+
+            state.routines[state.activeRoutineIndex].steps.push(newStep);
+            log("Ajout: " + type);
+            // Don't clear form completely, just value maybe? Or close it? 
+            // User might want to add multiple similar steps. Let's keep it but clear value.
+            document.getElementById('new-step-value').value = '';
+
+            socket.emit('update-state', state);
+            renderSteps();
+        }
+
+        function deleteStep(idx) {
+            state.routines[state.activeRoutineIndex].steps.splice(idx, 1);
+            log("Étape supprimée");
+            socket.emit('update-state', state);
+            renderSteps();
+        }
+
+        function duplicateStep(idx) {
+            const steps = state.routines[state.activeRoutineIndex].steps;
+            const clone = JSON.parse(JSON.stringify(steps[idx]));
+            steps.splice(idx + 1, 0, clone);
+            log("Étape dupliquée");
+            renderSteps();
+            syncState(); /* Fixed: Ensure syncState is available or use socket emit directly if needed */
+            socket.emit('update-state', state); // Fallback if syncState not defined
+        }
+
+        function editStep(idx) {
+            const step = state.routines[state.activeRoutineIndex].steps[idx];
+            const list = document.getElementById('steps-list');
+            const items = list.querySelectorAll('.step-item');
+            const item = items[idx];
+            if (!item) return;
+
+            let extraFields = '';
+            if (step.type === 'reveal') {
+                const cards = ['AS', '2S', '3S', '4S', '5S', '6S', '7S', '8S', '9S', '10S', 'JS', 'QS', 'KS', 'AH', '2H', '3H', '4H', '5H', '6H', '7H', '8H', '9H', '10H', 'JH', 'QH', 'KH', 'AD', '2D', '3D', '4D', '5D', '6D', '7D', '8D', '9D', '10D', 'JD', 'QD', 'KD', 'AC', '2C', '3C', '4C', '5C', '6C', '7C', '8C', '9C', '10C', 'JC', 'QC', 'KC'];
+                const options = cards.map(c => `<option value="${c}" ${c === step.value ? 'selected' : ''}>${c}</option>`).join('');
+                extraFields = `<label>Carte à révéler</label><select id="edit-val">${options}</select>`;
+            } else if (step.type === 'video') {
+                extraFields = `
+                    <label>Fichier Vidéo (URL ou Upload)</label>
+                    <div class="file-input-wrapper">
+                        <button class="btn btn-secondary" onclick="document.getElementById('video-upload-${idx}').click()">UPLOAD FICHIER</button>
+                        <input type="file" id="video-upload-${idx}" accept="video/*" style="display:none" onchange="uploadVideoFile(this, ${idx})">
+                    </div>
+                    <input id="edit-val" type="text" value="${step.url || ''}" placeholder="videos/mon-effet.mp4">
+                    <p style="font-size:11px;color:#888;margin-top:5px;">Formats supportés: mp4, webm.</p>
+                `;
+            } else if (step.type === 'audio') {
+                extraFields = `
+                    <label>Fichier Audio (URL ou Upload)</label>
+                    <div class="file-input-wrapper">
+                        <button class="btn btn-secondary" onclick="document.getElementById('audio-upload-${idx}').click()">UPLOAD FICHIER</button>
+                        <input type="file" id="audio-upload-${idx}" accept="audio/*" style="display:none" onchange="uploadAudioFile(this, ${idx})">
+                    </div>
+                    <input id="edit-audio-url" type="text" value="${step.url || ''}" placeholder="audio/son.wav">
+                    <div style="display:flex;gap:10px;">
+                        <div style="flex:1"><label>Vol Début (0-1)</label><input id="edit-startVol" type="number" step="0.1" max="1" min="0" value="${step.startVol !== undefined ? step.startVol : 0}"></div>
+                        <div style="flex:1"><label>Vol Fin (0-1)</label><input id="edit-endVol" type="number" step="0.1" max="1" min="0" value="${step.endVol !== undefined ? step.endVol : 1}"></div>
+                    </div>
+                    <label>Durée Fade (ms)</label>
+                    <input id="edit-fadeMs" type="number" value="${step.fadeMs || 2000}">
+                    <p style="font-size:11px;color:#f39c12;margin-top:5px;">💡 Mettre la <b>Durée</b> (en haut) à <b>0</b> pour que la musique se lance et passe tout de suite à la suite.</p>
+                `;
+            } else if (step.type === 'revealImage') {
+                extraFields = `
+                    <label>Image Finale (URL)</label>
+                    <input id="edit-final-img" type="text" value="${step.value || ''}" placeholder="images/final.jpg">
+                    <label>Images Shuffle (séparées par virgule)</label>
+                    <textarea id="edit-shuffle-imgs" rows="3" placeholder="img1.jpg, img2.jpg...">${(step.images || []).join(', ')}</textarea>
+                `;
+            } else if (step.type === 'flash') {
+                extraFields = `<div style="display:flex;gap:10px;align-items:center;">
+                    <div style="flex:1"><label>Nombre de flashs</label><input id="edit-val" type="number" value="${step.value || 1}" min="1" max="20"></div>
+                    <div style="flex:1"><label>Couleur</label><input id="edit-color" type="color" value="${step.color || '#ffffff'}"></div>
+                    <div style="flex:1;padding-top:18px;"><label style="display:flex;align-items:center;gap:8px;cursor:pointer;"><input id="edit-vib" type="checkbox" ${step.vibrate ? 'checked' : ''}> Vibration</label></div>
+                </div>`;
+            } else if (step.type === 'words') {
+                extraFields = `
+                <label>Mots (séparés par virgules)</label>
+                <input id="edit-words" type="text" value="${(step.words || []).join(', ')}" placeholder="MAGIE, MYSTÈRE, ILLUSION">
+                <label>Mot final révélé</label>
+                <input id="edit-val" type="text" value="${step.value || ''}" placeholder="LIBERTÉ">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px;">
+                    <div><label style="font-size:11px;">Phase Lettres %</label><input id="edit-letterPct" type="number" value="${step.letterPct || 60}" min="10" max="90" style="max-width:70px;"></div>
+                    <div><label style="font-size:11px;">Phase Mots %</label><input id="edit-wordPct" type="number" value="${step.wordPct || 30}" min="5" max="80" style="max-width:70px;"></div>
+                    <div><label style="font-size:11px;">Vitesse initiale (ms)</label><input id="edit-startSpeed" type="number" value="${step.startSpeed || 800}" min="100" max="2000" style="max-width:70px;"></div>
+                    <div><label style="font-size:11px;">Vitesse finale (ms)</label><input id="edit-endSpeed" type="number" value="${step.endSpeed || 120}" min="50" max="500" style="max-width:70px;"></div>
+                    <div><label style="font-size:11px;">Pause finale (ms)</label><input id="edit-pauseMs" type="number" value="${step.pauseMs || 2000}" min="500" max="10000" style="max-width:70px;"></div>
+                    <div><label style="font-size:11px;">Taille finale (vh)</label><input id="edit-finalSize" type="number" value="${step.finalSize || 10}" min="5" max="30" style="max-width:70px;"></div>
+                </div>`;
+            } else if (step.type === 'lottie') {
+                extraFields = `<label>Fichier Lottie JSON</label><input id="edit-val" type="text" value="${step.url || ''}" placeholder="animations/explosion.json">`;
+            } else if (step.type === 'dice') {
+                const faces = [1, 2, 3, 4, 5, 6];
+                const options = faces.map(f => `<option value="${f}" ${f === (step.value || 6) ? 'selected' : ''}>${f}</option>`).join('');
+                extraFields = `<label>Face Finale</label><select id="edit-val">${options}</select>`;
+            } else if (step.type === 'shuffle') {
+                extraFields = `<label>Vitesse défilement (ms)</label><input id="edit-speed" type="number" value="${step.speed || 150}">`;
+            } else if (step.type === 'emojis') {
+                extraFields = `<label>Vitesse Initiale (ms)</label><input id="edit-speed" type="number" value="${step.speed || 1200}" placeholder="Plus petit = plus vite">`;
+            } else if (step.type === 'cardFlip') {
+                const cards = ['AS', '2S', '3S', '4S', '5S', '6S', '7S', '8S', '9S', '10S', 'JS', 'QS', 'KS', 'AH', '2H', '3H', '4H', '5H', '6H', '7H', '8H', '9H', '10H', 'JH', 'QH', 'KH', 'AD', '2D', '3D', '4D', '5D', '6D', '7D', '8D', '9D', '10D', 'JD', 'QD', 'KD', 'AC', '2C', '3C', '4C', '5C', '6C', '7C', '8C', '9C', '10C', 'JC', 'QC', 'KC'];
+                const options = cards.map(c => `<option value="cards/${c}.jpg" ${step.value === ('cards/' + c + '.jpg') ? 'selected' : ''}>${c}</option>`).join('');
+                extraFields = `
+                    <label>Carte Finale</label><select id="edit-val">${options}</select>
+                    <label>Vitesse Animation (ms)</label><input id="edit-speed" type="number" value="${step.speed || 2000}">
+                `;
+            } else if (step.type === 'number') {
+                extraFields = `<label>Nombre Final</label><input id="edit-val" type="text" value="${step.value || '42'}">`;
+            } else if (step.type === 'glitch') {
+                extraFields = `
+                    <label>Message (Optionnel)</label><input id="edit-val" type="text" value="${step.value || ''}" placeholder="SYSTEM FAILURE">
+                    <label>Vitesse Glitch (ms)</label><input id="edit-speed" type="number" value="${step.speed || 300}">
+                `;
+            } else if (step.type === 'breathing') {
+                extraFields = `
+                    <label>Couleur (au plus fort)</label><input id="edit-val" type="color" value="${step.value || '#222222'}">
+                    <label>Vitesse Cycle (ms)</label><input id="edit-speed" type="number" value="${step.speed || 4000}">
+                `;
+            } else if (step.type === 'countdown') {
+                extraFields = `
+                    <label>Commencer à</label><input id="edit-val" type="number" value="${step.value || 3}">
+                    <label>Couleur</label><input id="edit-color" type="color" value="${step.color || '#ffffff'}">
+                `;
+            } else if (step.type === 'text') {
+                extraFields = `
+                    <label>Texte</label><input id="edit-val" type="text" value="${step.value || 'TEXTE'}">
+                    <div style="display:flex;gap:10px;">
+                        <div style="flex:1"><label>Couleur</label><input id="edit-color" type="color" value="${step.color || '#ffffff'}"></div>
+                        <div style="flex:1"><label>Taille (vh)</label><input id="edit-size" type="number" value="${step.size || 12}"></div>
+                    </div>
+                    <div style="display:flex;gap:10px;margin-top:5px;">
+                        <div style="flex:1">
+                            <label>Alignement</label>
+                            <select id="edit-align">
+                                <option value="center" ${step.align === 'center' ? 'selected' : ''}>Centré</option>
+                                <option value="left" ${step.align === 'left' ? 'selected' : ''}>Gauche</option>
+                                <option value="right" ${step.align === 'right' ? 'selected' : ''}>Droite</option>
+                            </select>
+                        </div>
+                        <div style="flex:1">
+                            <label>Police</label>
+                            <select id="edit-font">
+                                <option value="sans-serif" ${step.font === 'sans-serif' ? 'selected' : ''}>Sans Serif</option>
+                                <option value="serif" ${step.font === 'serif' ? 'selected' : ''}>Serif</option>
+                                <option value="monospace" ${step.font === 'monospace' ? 'selected' : ''}>Monospace</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div style="margin-top:5px;">
+                        <label style="display:flex;align-items:center;gap:5px;">
+                            <input id="edit-bold" type="checkbox" ${step.bold ? 'checked' : ''}> Gras (Bold)
+                        </label>
+                    </div>
+                `;
+            } else if (step.type === 'pulse' || step.type === 'beat') {
+                extraFields = `
+                    <label>Couleur</label><input id="edit-color" type="color" value="${step.color || '#ffffff'}">
+                    <label>BPM / Vitesse</label><input id="edit-speed" type="number" value="${step.speed || 120}">
+                `;
+            } else if (step.type === 'spiral' || step.type === 'ripple' || step.type === 'wave') {
+                extraFields = `<label>Vitesse Animation (ms)</label><input id="edit-speed" type="number" value="${step.speed || 3000}">`;
+            } else if (step.type === 'color' || step.type === 'fade' || step.type === 'mask') {
+                extraFields = `<label>Valeur / Couleur</label><input id="edit-val" type="text" value="${step.value || '#ff0000'}">`;
+            } else if (step.type === 'zoom' || step.type === 'shake') {
+                extraFields = `<label>Intensité</label><input id="edit-val" type="number" value="${step.value || 5}">`;
+            } else if (step.type === 'slot') {
+                extraFields = `
+                    <label>Symboles (séparés par virgule)</label><input id="edit-symbols" type="text" value="${(step.symbols || []).join(', ')}" placeholder="🍒, 🍋, ⭐">
+                    <label>Résultat Final (3 symboles)</label><input id="edit-val" type="text" value="${step.value || '⭐⭐⭐'}">
+                `;
+            } else if (step.type === 'pinpoint') {
+                extraFields = `
+                    <div style="display:flex;gap:10px;">
+                        <div style="flex:1"><label>Position X (%)</label><input id="edit-x" type="number" value="${step.x || 50}"></div>
+                        <div style="flex:1"><label>Position Y (%)</label><input id="edit-y" type="number" value="${step.y || 50}"></div>
+                    </div>
+                    <label>Couleur Cible</label><input id="edit-color" type="color" value="${step.color || '#ff0000'}">
+                `;
+            } else if (step.type === 'unlock') {
+                extraFields = `<label>Emoji Cadenas</label><input id="edit-val" type="text" value="${step.value || '🔓'}">`;
+            } else if (step.type === 'mirror') {
+                extraFields = `
+                    <label>Axe</label>
+                    <select id="edit-val">
+                        <option value="v" ${step.value === 'v' ? 'selected' : ''}>Vertical (Miroir V)</option>
+                        <option value="h" ${step.value === 'h' ? 'selected' : ''}>Horizontal (Miroir H)</option>
+                    </select>
+                `;
+            } else if (step.type === 'sparkle' || step.type === 'fire' || step.type === 'staticNoise' || step.type === 'starfield') {
+                extraFields = `
+                    <div style="display:flex;gap:10px;">
+                        <div style="flex:1"><label>Intensité / Densité</label><input id="edit-val" type="number" value="${step.value || 50}"></div>
+                        <div style="flex:1"><label>Couleur</label><input id="edit-color" type="color" value="${step.color || '#ffffff'}"></div>
+                    </div>
+                `;
+            } else if (step.type === 'eye' || step.type === 'puzzle' || step.type === 'crystal' || step.type === 'snapshot') {
+                extraFields = `<label>Durée / Vitesse (ms)</label><input id="edit-speed" type="number" value="${step.speed || 1000}">`;
+            } else if (step.type === 'arrow') {
+                extraFields = `<label>Animation</label><select id="edit-val">
+                    <option value="static" ${step.value === 'static' ? 'selected' : ''}>Fixe</option>
+                    <option value="bounce" ${step.value === 'bounce' ? 'selected' : ''}>Rebond</option>
+                 </select>`;
+            }
+
+            item.innerHTML = `
+                <div style="width:100%;display:flex;flex-direction:column;gap:10px;">
+                    <div style="display:flex;gap:8px;align-items:center;">
+                        <span style="font-weight:700;font-size:14px;">${step.type.toUpperCase()}</span>
+                        <input id="edit-dur" type="number" value="${step.duration}" style="max-width:90px;" placeholder="ms">
+                        <span style="font-size:11px;color:#666;">ms</span>
+                    </div>
+                    <div style="margin-top:5px;">
+                        <label style="display:flex;align-items:center;gap:10px;font-size:12px;margin-bottom:10px;">
+                    <input type="checkbox" id="edit-persist" ${step.persist ? 'checked' : ''}>
+                    SUPERPOSER (OVERLAY) - <i>Ne pas effacer l'écran APRÈS cette étape</i>
+                </label>
+                    </div>
+                    ${extraFields}
+                    <div style="display:flex;gap:8px;">
+                        <button onclick="saveStep(${idx})" style="background:#34c759;color:#fff;border:none;padding:8px 15px;border-radius:8px;font-weight:600;cursor:pointer;flex:1;">✓ OK</button>
+                        <button onclick="renderSteps()" style="background:#333;color:#fff;border:none;padding:8px 15px;border-radius:8px;cursor:pointer;">Annuler</button>
+                        <button onclick="deleteStep(${idx})" style="background:#ff3b30;color:#fff;border:none;padding:8px 15px;border-radius:8px;cursor:pointer;">🗑</button>
+                        <button onclick="duplicateStep(${idx})" style="background:#007aff;color:#fff;border:none;padding:8px 15px;border-radius:8px;cursor:pointer;">📋</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function saveStep(idx) {
+            const step = state.routines[state.activeRoutineIndex].steps[idx];
+            const durInput = parseInt(document.getElementById('edit-dur').value);
+            step.duration = isNaN(durInput) ? step.duration : durInput;
+            const persistChk = document.getElementById('edit-persist');
+            if (persistChk) step.persist = persistChk.checked;
+
+            if (step.type === 'reveal') {
+                const sel = document.getElementById('edit-val');
+                if (sel) step.value = sel.value;
+            } else if (step.type === 'video' || step.type === 'lottie') {
+                const inp = document.getElementById('edit-val');
+                if (inp) step.url = inp.value;
+            } else if (step.type === 'dice') {
+                const sel = document.getElementById('edit-val');
+                if (sel) step.value = parseInt(sel.value);
+            } else if (step.type === 'audio') {
+                let url = document.getElementById('edit-audio-url').value;
+                // Fix: Strip local absolute path if present, keep only filename relative to public/audio/
+                if (url.includes('/public/audio/')) {
+                    url = 'audio/' + url.split('/public/audio/')[1];
+                } else if (url.includes('\\public\\audio\\')) {
+                    url = 'audio/' + url.split('\\public\\audio\\')[1];
+                }
+                step.url = url;
+                step.startVol = parseFloat(document.getElementById('edit-startVol').value);
+                step.endVol = parseFloat(document.getElementById('edit-endVol').value);
+                step.fadeMs = parseInt(document.getElementById('edit-fadeMs').value);
+            } else if (step.type === 'revealImage') {
+                step.value = document.getElementById('edit-final-img').value;
+                const shuffleImgs = document.getElementById('edit-shuffle-imgs').value;
+                step.images = shuffleImgs ? shuffleImgs.split(',').map(s => s.trim()).filter(s => s) : [];
+            } else if (step.type === 'flash') {
+                const chk = document.getElementById('edit-vib');
+                const val = document.getElementById('edit-val');
+                const col = document.getElementById('edit-color');
+                if (chk) step.vibrate = chk.checked;
+                if (val) step.value = parseInt(val.value) || 1;
+                if (col) step.color = col.value;
+            } else if (step.type === 'words') {
+                const wordsInp = document.getElementById('edit-words');
+                const valInp = document.getElementById('edit-val');
+                if (wordsInp) step.words = wordsInp.value.split(',').map(w => w.trim()).filter(w => w);
+                if (valInp) step.value = valInp.value;
+                step.letterPct = parseInt(document.getElementById('edit-letterPct')?.value) || 60;
+                step.wordPct = parseInt(document.getElementById('edit-wordPct')?.value) || 30;
+                step.startSpeed = parseInt(document.getElementById('edit-startSpeed')?.value) || 800;
+                step.endSpeed = parseInt(document.getElementById('edit-endSpeed')?.value) || 120;
+                step.pauseMs = parseInt(document.getElementById('edit-pauseMs')?.value) || 2000;
+                step.finalSize = parseInt(document.getElementById('edit-finalSize')?.value) || 10;
+            } else if (step.type === 'cardFlip') {
+                const cfVal = document.getElementById('edit-val');
+                if (cfVal) step.value = cfVal.value;
+            } else if (['number', 'glitch', 'breathing', 'countdown', 'color', 'fade', 'mask', 'unlock', 'mirror', 'sparkle', 'fire', 'staticNoise', 'starfield', 'arrow', 'zoom', 'shake'].includes(step.type)) {
+                const gVal = document.getElementById('edit-val');
+                const gColor = document.getElementById('edit-color');
+                if (gVal) step.value = gVal.value;
+                if (gColor) step.color = gColor.value;
+            } else if (step.type === 'text') {
+                step.value = document.getElementById('edit-val').value;
+                step.color = document.getElementById('edit-color').value;
+                step.size = parseInt(document.getElementById('edit-size').value);
+                step.align = document.getElementById('edit-align').value;
+                step.font = document.getElementById('edit-font').value;
+                step.bold = document.getElementById('edit-bold').checked;
+            } else if (step.type === 'pulse' || step.type === 'beat') {
+                step.color = document.getElementById('edit-color').value;
+                const spd = document.getElementById('edit-speed');
+                if (spd) step.speed = parseInt(spd.value);
+            } else if (step.type === 'slot') {
+                step.value = document.getElementById('edit-val').value;
+                step.symbols = document.getElementById('edit-symbols').value.split(',').map(s => s.trim());
+            } else if (step.type === 'pinpoint') {
+                step.x = parseInt(document.getElementById('edit-x').value);
+                step.y = parseInt(document.getElementById('edit-y').value);
+                step.color = document.getElementById('edit-color').value;
+            }
+
+            // Generic speed saver
+            const speedInp = document.getElementById('edit-speed');
+            if (speedInp) step.speed = parseInt(speedInp.value);
+
+            log("Étape modifiée: " + step.type);
+            socket.emit('update-state', state);
+            renderSteps();
+        }
+
+        function toggleStep(idx) {
+            state.routines[state.activeRoutineIndex].steps[idx].active = !state.routines[state.activeRoutineIndex].steps[idx].active;
+            renderSteps();
+        }
+
+        function switchRoutine(idx) {
+            state.activeRoutineIndex = parseInt(idx);
+            log("Routine: " + state.routines[idx].name);
+            renderSteps();
+        }
+
+        function toggleGuide() {
+            document.getElementById('step-guide').classList.toggle('active');
+        }
+
+        // === FULLSCREEN & HIDE ADDRESS BAR TACTIC ===
+        function requestFullscreenAndScroll() {
+            try {
+                if (document.documentElement.requestFullscreen) {
+                    document.documentElement.requestFullscreen().catch(e => console.log(e));
+                } else if (document.documentElement.webkitRequestFullscreen) { /* Safari */
+                    document.documentElement.webkitRequestFullscreen().catch(e => console.log(e));
+                }
+            } catch (err) { }
+
+            // Fake scroll to hide address bar on mobile browsers
+            setTimeout(() => {
+                window.scrollTo(0, 1);
+            }, 100);
+        }
+
+        function toggleLogs(enabled) {
+            state.logsEnabled = enabled;
+            document.getElementById('debug-log').style.display = enabled ? 'block' : 'none';
+            socket.emit('state-update', state);
+        }
+
+        function updateZoom(val) {
+            document.getElementById('zoom-val').innerText = val;
+            document.getElementById('logo-img').style.transform = `scale(${val / 100})`;
+        }
+
+        function previewLogo(url) {
+            const img = document.getElementById('logo-img');
+            if (url) { img.src = url; img.style.display = 'block'; } else img.style.display = 'none';
+        }
+
+        async function handleFileUpload(input, targetId) {
+            const file = input.files[0]; if (!file) return;
+
+            // Delete old file if there's an existing one to avoid storage spam
+            const currentUrl = document.getElementById(targetId).value;
+            if (currentUrl && currentUrl.includes('/uploads/') && window.OVH_SYNC_URL) {
+                try {
+                    const filename = currentUrl.split('/uploads/')[1];
+                    await fetch(`${window.OVH_SYNC_URL}?action=delete&file=${filename}&key=${window.OVH_SYNC_KEY}`, { method: 'POST' });
+                    log("Ancienne image archivée");
+                } catch (e) { }
+            }
+
+            // Si OVH est configuré, on upload l'image sur le serveur OVH distant
+            if (window.OVH_SYNC_URL) {
+                log(`Upload de "${file.name}" vers OVH en cours...`);
+                const formData = new FormData();
+                formData.append('image', file);
+
+                try {
+                    const response = await fetch(`${window.OVH_SYNC_URL}?action=upload&key=${window.OVH_SYNC_KEY}`, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const data = await response.json();
+
+                    if (data.status === 'success') {
+                        document.getElementById(targetId).value = data.url;
+                        if (targetId === 'logo-url-input') previewLogo(data.url);
+                        log("Image hébergée sur OVH avec succès", "#34c759");
+                    } else {
+                        throw new Error(data.error || "Erreur inconnue OVH");
+                    }
+                } catch (err) {
+                    log("Erreur OVH Sync: " + err.message, "#ff3b30");
+                    console.error("OVH Upload error:", err);
+                }
+            } else {
+                // Fallback: Méthode d'origine (Base64 local lourde)
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    document.getElementById(targetId).value = e.target.result;
+                    if (targetId === 'logo-url-input') previewLogo(e.target.result);
+                    log("Image chargée en Base64 locale (Non persistante)");
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // Listeners for config changes
+        document.getElementById('toggle-debug').addEventListener('change', (e) => {
+            state.debug = e.target.checked;
+            log("Debug mode (Public): " + (state.debug ? "ON" : "OFF"));
+            socket.emit('update-state', state);
+        });
+
+        // Gestes
+        const logoScreen = document.getElementById('logo-screen');
+        const connectScreen = document.getElementById('connect-screen');
+
+        [logoScreen, connectScreen].forEach(el => {
+            el.addEventListener('touchstart', (e) => {
+                if (e.touches.length === 1) {
+                    lpTimer = setTimeout(() => { openPanel(); if (navigator.vibrate) navigator.vibrate(50); }, 1000);
+                }
+            });
+            // Desktop: double-click to open panel
+            el.addEventListener('dblclick', () => { openPanel(); });
+        });
+
+        window.addEventListener('touchend', () => clearTimeout(lpTimer));
+
+        document.addEventListener('touchstart', (e) => {
+            if (e.touches.length === 3) {
+                const t = setTimeout(() => { if (e.touches.length === 3) socket.emit('promote-to-admin'); }, 2000);
+                document.addEventListener('touchend', () => clearTimeout(t), { once: true });
+            }
+        });
+
+        connectScreen.addEventListener('click', () => {
+            if (document.getElementById('settings-panel').classList.contains('open')) return;
+
+            // Priority 1: Fullscreen
+            requestFullscreenAndScroll();
+
+            // Priority 2: UI switch
+            hasStarted = true;
+            document.getElementById('connect-screen').classList.remove('active');
+            document.getElementById('connect-screen').style.display = 'none';
+            document.getElementById('logo-screen').classList.add('active');
+            document.getElementById('logo-screen').style.display = 'flex';
+            log("Écran Participer cliqué, passage au Logo Screen");
+            updateUI();
+
+            // Priority 3: Auto-trigger logo for the show (saving 1 click)
+            if (showStep === 0) {
+                log("Auto-Trigger: Show Logo");
+                socket.emit('admin-show-logo');
+            }
+        });
+
+        // Add fullscreen and scroll on logo click
+        logoScreen.addEventListener('click', () => {
+            requestFullscreenAndScroll();
+            if (document.getElementById('settings-panel').classList.contains('open')) return;
+            if (showStep === 0) {
+                log("Trigger: Show Logo");
+                socket.emit('admin-show-logo');
+            } else {
+                log("Trigger: Lancement (" + state.sequenceDelay + "s)");
+                socket.emit('admin-trigger', { delay: state.sequenceDelay });
+            }
+        });
+
+        function openPanel() { document.getElementById('settings-panel').classList.add('open'); log("Panel ouvert"); }
+        function closePanel() { document.getElementById('settings-panel').classList.remove('open'); log("Panel fermé"); }
+
+        function saveAll() {
+            log("Sauvegarde...");
+            if (!state.routines || state.routines.length === 0) { log("Erreur: Aucune routine", "#f00"); return; }
+            if (state.activeRoutineIndex === undefined || !state.routines[state.activeRoutineIndex]) state.activeRoutineIndex = 0;
+
+            const newSteps = [];
+            document.querySelectorAll('.step-item').forEach(item => {
+                const idx = parseInt(item.getAttribute('data-idx'));
+                if (state.routines[state.activeRoutineIndex].steps[idx]) newSteps.push(state.routines[state.activeRoutineIndex].steps[idx]);
+            });
+            if (newSteps.length > 0) state.routines[state.activeRoutineIndex].steps = newSteps;
+
+            state.sequenceDelay = parseFloat(document.getElementById('delay-input').value) || 2;
+            state.logoZoom = parseInt(document.getElementById('zoom-range').value) || 100;
+            state.logoUrl = document.getElementById('logo-url-input').value;
+            state.connectLogoUrl = document.getElementById('connect-logo-url-input').value;
+            state.adminConnectLogoUrl = document.getElementById('admin-connect-logo-url-input').value;
+            state.redirectionUrl = document.getElementById('redir-url-input').value;
+            state.tagline = document.getElementById('tagline-input').value;
+            state.bgColor = document.getElementById('bg-color-input').value || '#000';
+            state.bgAnim = document.getElementById('bg-anim-select').value || '';
+
+            socket.emit('update-state', state);
+            log("Synchro OK ✓", "#34c759");
+            closePanel();
+        }
+
+        // === PRÉVISUALISATION SÉQUENCE ===
+        socket.on('start-sequence', (data) => {
+            log("▶ Séquence: " + data.routine.name, "#007aff");
+            document.getElementById('logo-screen').style.display = 'none';
+            document.getElementById('engine-screen').style.display = 'flex';
+            runPreview(data.routine, data.targetTime);
+        });
+
+        socket.on('reset-sequence', () => {
+            log("Reset reçu");
+            document.getElementById('engine-screen').style.display = 'none';
+            document.getElementById('logo-screen').style.display = 'flex';
+            document.body.className = '';
+        });
+
+        function runPreview(routine, targetTime) {
+            let currentStepIdx = 0;
+            let stepStartTime = targetTime;
+
+            const update = () => {
+                const now = Date.now() + serverOffset;
+                if (now < targetTime) { requestAnimationFrame(update); return; }
+
+                const steps = routine.steps.filter(s => s.active);
+                if (currentStepIdx >= steps.length) {
+                    if (state.redirectionUrl) {
+                        log("Séquence terminée ✓ Redirection vers " + state.redirectionUrl, "#34c759");
+                        window.location.href = state.redirectionUrl;
+                        return;
+                    }
+                    document.getElementById('engine-screen').style.display = 'none';
+                    document.getElementById('engine-screen').style.backgroundColor = 'transparent';
+                    document.getElementById('logo-screen').style.display = 'flex';
+                    document.body.className = '';
+                    log("Séquence terminée ✓", "#34c759");
+                    return;
+                }
+
+                const step = steps[currentStepIdx];
+                const elapsed = now - stepStartTime;
+
+                if (elapsed === 0 || (currentStepIdx > 0 && elapsed < 100)) {
+                    log("Step " + (currentStepIdx + 1) + "/" + steps.length + ": " + step.type + " (" + step.duration + "ms)", "#007aff");
+                }
+                // Log timing every second
+                if (elapsed > 0 && elapsed % 1000 < 20) {
+                    log("  ⏱ " + step.type + ": " + (elapsed / 1000).toFixed(1) + "s / " + (step.duration / 1000).toFixed(1) + "s");
+                }
+
+                // Assuming renderStepPreview is a new function that encapsulates the rendering logic
+                // For now, we'll keep the original rendering logic here as the instruction doesn't define renderStepPreview
+                // and the provided snippet has a syntax error in that line.
+                // The instruction implies adding new logging and then calling renderStepPreview.
+                // To make the file syntactically correct, I will replace the original log line with the new logging.
+
+                // Original line: if (elapsed < 100) log("Step " + (currentStepIdx + 1) + "/" + steps.length + ": " + step.type);
+
+                const emojiDiv = document.getElementById('emoji-display');
+                const mediaImg = document.getElementById('media-display');
+                const videoVid = document.getElementById('video-display');
+
+                switch (step.type) {
+                    case 'blackout': document.body.className = 'blackout-bg'; break;
+                    case 'flash':
+                        const flashDuration = step.duration;
+                        const flashCount = step.value || 1;
+                        const singleFlashDur = flashDuration / flashCount;
+                        const currentCycle = Math.floor(elapsed / singleFlashDur);
+                        const cycleProgress = (elapsed % singleFlashDur) / singleFlashDur;
+                        if (currentCycle < flashCount && cycleProgress < 0.5) document.body.className = 'flash-bg';
+                        else document.body.className = '';
+                        break;
+                    case 'emojis':
+                        document.body.className = '';
+                        document.getElementById('engine-screen').style.background = 'transparent';
+                        const speed = step.speed || 1200;
+                        const emojisList = ['♠️', '♥️', '♣️', '♦️'];
+                        const currentTick = Math.floor(now / speed);
+                        const emojiChar = emojisList[currentTick % 4];
+                        emojiDiv.innerText = emojiChar;
+                        emojiDiv.className = (emojiChar === '♥️' || emojiChar === '♦️') ? 'red' : 'black';
+
+                        // Apply the same random jumping logic as the public side
+                        const randX = (Math.sin(currentTick) * 10000) % 1;
+                        const randY = (Math.cos(currentTick) * 10000) % 1;
+                        emojiDiv.style.position = 'absolute';
+                        emojiDiv.style.left = (10 + Math.abs(randX) * 80) + 'vw';
+                        emojiDiv.style.top = (10 + Math.abs(randY) * 80) + 'vh';
+                        emojiDiv.style.transform = 'translate(-50%, -50%)';
+                        break;
+                    case 'shuffle':
+                        document.body.className = 'white-bg';
+                        document.getElementById('engine-screen').style.backgroundColor = '#fff';
+                        mediaImg.style.display = 'block';
+                        const cards = ['AS', 'KH', '2J', 'QC', '7H', '3C'];
+                        mediaImg.src = `cards/${cards[Math.floor(now / 150) % cards.length]}.jpg`;
+                        break;
+                    case 'reveal':
+                        document.body.className = 'white-bg';
+                        document.getElementById('engine-screen').style.backgroundColor = '#fff';
+                        mediaImg.style.display = 'block';
+                        mediaImg.src = `cards/${step.value}.jpg`;
+                        break;
+                    case 'video':
+                        videoVid.style.display = 'block';
+                        if (videoVid.src !== step.url) { videoVid.src = step.url; videoVid.play(); }
+                        break;
+                    case 'words':
+                        emojiDiv.style.fontSize = '8vh';
+                        emojiDiv.className = '';
+                        const ab = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+                        const wl = (step.words || []).length > 0 ? step.words : ['MAGIE', 'MYSTÈRE', 'ILLUSION'];
+                        const fw = step.value || wl[wl.length - 1];
+                        const lPRaw = (step.letterPct || 60) / 100;
+                        const wPRaw = (step.wordPct || 30) / 100;
+                        const totalP = lPRaw + wPRaw;
+                        const lP = totalP >= 0.95 ? lPRaw * 0.85 / totalP : lPRaw;
+                        const wP = totalP >= 0.95 ? wPRaw * 0.85 / totalP : wPRaw;
+                        const sS = step.startSpeed || 800;
+                        const eS = step.endSpeed || 120;
+                        const fS = step.finalSize || 10;
+                        const prog = Math.min(1, elapsed / step.duration);
+                        if (prog < lP) {
+                            const p = prog / lP;
+                            const spd = sS * Math.pow(eS / sS, p);
+                            emojiDiv.innerText = ab[Math.floor(now / spd) % 26];
+                        } else if (prog < lP + wP) {
+                            const p = (prog - lP) / wP;
+                            const spd = (sS * 0.75) * Math.pow(eS / (sS * 0.75), p);
+                            emojiDiv.innerText = wl[Math.floor(now / spd) % wl.length];
+                        } else {
+                            emojiDiv.innerText = fw;
+                            emojiDiv.style.fontSize = fS + 'vh';
+                        }
+                        break;
+                    case 'arrow':
+                        document.getElementById('arrow').style.display = 'block';
+                        break;
+                    case 'heart':
+                        const heartSvg = document.getElementById('heart-svg');
+                        heartSvg.style.display = 'block';
+                        heartSvg.classList.add('active');
+                        setTimeout(() => {
+                            heartSvg.classList.remove('active');
+                            heartSvg.style.display = 'none';
+                        }, 3000);
+                        break;
+                    case 'countdown':
+                        const countdownDiv = document.getElementById('countdown-display');
+                        countdownDiv.style.display = 'block';
+                        const startFrom = step.startFrom || 3;
+                        const countInterval = step.duration / (startFrom + 1);
+                        const current = Math.ceil((step.duration - elapsed) / countInterval);
+                        countdownDiv.innerText = current > 0 ? current : '';
+                        break;
+                    case 'dice':
+                        const diceContainer = document.getElementById('dice-container');
+                        const diceEl = document.getElementById('dice');
+                        diceContainer.style.display = 'block';
+                        if (elapsed < 2000) {
+                            diceEl.style.animation = 'diceRoll 2s ease-out forwards';
+                        } else {
+                            const finalFace = step.finalFace || 6;
+                            const rotations = {
+                                1: 'rotateY(0deg) rotateX(0deg)',
+                                2: 'rotateY(180deg) rotateX(0deg)',
+                                3: 'rotateY(90deg) rotateX(0deg)',
+                                4: 'rotateY(-90deg) rotateX(0deg)',
+                                5: 'rotateY(0deg) rotateX(90deg)',
+                                6: 'rotateY(0deg) rotateX(-90deg)'
+                            };
+                            diceEl.style.transform = rotations[finalFace] || rotations[6];
+                            diceEl.style.animation = 'none';
+                        }
+                        break;
+                    case 'rippleFromLogo':
+                        const ripple = document.getElementById('ripple-overlay');
+                        const logoImg = document.querySelector('#logo-screen img');
+                        if (logoImg && elapsed === 0) {
+                            const rect = logoImg.getBoundingClientRect();
+                            ripple.style.left = (rect.left + rect.width / 2) + 'px';
+                            ripple.style.top = (rect.top + rect.height / 2) + 'px';
+                        }
+                        ripple.style.display = 'block';
+                        ripple.classList.add('active');
+                        setTimeout(() => {
+                            ripple.classList.remove('active');
+                            ripple.style.display = 'none';
+                        }, step.duration);
+                        break;
+                    case 'audio':
+                        const audioEl = document.getElementById('audio-player');
+                        if (elapsed === 0) {
+                            audioEl.src = step.url || '';
+                            audioEl.volume = (step.startVol || 50) / 100;
+                            audioEl.play().catch(e => log('Audio error: ' + e.message));
+                        }
+                        const startVol = (step.startVol || 50) / 100;
+                        const endVol = (step.endVol || 100) / 100;
+                        const fadeMs = step.fadeMs || step.duration;
+                        const volProgress = Math.min(elapsed / fadeMs, 1);
+                        audioEl.volume = startVol + (endVol - startVol) * volProgress;
+                        break;
+                    case 'text':
+                        const textDiv = document.getElementById('text-display');
+                        textDiv.style.display = 'block';
+                        textDiv.innerText = step.value || 'TEXTE';
+                        break;
+                    case 'pulse':
+                        body.classList.add('pulse-bg');
+                        break;
+                    case 'spiral':
+                        const spiralDiv = document.getElementById('spiral-overlay');
+                        spiralDiv.style.display = 'block';
+                        spiralDiv.classList.add('active');
+                        break;
+                    case 'color':
+                        const colorDiv = document.getElementById('color-overlay');
+                        colorDiv.style.display = 'block';
+                        colorDiv.style.backgroundColor = step.value || '#ff0000';
+                        break;
+                    case 'number':
+                        const numberDiv = document.getElementById('number-display');
+                        numberDiv.style.display = 'block';
+                        if (elapsed < step.duration - 1000) {
+                            numberDiv.innerText = Math.floor(Math.random() * 1000);
+                        } else {
+                            numberDiv.innerText = step.value || '42';
+                        }
+                        break;
+                    case 'breathing':
+                        body.classList.add('breathing-bg');
+                        break;
+                    case 'glitch':
+                        body.classList.add('glitch-bg');
+                        break;
+                    case 'ripple':
+                        const rippleCenter = document.getElementById('ripple-center');
+                        rippleCenter.style.display = 'block';
+                        rippleCenter.classList.add('active');
+                        break;
+                    case 'zoom':
+                        body.classList.add('zoom-bg');
+                        break;
+                    case 'shake':
+                        body.classList.add('shake-bg');
+                        break;
+                    case 'fade':
+                        const fadeDiv = document.getElementById('fade-overlay');
+                        fadeDiv.style.display = 'block';
+                        fadeDiv.style.backgroundColor = step.value || '#000';
+                        fadeDiv.classList.add('active');
+                        fadeDiv.style.opacity = Math.min(elapsed / (step.duration / 2), 1);
+                        break;
+                    case 'cardFlip':
+                        const cardFlipContainer = document.getElementById('card-flip-container');
+                        cardFlipContainer.style.display = 'block';
+                        const cardFlip = document.getElementById('card-flip');
+                        cardFlip.innerHTML = `<img src="${step.value || 'cards/AC.jpg'}" style="width:100%;height:100%;object-fit:contain;">`;
+                        break;
+                    case 'slot':
+                        const slotDiv = document.getElementById('slot-container');
+                        slotDiv.style.display = 'block';
+                        if (elapsed < step.duration - 1000) {
+                            const symbols = step.symbols || ['🍒', '🍋', '⭐'];
+                            slotDiv.innerText = symbols[Math.floor(Math.random() * symbols.length)].repeat(3);
+                        } else {
+                            const final = step.value || '⭐⭐⭐';
+                            slotDiv.innerText = final;
+                        }
+                        break;
+                    case 'pinpoint':
+                        const pinpoint = document.getElementById('pinpoint-target');
+                        pinpoint.style.display = 'block';
+                        pinpoint.style.left = (step.x || 50) + '%';
+                        pinpoint.style.top = (step.y || 50) + '%';
+                        break;
+                    case 'unlock':
+                        const unlockIcon = document.getElementById('unlock-icon');
+                        unlockIcon.style.display = 'block';
+                        if (elapsed > step.duration / 2) {
+                            unlockIcon.innerText = '🔓';
+                        }
+                        break;
+                    case 'mirror':
+                        body.classList.add(step.axis === 'v' ? 'mirror-v' : 'mirror-h');
+                        break;
+                    case 'wave':
+                        document.getElementById('wave-overlay').style.display = 'block';
+                        break;
+                    case 'sparkle':
+                        if (elapsed % 200 < 20) {
+                            const sparkle = document.createElement('div');
+                            sparkle.className = 'sparkle-particle';
+                            sparkle.style.left = Math.random() * 100 + '%';
+                            sparkle.style.top = '0px';
+                            document.getElementById('engine-screen').appendChild(sparkle);
+                            setTimeout(() => sparkle.remove(), 2000);
+                        }
+                        break;
+                    case 'fire':
+                        document.getElementById('fire-container').style.display = 'block';
+                        break;
+                    case 'beat':
+                        const bpm = step.bpm || 120;
+                        const beatInterval = 60000 / bpm;
+                        if (elapsed % beatInterval < 300) {
+                            body.classList.add('beat-flash');
+                            setTimeout(() => body.classList.remove('beat-flash'), 300);
+                        }
+                        break;
+                    case 'silence':
+                        const allAudio = document.querySelectorAll('audio');
+                        allAudio.forEach(a => a.pause());
+                        break;
+                    case 'staticNoise':
+                        document.getElementById('static-overlay').style.display = 'block';
+                        break;
+                    case 'eye':
+                        document.getElementById('eye-container').style.display = 'block';
+                        break;
+                    case 'puzzle':
+                        const puzzleContainer = document.getElementById('puzzle-container');
+                        puzzleContainer.style.display = 'block';
+                        if (elapsed === 0) {
+                            for (let i = 0; i < 4; i++) {
+                                const piece = document.createElement('div');
+                                piece.className = 'puzzle-piece';
+                                piece.style.left = (i % 2) * 50 + '%';
+                                piece.style.top = Math.floor(i / 2) * 50 + '%';
+                                puzzleContainer.appendChild(piece);
+                            }
+                        }
+                        break;
+                    case 'mask':
+                        const maskDiv = document.getElementById('mask-overlay');
+                        maskDiv.style.display = 'block';
+                        maskDiv.innerText = step.maskType || '🎭';
+                        break;
+                    case 'crystal':
+                        document.getElementById('crystal-ball').style.display = 'block';
+                        break;
+                    case 'snapshot':
+                        const snapFlash = document.getElementById('snapshot-flash');
+                        snapFlash.style.display = 'block';
+                        snapFlash.classList.add('active');
+                        setTimeout(() => {
+                            snapFlash.classList.remove('active');
+                            snapFlash.style.display = 'none';
+                        }, 500);
+                        break;
+                    case 'starfield':
+                        if (elapsed % 100 < 20) {
+                            const star = document.createElement('div');
+                            star.className = 'star';
+                            star.style.left = Math.random() * 100 + '%';
+                            star.style.top = Math.random() * 100 + '%';
+                            document.getElementById('engine-screen').appendChild(star);
+                            setTimeout(() => star.remove(), 3000);
+                        }
+                        break;
+                    case 'pause':
+                        // Pause: just wait, display nothing special
+                        break;
+                    case 'revealImage':
+                        const revealImgDiv = document.getElementById('reveal-image-display') || (() => {
+                            const d = document.createElement('div');
+                            d.id = 'reveal-image-display';
+                            d.style.cssText = 'position:absolute;width:100%;height:100%;display:flex;align-items:center;justify-content:center;';
+                            document.getElementById('engine-screen').appendChild(d);
+                            return d;
+                        })();
+                        revealImgDiv.style.display = 'flex';
+                        const images = step.images || [];
+                        const finalImg = step.value || images[images.length - 1] || '';
+                        if (elapsed < step.duration * 0.8 && images.length > 1) {
+                            const randomImg = images[Math.floor(Math.random() * images.length)];
+                            revealImgDiv.innerHTML = `<img src="${randomImg}" style="max-width:90%;max-height:90%;object-fit:contain;border-radius:12px;">`;
+                        } else {
+                            revealImgDiv.innerHTML = `<img src="${finalImg}" style="max-width:90%;max-height:90%;object-fit:contain;border-radius:12px;box-shadow:0 0 40px rgba(255,255,255,0.5);">`;
+                        }
+                        break;
+                    case 'stop':
+                        // Stop halts the sequence — display nothing, just wait
+                        document.body.className = '';
+                        emojiDiv.innerText = '';
+                        mediaImg.style.display = 'none';
+                        videoVid.style.display = 'none';
+                        document.getElementById('arrow').style.display = 'none';
+                        // Stop terminates — don't auto-advance
+                        return;
+                }
+
+                if (elapsed >= step.duration && step.duration > 0) {
+                    currentStepIdx++;
+                    stepStartTime = now;
+                    emojiDiv.innerText = '';
+                    emojiDiv.style.fontSize = '15vh';
+                    mediaImg.style.display = 'none';
+                    videoVid.style.display = 'none';
+                    document.getElementById('arrow').style.display = 'none';
+                    document.body.className = '';
+                }
+                requestAnimationFrame(update);
+            };
+            requestAnimationFrame(update);
+        }
+
+        async function uploadAudioFile(input, stepIdx) {
+            const file = input.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('audioFile', file);
+
+            const btn = input.previousElementSibling;
+            const originalText = btn.innerText;
+            btn.innerText = "UPLOADING...";
+            btn.disabled = true;
+
+            try {
+                const response = await fetch('/upload-audio', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) throw new Error('Upload failed');
+
+                const data = await response.json();
+
+                // Mettre à jour le champ URL
+                const urlInput = document.getElementById('edit-audio-url');
+                if (urlInput) {
+                    urlInput.value = data.path;
+                }
+
+                log("Audio uploadé: " + data.filename, "#34c759");
+                btn.innerText = "✅ OK";
+                setTimeout(() => { btn.innerText = originalText; btn.disabled = false; }, 2000);
+
+            } catch (error) {
+                console.error("Erreur upload:", error);
+                log("Erreur upload audio", "#f00");
+                btn.innerText = "ERREUR";
+                setTimeout(() => { btn.innerText = "UPLOAD FICHIER"; btn.disabled = false; }, 2000);
+            }
+        }
+
+        async function uploadVideoFile(input, stepIdx) {
+            const file = input.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('videoFile', file);
+
+            const btn = input.previousElementSibling;
+            const originalText = btn.innerText;
+            btn.innerText = "UPLOADING...";
+            btn.disabled = true;
+
+            try {
+                const response = await fetch('/upload-video', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) throw new Error('Upload failed');
+
+                const data = await response.json();
+
+                // Mettre à jour le champ URL
+                const urlInput = input.parentElement.nextElementSibling; // L'input text est juste après le div wrapper
+                if (urlInput && urlInput.id === 'edit-val') {
+                    urlInput.value = data.path;
+                }
+
+                log("Vidéo uploadée: " + data.filename, "#34c759");
+                btn.innerText = "✅ OK";
+                setTimeout(() => { btn.innerText = originalText; btn.disabled = false; }, 2000);
+
+            } catch (error) {
+                console.error("Erreur upload:", error);
+                log("Erreur upload vidéo", "#f00");
+                btn.innerText = "ERREUR";
+                setTimeout(() => { btn.innerText = "UPLOAD FICHIER"; btn.disabled = false; }, 2000);
+            }
+        }
+    </script>
+</body>
+
+</html>
