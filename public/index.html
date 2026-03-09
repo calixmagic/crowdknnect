@@ -1934,6 +1934,10 @@
                     break;
                 case 'video':
                     videoVid.style.display = 'block';
+
+                    // Apply object-fit from step config (contain or cover)
+                    videoVid.style.objectFit = step.fitMode === 'cover' ? 'cover' : 'contain';
+
                     // Initialisation sécurisée via attribut data
                     if (videoVid.getAttribute('data-current-url') !== step.url) {
                         videoVid.setAttribute('data-current-url', step.url);

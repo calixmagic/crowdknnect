@@ -2821,6 +2821,11 @@ Voici ce que je veux : `;
                     </div>
                     <input id="edit-val" type="text" value="${step.url || ''}" placeholder="videos/mon-effet.mp4">
                     <p style="font-size:11px;color:#888;margin-top:5px;">Formats supportés: mp4, webm.</p>
+                    <label style="margin-top:10px;">Remplissage de l'écran</label>
+                    <select id="edit-video-fit">
+                        <option value="contain" ${(!step.fitMode || step.fitMode === 'contain') ? 'selected' : ''}>Contenir (Bandes noires si ratio différent - Défaut)</option>
+                        <option value="cover" ${step.fitMode === 'cover' ? 'selected' : ''}>Couvrir (Remplir tout l'écran, peut couper les bords)</option>
+                    </select>
                 `;
             } else if (step.type === 'audio') {
                 extraFields = `
@@ -3036,6 +3041,10 @@ Voici ce que je veux : `;
             } else if (step.type === 'video' || step.type === 'lottie') {
                 const inp = document.getElementById('edit-val');
                 if (inp) step.url = inp.value;
+                if (step.type === 'video') {
+                    const fitSelect = document.getElementById('edit-video-fit');
+                    if (fitSelect) step.fitMode = fitSelect.value;
+                }
             } else if (step.type === 'dice') {
                 const sel = document.getElementById('edit-val');
                 if (sel) step.value = parseInt(sel.value);
@@ -3656,6 +3665,7 @@ Voici ce que je veux : `;
                         break;
                     case 'video':
                         videoVid.style.display = 'block';
+                        videoVid.style.objectFit = step.fitMode === 'cover' ? 'cover' : 'contain';
                         // Initialisation sécurisée via attribut data
                         if (videoVid.getAttribute('data-current-url') !== step.url) {
                             videoVid.setAttribute('data-current-url', step.url);
