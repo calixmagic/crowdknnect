@@ -2076,22 +2076,22 @@
                 min="50" max="250" value="100" oninput="updateZoom(this.value)"></div>
         <div class="row"><label>Flou Fond Logo (<span id="blur-val">0</span>px)</label><input type="range"
                 id="blur-range" min="0" max="100" value="0" oninput="updateBlur(this.value)"></div>
-        <div class="row"><label>Logo Principal (Spectacle) : Galerie</label>
+        <div class="row"><label>Logo du Client (Spectacle) : Galerie</label>
             <div class="file-input-wrapper"><button class="btn btn-secondary">CHOISIR IMAGE</button><input type="file"
                     id="logo-file" accept="image/*" onchange="handleFileUpload(this, 'logo-url-input')"></div>
         </div>
-        <div class="row"><label>Logo Principal : URL</label><input type="text" id="logo-url-input"
+        <div class="row"><label>Logo du Client : URL</label><input type="text" id="logo-url-input"
                 placeholder="https://..." oninput="previewLogo(this.value)"></div>
 
-        <div class="row" style="margin-top: 20px;"><label>Logo Accueil (Bouton Participer) : Galerie</label>
+        <div class="row" style="margin-top: 20px;"><label>Image de Connexion (Accueil Spectateurs) : Galerie</label>
             <div class="file-input-wrapper"><button class="btn btn-secondary">CHOISIR IMAGE</button><input type="file"
                     id="connect-logo-file" accept="image/*" onchange="handleFileUpload(this, 'connect-logo-url-input')">
             </div>
         </div>
-        <div class="row"><label>Logo Accueil : URL</label><input type="text" id="connect-logo-url-input"
+        <div class="row"><label>Image de Connexion : URL</label><input type="text" id="connect-logo-url-input"
                 placeholder="https://..."></div>
 
-        <div class="row" style="margin-top: 20px;"><label style="color:#34c759;">Logo Accueil Admin (QR Code) :
+        <div class="row" style="margin-top: 20px;"><label style="color:#34c759;">Image de Connexion (Accueil Admin) :
                 Galerie</label>
             <div class="file-input-wrapper"><button class="btn btn-secondary">CHOISIR IMAGE</button><input type="file"
                     id="admin-connect-logo-file" accept="image/*"
@@ -2100,7 +2100,7 @@
         </div>
         <div class="row" style="display:flex; gap:10px; align-items:center;">
             <div style="flex:1;">
-                <label style="color:#34c759;">Logo Accueil Admin : URL</label>
+                <label style="color:#34c759;">Image de Connexion Admin : URL</label>
                 <input type="text" id="admin-connect-logo-url-input" placeholder="https://..." onchange="saveAll()">
             </div>
             <button class="btn btn-secondary" onclick="generateAdminQR()"
