@@ -107,6 +107,58 @@
             }
         }
 
+        @keyframes smokeRise {
+            0% {
+                transform: translateY(0) scale(1);
+                opacity: 0;
+            }
+
+            20% {
+                opacity: 0.5;
+            }
+
+            80% {
+                opacity: 0.3;
+            }
+
+            100% {
+                transform: translateY(-110vh) scale(2.5);
+                opacity: 0;
+            }
+        }
+
+        @keyframes kineticBounce {
+            0% {
+                opacity: 0;
+                transform: translateY(60px) scaleY(0.3);
+            }
+
+            60% {
+                opacity: 1;
+                transform: translateY(-12px) scaleY(1.15);
+            }
+
+            80% {
+                transform: translateY(6px) scaleY(0.95);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translateY(0) scaleY(1);
+            }
+        }
+
+        @keyframes wordShuffleFlash {
+            0% {
+                opacity: 0;
+                transform: scale(1.15);
+            }
+
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
 
 
         #logo-container {
@@ -1398,6 +1450,20 @@
         <div id="iris-overlay"
             style="position:fixed;top:0;left:0;width:100%;height:100%;background:#000;display:none;z-index:904;clip-path:circle(150% at 50% 50%);transition:clip-path 1s ease-in-out;">
         </div>
+        <div id="invert-flash-overlay"
+            style="position:fixed;top:0;left:0;width:100%;height:100%;display:none;pointer-events:none;z-index:1000;">
+        </div>
+        <div id="smoke-overlay"
+            style="position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;display:none;z-index:905;overflow:hidden;">
+        </div>
+        <div id="kinetic-text-overlay"
+            style="position:fixed;top:0;left:0;width:100%;height:100%;display:none;pointer-events:none;z-index:910;align-items:center;justify-content:center;flex-wrap:wrap;gap:2px;padding:20px;">
+        </div>
+        <div id="word-shuffle-overlay"
+            style="position:fixed;top:0;left:0;width:100%;height:100%;display:none;pointer-events:none;z-index:911;align-items:center;justify-content:center;">
+            <span id="word-shuffle-text"
+                style="font-size:12vw;font-weight:900;text-align:center;color:#fff;text-transform:uppercase;text-shadow:0 0 30px rgba(255,255,255,0.6);"></span>
+        </div>
 
     </div> <!-- End Admin App Container -->
 
@@ -2414,11 +2480,109 @@
                         }
                     }
                     break;
+
+                case 'invert-flash': {
+                    const flashOv = document.getElementById('invert-flash-overlay');
+                    flashOv.style.display = 'block';
+                    // Toggle filter invert at a steady rhythm (every 150ms)
+                    const flashPeriod = step.speed || 180;
+                    const flashTick = Math.floor(elapsed / flashPeriod);
+                    if (flashTick % 2 === 0) {
+                        flashOv.style.background = 'rgba(255,255,255,0.92)';
+                        document.getElementById('engine-screen').style.filter = 'invert(1) hue-rotate(180deg)';
+                    } else {
+                        flashOv.style.background = 'transparent';
+                        document.getElementById('engine-screen').style.filter = '';
+                    }
+                    break;
+                }
+
+                case 'smoke': {
+                    const smokeEl = document.getElementById('smoke-overlay');
+                    smokeEl.style.display = 'flex';
+                    // Generate smoke particles lazily (only once)
+                    if (!smokeEl.dataset.inited) {
+                        smokeEl.dataset.inited = 'true';
+                        smokeEl.innerHTML = '';
+                        for (let i = 0; i < 18; i++) {
+                            const p = document.createElement('div');
+                            const size = 60 + Math.random() * 180;
+                            const x = Math.random() * 100;
+                            const delay = Math.random() * 5;
+                            const dur = 6 + Math.random() * 8;
+                            p.style.cssText = `
+                                position:absolute;
+                                left:${x}%;
+                                bottom:-${size * 0.5}px;
+                                width:${size}px;
+                                height:${size}px;
+                                border-radius:50%;
+                                background:radial-gradient(circle, rgba(200,220,255,0.25) 0%, transparent 70%);
+                                filter:blur(${20 + Math.random() * 30}px);
+                                animation:smokeRise ${dur}s ${delay}s infinite ease-in;
+                                transform-origin:center bottom;
+                            `;
+                            smokeEl.appendChild(p);
+                        }
+                    }
+                    break;
+                }
+
+                case 'kinetic-text': {
+                    const kineticEl = document.getElementById('kinetic-text-overlay');
+                    kineticEl.style.display = 'flex';
+                    const letters = (step.value || '?').split('');
+                    if (!kineticEl.dataset.value || kineticEl.dataset.value !== step.value) {
+                        kineticEl.dataset.value = step.value;
+                        kineticEl.innerHTML = '';
+                        letters.forEach((ch, i) => {
+                            const span = document.createElement('span');
+                            span.textContent = ch === ' ' ? '\u00a0' : ch;
+                            span.style.cssText = `
+                                display:inline-block;
+                                font-size:${Math.min(22, 90 / letters.length)}vw;
+                                font-weight:900;
+                                color:#fff;
+                                text-transform:uppercase;
+                                text-shadow:0 0 20px rgba(255,255,255,0.8);
+                                animation:kineticBounce 0.6s ${i * 0.07}s cubic-bezier(0.36,0.07,0.19,0.97) both;
+                                opacity:0;
+                            `;
+                            kineticEl.appendChild(span);
+                        });
+                    }
+                    break;
+                }
+
+                case 'word-shuffle': {
+                    const wsOverlay = document.getElementById('word-shuffle-overlay');
+                    wsOverlay.style.display = 'flex';
+                    const wsText = document.getElementById('word-shuffle-text');
+                    const wordList = (step.value || 'Synergie,Croissance,Innovation,Leadership,ROI,Performance,Stratégie,Agilité,Objectifs,Succès').split(',').map(w => w.trim());
+                    const wsPeriod = step.speed || 120;
+                    const wsTick = Math.floor(elapsed / wsPeriod);
+                    const wsWord = wordList[wsTick % wordList.length];
+                    if (wsText.textContent !== wsWord) {
+                        wsText.textContent = wsWord;
+                        wsText.style.animation = 'none';
+                        wsText.offsetHeight; // force reflow
+                        wsText.style.animation = 'wordShuffleFlash 0.1s ease';
+                    }
+                    break;
+                }
+
                 case 'stop':
                     body.className = '';
                     mediaImg.style.display = 'none';
                     videoVid.style.display = 'none';
                     document.getElementById('arrow').style.display = 'none';
+                    document.getElementById('invert-flash-overlay').style.display = 'none';
+                    document.getElementById('engine-screen').style.filter = '';
+                    document.getElementById('smoke-overlay').style.display = 'none';
+                    document.getElementById('smoke-overlay').removeAttribute('data-inited');
+                    document.getElementById('kinetic-text-overlay').style.display = 'none';
+                    document.getElementById('kinetic-text-overlay').removeAttribute('data-value');
+                    document.getElementById('word-shuffle-overlay').style.display = 'none';
                     return; // Stop halts the sequence
             }
         }

@@ -1859,6 +1859,14 @@
                         <td>Effet matrix/bug visuel</td>
                     </tr>
                     <tr>
+                        <td>🦓 InvertFlash</td>
+                        <td>Inversion Négative rapide (Tension)</td>
+                    </tr>
+                    <tr>
+                        <td>🔠 KineticText</td>
+                        <td>Texte avec lettres rebondissantes</td>
+                    </tr>
+                    <tr>
                         <td>❤️ Heart</td>
                         <td>Animation morphing point → cœur battant</td>
                     </tr>
@@ -1935,6 +1943,10 @@
                         <td>Paillettes qui tombent</td>
                     </tr>
                     <tr>
+                        <td>💨 Smoke</td>
+                        <td>Fumée Magic WebGL/CSS interactive</td>
+                    </tr>
+                    <tr>
                         <td>🌀 Spiral</td>
                         <td>Spirale tournante hypnotique</td>
                     </tr>
@@ -1969,6 +1981,10 @@
                     <tr>
                         <td>🔤 Words</td>
                         <td>Lettres → mots → MOT FINAL</td>
+                    </tr>
+                    <tr>
+                        <td>🌪️ WordShuffle</td>
+                        <td>Défilement ultra-rapide de mots</td>
                     </tr>
                     <tr>
                         <td>🔍 Zoom</td>
@@ -2601,8 +2617,10 @@ Voici ce que je veux : `;
                             <option value="revealImage">🖼️ RevealImage</option>
                             <option value="ripple">〰️ Ripple</option>
                             <option value="rippleFromLogo">〰️ RippleFromLogo</option>
+                            <option value="smoke">💨 Smoke (Fumée)</option>
                             <option value="shake">📣 Shake</option>
                             <option value="shuffle">🔀 Shuffle</option>
+                            <option value="word-shuffle">🌪️ Word-Shuffle (Mots rapides)</option>
                             <option value="silence">🔇 Silence</option>
                             <option value="slot">🎰 Slot</option>
                             <option value="snapshot">📸 Snapshot</option>
@@ -2611,6 +2629,8 @@ Voici ce que je veux : `;
                             <option value="starfield">🌟 Starfield</option>
                             <option value="staticNoise">📻 StaticNoise</option>
                             <option value="text">📝 Text</option>
+                            <option value="kinetic-text">🔠 Kinetic-Text (Animé)</option>
+                            <option value="invert-flash">🦓 Invert-Flash (Négatif)</option>
                             <option value="unlock">🔓 Unlock</option>
                             <option value="video">🎬 Video</option>
                             <option value="wave">🌊 Wave</option>
@@ -2636,6 +2656,7 @@ Voici ce que je veux : `;
 
             const placeholders = {
                 text: "Texte à afficher",
+                "kinetic-text": "Mot/Texte rebondissant",
                 audio: "URL audio (audio/file.mp3)",
                 video: "URL vidéo (videos/file.mp4)",
                 color: "Code couleur (#ff0000)",
@@ -2644,6 +2665,7 @@ Voici ce que je veux : `;
                 reveal: "Carte (ex: KH, AS)",
                 revealImage: "URL image",
                 words: "Mot final",
+                "word-shuffle": "Mots,séparés,par,virgules",
                 pinpoint: "X,Y (ex: 50,50)",
                 glitch: "Message glitch",
                 slot: "Résultat (⭐⭐⭐)"
@@ -2657,20 +2679,18 @@ Voici ce que je veux : `;
             const value = document.getElementById('new-step-value').value;
 
             const newStep = { id: Date.now(), type, duration, active: true };
-            if (value) {
-                // Special handling for some types if needed, but generic assignment is usually fine
-                // For audio/video/lottie, map value to 'url' if it looks like a url, or just value if simple
+            const effectiveValue = value || (type === 'word-shuffle' ? 'Synergie,Croissance,Innovation,Leadership,ROI,Performance,Stratégie,Agilité,Objectifs,Succès' : '');
+            if (effectiveValue) {
                 if (['audio', 'video', 'lottie'].includes(type)) {
-                    newStep.url = value;
+                    newStep.url = effectiveValue;
                 } else if (type === 'pinpoint') {
-                    // Try to parse "50,50"
-                    const parts = value.split(',');
+                    const parts = effectiveValue.split(',');
                     if (parts.length === 2) {
                         newStep.x = parseInt(parts[0].trim());
                         newStep.y = parseInt(parts[1].trim());
                     }
                 } else {
-                    newStep.value = value;
+                    newStep.value = effectiveValue;
                 }
             }
 
