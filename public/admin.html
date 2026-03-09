@@ -1762,6 +1762,24 @@
             style="position:absolute;top:0;left:0;width:100%;height:100%;background:#000;display:none;z-index:904;clip-path:circle(150% at 50% 50%);transition:clip-path 1s ease-in-out;">
         </div>
         <div id="glitch-text-overlay"></div>
+        <div id="invert-flash-overlay"
+            style="display:none; position:absolute; top:0; left:0; width:100%; height:100%; z-index:9000; background:#fff; mix-blend-mode:difference; pointer-events:none;">
+        </div>
+        <div id="smoke-overlay"
+            style="display:none; position:absolute; bottom:-10%; left:0; width:100%; height:80%; z-index:9001; background:radial-gradient(ellipse at bottom, rgba(200,200,200,0.4) 0%, transparent 70%); filter:blur(20px); pointer-events:none;">
+        </div>
+        <div id="kinetic-text-overlay"
+            style="display:none; position:absolute; top:0; left:0; width:100%; height:100%; z-index:9002; display:flex; justify-content:center; align-items:center;">
+            <div id="kinetic-text-content"
+                style="display:flex; gap:2vw; font-size:15vw; font-weight:900; color:#fff; text-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+            </div>
+        </div>
+        <div id="word-shuffle-overlay"
+            style="display:none; position:absolute; top:0; left:0; width:100%; height:100%; z-index:9003; display:flex; justify-content:center; align-items:center;">
+            <div id="word-shuffle-content"
+                style="font-size:15vw; font-weight:900; color:#fff; text-align:center; text-transform:uppercase; text-shadow: 0 10px 40px rgba(255,255,255,0.4);">
+            </div>
+        </div>
     </div>
 
     <div id="settings-panel">
@@ -3393,6 +3411,13 @@ Voici ce que je veux : `;
                 if (mediaImg) mediaImg.style.display = 'none';
                 const videoVid = document.getElementById('video-display');
                 if (videoVid) { videoVid.style.display = 'none'; videoVid.pause(); }
+
+                const engineScreen = document.getElementById('engine-screen');
+                if (engineScreen) engineScreen.style.filter = 'none';
+
+                const kineticTextOverlay = document.getElementById('kinetic-text-overlay');
+                if (kineticTextOverlay) kineticTextOverlay.removeAttribute('data-value');
+
                 // Bulletproof cleanup: hide ALL children of engine-screen and reset common inline styles
                 document.querySelectorAll('#engine-screen > *').forEach(el => {
                     if (el && el.id !== 'debug-log') {
@@ -3574,6 +3599,49 @@ Voici ce que je veux : `;
                             emojiDiv.innerText = fw;
                             emojiDiv.style.fontSize = fS + 'vh';
                         }
+                        break;
+                    case 'invert-flash':
+                        const ifO = document.getElementById('invert-flash-overlay');
+                        const ifSpeed = step.speed || 180;
+                        if (Math.floor(now / ifSpeed) % 2 === 0) {
+                            ifO.style.display = 'block';
+                            document.getElementById('engine-screen').style.filter = 'invert(100%)';
+                        } else {
+                            ifO.style.display = 'none';
+                            document.getElementById('engine-screen').style.filter = 'none';
+                        }
+                        break;
+                    case 'smoke':
+                        const smokeO = document.getElementById('smoke-overlay');
+                        smokeO.style.display = 'block';
+                        smokeO.style.animation = 'smokeRise 4s infinite alternate ease-in-out';
+                        break;
+                    case 'kinetic-text':
+                        const kT = document.getElementById('kinetic-text-overlay');
+                        const kTC = document.getElementById('kinetic-text-content');
+                        if (kT.getAttribute('data-value') !== step.value) {
+                            kT.setAttribute('data-value', step.value || 'MAGIE');
+                            kTC.innerHTML = '';
+                            (step.value || 'MAGIE').split('').forEach((char, i) => {
+                                const span = document.createElement('span');
+                                span.innerText = char;
+                                span.style.display = 'inline-block';
+                                span.style.animation = `kineticBounce 0.5s ${i * 0.1}s forwards cubic-bezier(0.175, 0.885, 0.32, 1.275)`;
+                                span.style.opacity = '0';
+                                span.style.transform = 'translateY(-50vh) scale(0.5)';
+                                kTC.appendChild(span);
+                            });
+                        }
+                        kT.style.display = 'flex';
+                        break;
+                    case 'word-shuffle':
+                        const wSO = document.getElementById('word-shuffle-overlay');
+                        const wSC = document.getElementById('word-shuffle-content');
+                        wSO.style.display = 'flex';
+                        const wordList = step.value ? step.value.split(',').map(w => w.trim()) : ['SYNERGIE', 'CROISSANCE', 'INNOVATION', 'LEADERSHIP'];
+                        const wSpeed = step.speed || 120;
+                        wSC.innerText = wordList[Math.floor(now / wSpeed) % wordList.length];
+                        wSC.style.animation = 'wordShuffleFlash 0.2s infinite alternate';
                         break;
                     case 'arrow':
                         const arrow = document.getElementById('arrow');
