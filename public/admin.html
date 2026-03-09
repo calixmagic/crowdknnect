@@ -3502,6 +3502,12 @@ Voici ce que je veux : `;
 
                 const slotContainer = document.getElementById('slot-container');
                 if (slotContainer) slotContainer.innerText = '';
+
+                // Explicit cleanup for word-shuffle to avoid WebKit sticking bug
+                const wsOverlay = document.getElementById('word-shuffle-overlay');
+                const wsContent = document.getElementById('word-shuffle-content');
+                if (wsOverlay) wsOverlay.style.display = 'none';
+                if (wsContent) { wsContent.innerText = ''; wsContent.style.animation = 'none'; }
             };
 
             const update = () => {

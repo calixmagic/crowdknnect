@@ -1825,6 +1825,12 @@
 
                         const slotContainer = document.getElementById('slot-container');
                         if (slotContainer) slotContainer.innerText = '';
+
+                        // Explicit cleanup for word-shuffle to avoid WebKit sticking bug
+                        const wsOverlay = document.getElementById('word-shuffle-overlay');
+                        const wsText = document.getElementById('word-shuffle-text');
+                        if (wsOverlay) wsOverlay.style.display = 'none';
+                        if (wsText) { wsText.textContent = ''; wsText.style.animation = 'none'; }
                     }
                 }
                 requestAnimationFrame(update);
