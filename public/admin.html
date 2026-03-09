@@ -2412,7 +2412,7 @@
                 }
             }
 
-            const icons = { emojis: '🃏', blackout: '⬛', flash: '⚡', torch: '🔦', spotlight: '🔦', scratch: '🪙', blow: '🌬️', typing: '⌨️', shatter: '🔨', iris: '👁️‍🗨️', shuffle: '🔀', reveal: '🎴', revealImage: '🖼️', video: '🎬', words: '🔤', lottie: '🎆', arrow: '⬇', heart: '❤️', countdown: '🔢', dice: '🎲', rippleFromLogo: '〰️', audio: '🔊', text: '📝', pulse: '💓', spiral: '🌀', color: '🎨', number: '🔢', breathing: '🫁', glitch: '⚡', ripple: '〰️', zoom: '🔍', shake: '📣', fade: '🌫️', pause: '⏸', cardFlip: '🎴', slot: '🎰', pinpoint: '🎯', unlock: '🔓', mirror: '🪞', wave: '🌊', sparkle: '✨', fire: '🔥', beat: '🎵', silence: '🔇', staticNoise: '📻', eye: '👁️', puzzle: '🧩', mask: '🎭', crystal: '🔮', snapshot: '📸', starfield: '🌟', stop: '⏹' };
+            const icons = { emojis: '🃏', blackout: '⬛', flash: '⚡', torch: '🔦', spotlight: '🔦', scratch: '🪙', blow: '🌬️', typing: '⌨️', shatter: '🔨', iris: '👁️‍🗨️', shuffle: '🔀', reveal: '🎴', revealImage: '🖼️', video: '🎬', words: '🔤', lottie: '🎆', arrow: '⬇', heart: '❤️', countdown: '🔢', dice: '🎲', rippleFromLogo: '〰️', audio: '🔊', text: '📝', pulse: '💓', spiral: '🌀', color: '🎨', number: '🔢', breathing: '🫁', glitch: '⚡', ripple: '〰️', zoom: '🔍', shake: '📣', fade: '🌫️', pause: '⏸', cardFlip: '🎴', slot: '🎰', pinpoint: '🎯', unlock: '🔓', mirror: '🪞', wave: '🌊', sparkle: '✨', fire: '🔥', beat: '🎵', silence: '🔇', staticNoise: '📻', eye: '👁️', puzzle: '🧩', mask: '🎭', crystal: '🔮', snapshot: '📸', starfield: '🌟', 'kinetic-text': '🔠', 'invert-flash': '🦓', 'smoke': '💨', 'word-shuffle': '🌪️', stop: '⏹' };
             list.innerHTML = routine.steps.map((step, idx) => `
                 <div class="step-item" draggable="true" data-idx="${idx}">
                     <div class="step-handle">☰</div>
@@ -2905,6 +2905,19 @@ Voici ce que je veux : `;
                     <option value="static" ${step.value === 'static' ? 'selected' : ''}>Fixe</option>
                     <option value="bounce" ${step.value === 'bounce' ? 'selected' : ''}>Rebond</option>
                  </select>`;
+            } else if (step.type === 'kinetic-text') {
+                extraFields = `
+                    <label>Texte à animer</label><input id="edit-val" type="text" value="${step.value || ''}" placeholder="MAGIE">
+                `;
+            } else if (step.type === 'word-shuffle') {
+                extraFields = `
+                    <label>Mots (séparés par virgules)</label><input id="edit-val" type="text" value="${step.value || ''}" placeholder="Mot1, Mot2, Mot3">
+                    <label>Vitesse par mot (ms)</label><input id="edit-speed" type="number" value="${step.speed || 120}">
+                `;
+            } else if (step.type === 'invert-flash') {
+                extraFields = `
+                    <label>Vitesse Flash (ms)</label><input id="edit-speed" type="number" value="${step.speed || 180}">
+                `;
             }
 
             item.innerHTML = `
@@ -2987,7 +3000,7 @@ Voici ce que je veux : `;
             } else if (step.type === 'cardFlip') {
                 const cfVal = document.getElementById('edit-val');
                 if (cfVal) step.value = cfVal.value;
-            } else if (['number', 'glitch', 'breathing', 'countdown', 'color', 'fade', 'mask', 'unlock', 'mirror', 'sparkle', 'fire', 'staticNoise', 'starfield', 'arrow', 'zoom', 'shake'].includes(step.type)) {
+            } else if (['number', 'glitch', 'breathing', 'countdown', 'color', 'fade', 'mask', 'unlock', 'mirror', 'sparkle', 'fire', 'staticNoise', 'starfield', 'arrow', 'zoom', 'shake', 'kinetic-text', 'word-shuffle'].includes(step.type)) {
                 const gVal = document.getElementById('edit-val');
                 const gColor = document.getElementById('edit-color');
                 if (gVal) step.value = gVal.value;
