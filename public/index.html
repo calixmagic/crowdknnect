@@ -1460,9 +1460,9 @@
             style="position:fixed;top:0;left:0;width:100%;height:100%;display:none;pointer-events:none;z-index:910;align-items:center;justify-content:center;flex-wrap:wrap;gap:2px;padding:20px;">
         </div>
         <div id="word-shuffle-overlay"
-            style="position:fixed;top:0;left:0;width:100%;height:100%;display:none;pointer-events:none;z-index:911;align-items:center;justify-content:center;">
+            style="position:fixed;top:0;left:0;width:100%;height:100%;display:none;pointer-events:none;z-index:911;">
             <span id="word-shuffle-text"
-                style="font-size:12vw;font-weight:900;text-align:center;color:#fff;text-transform:uppercase;text-shadow:0 0 30px rgba(255,255,255,0.6);"></span>
+                style="position:absolute;font-weight:900;text-align:center;color:#fff;text-transform:uppercase;text-shadow:0 0 30px rgba(255,255,255,0.6);transform:translate(-50%,-50%);white-space:nowrap;"></span>
         </div>
 
     </div> <!-- End Admin App Container -->
@@ -2556,13 +2556,23 @@
 
                 case 'word-shuffle': {
                     const wsOverlay = document.getElementById('word-shuffle-overlay');
-                    wsOverlay.style.display = 'flex';
+                    wsOverlay.style.display = 'block';
                     const wsText = document.getElementById('word-shuffle-text');
                     const wordList = (step.value || 'Synergie,Croissance,Innovation,Leadership,ROI,Performance,Stratégie,Agilité,Objectifs,Succès').split(',').map(w => w.trim());
                     const wsPeriod = step.speed || 120;
                     const wsTick = Math.floor(elapsed / wsPeriod);
                     const wsWord = wordList[wsTick % wordList.length];
                     if (wsText.textContent !== wsWord) {
+                        // Generate pseudo-random positions based on tick so it syncs across devices
+                        const randX = (Math.sin(wsTick * 123.45) * 10000) % 1;
+                        const randY = (Math.cos(wsTick * 678.9) * 10000) % 1;
+                        const randSize = (Math.sin(wsTick * 321.0) * 10000) % 1;
+
+                        const scale = 0.5 + Math.abs(randSize) * 2; // scale from 0.5 to 2.5
+                        wsText.style.fontSize = (10 * scale) + 'vw';
+                        wsText.style.left = (15 + Math.abs(randX) * 70) + 'vw';
+                        wsText.style.top = (20 + Math.abs(randY) * 60) + 'vh';
+
                         wsText.textContent = wsWord;
                         wsText.style.animation = 'none';
                         wsText.offsetHeight; // force reflow

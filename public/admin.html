@@ -440,8 +440,10 @@
             display: none;
         }
 
-        .white-bg {
+        body.white-bg {
             background-color: #fff !important;
+            width: 100%;
+            height: 100%;
             color: #000 !important;
         }
 
@@ -1739,7 +1741,7 @@
         <div id="connect-logo-container"
             style="width: 80vw; max-width: 400px; margin-bottom: 20px; display: flex; justify-content: center; align-items: center;">
             <img id="connect-logo-img" src="" alt="Logo"
-                style="width: 100%; height: 100%; object-fit: contain; display: none; transition: transform 0.2s ease-out;">
+                style="max-width: 100%; height: auto; max-height: 60vh; object-fit: contain; display: none; transition: transform 0.2s ease-out;">
         </div>
         <div style="font-size: 1.5rem; color: #fff; letter-spacing: 2px; text-transform: uppercase;">
             Touchez pour participer
@@ -1828,9 +1830,9 @@
             </div>
         </div>
         <div id="word-shuffle-overlay"
-            style="display:none; position:absolute; top:0; left:0; width:100%; height:100%; z-index:9003; display:flex; justify-content:center; align-items:center;">
+            style="display:none; position:absolute; top:0; left:0; width:100%; height:100%; z-index:9003;">
             <div id="word-shuffle-content"
-                style="font-size:15vw; font-weight:900; color:#fff; text-align:center; text-transform:uppercase; text-shadow: 0 10px 40px rgba(255,255,255,0.4);">
+                style="position:absolute;font-size:15vw; font-weight:900; color:#fff; text-align:center; text-transform:uppercase; text-shadow: 0 10px 40px rgba(255,255,255,0.4);transform:translate(-50%,-50%);white-space:nowrap;">
             </div>
         </div>
     </div>
@@ -3610,14 +3612,14 @@ Voici ce que je veux : `;
                         break;
                     case 'shuffle':
                         document.body.className = 'white-bg';
-                        document.getElementById('engine-screen').style.backgroundColor = '#fff';
+                        document.getElementById('engine-screen').style.backgroundColor = 'transparent';
                         mediaImg.style.display = 'block';
                         const cards = ['AS', 'KH', '2J', 'QC', '7H', '3C'];
                         mediaImg.src = `cards/${cards[Math.floor(now / 150) % cards.length]}.jpg`;
                         break;
                     case 'reveal':
                         document.body.className = 'white-bg';
-                        document.getElementById('engine-screen').style.backgroundColor = '#fff';
+                        document.getElementById('engine-screen').style.backgroundColor = 'transparent';
                         mediaImg.style.display = 'block';
                         mediaImg.src = `cards/${step.value}.jpg`;
                         break;
@@ -3690,11 +3692,27 @@ Voici ce que je veux : `;
                     case 'word-shuffle':
                         const wSO = document.getElementById('word-shuffle-overlay');
                         const wSC = document.getElementById('word-shuffle-content');
-                        wSO.style.display = 'flex';
+                        wSO.style.display = 'block';
                         const wordList = step.value ? step.value.split(',').map(w => w.trim()) : ['SYNERGIE', 'CROISSANCE', 'INNOVATION', 'LEADERSHIP'];
                         const wSpeed = step.speed || 120;
-                        wSC.innerText = wordList[Math.floor(now / wSpeed) % wordList.length];
-                        wSC.style.animation = 'wordShuffleFlash 0.2s infinite alternate';
+                        const wsTick = Math.floor(now / wSpeed);
+                        const wsWord = wordList[wsTick % wordList.length];
+
+                        if (wSC.innerText !== wsWord) {
+                            const randX = (Math.sin(wsTick * 123.45) * 10000) % 1;
+                            const randY = (Math.cos(wsTick * 678.9) * 10000) % 1;
+                            const randSize = (Math.sin(wsTick * 321.0) * 10000) % 1;
+
+                            const scale = 0.5 + Math.abs(randSize) * 2;
+                            wSC.style.fontSize = (10 * scale) + 'vw';
+                            wSC.style.left = (15 + Math.abs(randX) * 70) + 'vw';
+                            wSC.style.top = (20 + Math.abs(randY) * 60) + 'vh';
+
+                            wSC.innerText = wsWord;
+                            wSC.style.animation = 'none';
+                            wSC.offsetHeight; // reflow
+                            wSC.style.animation = 'wordShuffleFlash 0.1s ease';
+                        }
                         break;
                     case 'arrow':
                         const arrow = document.getElementById('arrow');
