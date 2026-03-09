@@ -3514,6 +3514,18 @@ Voici ce que je veux : `;
                 const wsContent = document.getElementById('word-shuffle-content');
                 if (wsOverlay) wsOverlay.style.display = 'none';
                 if (wsContent) { wsContent.innerText = ''; wsContent.style.animation = 'none'; }
+
+                // Explicit cleanup for kinetic-text to avoid WebKit sticking bug
+                const kineticOverlay = document.getElementById('kinetic-text-overlay');
+                const kineticContent = document.getElementById('kinetic-text-content');
+                if (kineticOverlay) {
+                    kineticOverlay.style.display = 'none';
+                    kineticOverlay.removeAttribute('data-value');
+                }
+                if (kineticContent) {
+                    kineticContent.innerHTML = '';
+                    kineticContent.style.animation = 'none';
+                }
             };
 
             const update = () => {

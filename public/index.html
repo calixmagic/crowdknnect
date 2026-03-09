@@ -1831,6 +1831,14 @@
                         const wsText = document.getElementById('word-shuffle-text');
                         if (wsOverlay) wsOverlay.style.display = 'none';
                         if (wsText) { wsText.textContent = ''; wsText.style.animation = 'none'; }
+
+                        // Explicit cleanup for kinetic-text to avoid WebKit sticking bug
+                        const kineticOverlay = document.getElementById('kinetic-text-overlay');
+                        if (kineticOverlay) {
+                            kineticOverlay.style.display = 'none';
+                            kineticOverlay.removeAttribute('data-value');
+                            kineticOverlay.innerHTML = '';
+                        }
                     }
                 }
                 requestAnimationFrame(update);
