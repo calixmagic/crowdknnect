@@ -2287,7 +2287,13 @@
                     if (targetLogo) {
                         connectImg.src = targetLogo;
                         connectImg.style.display = 'block';
-                        connectImg.style.transform = `scale(${(state.logoZoom || 100) / 100})`;
+                        if (targetLogo === state.adminConnectLogoUrl) {
+                            connectImg.style.transform = 'none'; // Lock QR code to exactly its container size (80vw)
+                            connectImg.style.width = '100%';     // Force to fill the 80vw container width
+                        } else {
+                            connectImg.style.width = 'auto';
+                            connectImg.style.transform = `scale(${(state.logoZoom || 100) / 100})`;
+                        }
                     } else {
                         connectImg.style.display = 'none';
                     }
