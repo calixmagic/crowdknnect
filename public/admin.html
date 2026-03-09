@@ -3580,6 +3580,23 @@ Voici ce que je veux : `;
                 const step = steps[currentStepIdx];
                 const elapsed = now - stepStartTime;
 
+                if (elapsed >= step.duration) {
+                    currentStepIdx++;
+                    stepStartTime = now;
+                    log("  ✓ " + step.type + " terminé en " + (elapsed / 1000).toFixed(1) + "s");
+
+                    if (step.persist) {
+                        log("  → Persist: ON (L'écran n'est pas effacé)");
+                    } else {
+                        log("  → Persist: OFF (Écran effacé)");
+                        cleanupPreview();
+                    }
+
+                    // Force the loop to pick up the next step next frame
+                    currentSequenceFrame = requestAnimationFrame(update);
+                    return;
+                }
+
                 if (lastLoggedStepIdx !== currentStepIdx) {
                     log("Step " + (currentStepIdx + 1) + "/" + steps.length + ": " + step.type + " (" + step.duration + "ms)", "#007aff");
                     lastLoggedStepIdx = currentStepIdx;
