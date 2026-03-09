@@ -4149,31 +4149,52 @@ Voici ce que je veux : `;
             const file = input.files[0];
             if (!file) return;
 
-            const formData = new FormData();
-            formData.append('audioFile', file);
-
             const btn = input.previousElementSibling;
             const originalText = btn.innerText;
             btn.innerText = "UPLOADING...";
             btn.disabled = true;
 
+            const urlInput = document.getElementById('edit-audio-url');
+            const currentUrl = urlInput ? urlInput.value : '';
+            if (currentUrl && currentUrl.includes('/uploads/') && window.OVH_SYNC_URL) {
+                try {
+                    const filename = currentUrl.split('/uploads/')[1];
+                    await fetch(`${window.OVH_SYNC_URL}?action=delete&file=${filename}&key=${window.OVH_SYNC_KEY}`, { method: 'POST' });
+                } catch (e) { }
+            }
+
+            const formData = new FormData();
+
             try {
-                const response = await fetch('/upload-audio', {
-                    method: 'POST',
-                    body: formData
-                });
+                let uploadPath = '';
 
-                if (!response.ok) throw new Error('Upload failed');
-
-                const data = await response.json();
-
-                // Mettre à jour le champ URL
-                const urlInput = document.getElementById('edit-audio-url');
-                if (urlInput) {
-                    urlInput.value = data.path;
+                if (window.OVH_SYNC_URL) {
+                    formData.append('image', file);
+                    const response = await fetch(`${window.OVH_SYNC_URL}?action=upload&key=${window.OVH_SYNC_KEY}`, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const data = await response.json();
+                    if (data.status === 'success') {
+                        uploadPath = data.url;
+                        log("Audio hébergé sur OVH avec succès", "#34c759");
+                    } else {
+                        throw new Error(data.error || "Erreur OVH");
+                    }
+                } else {
+                    formData.append('audioFile', file);
+                    const response = await fetch('/upload-audio', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    if (!response.ok) throw new Error('Upload failed');
+                    const data = await response.json();
+                    uploadPath = data.path;
+                    log("Audio uploadé: " + file.name, "#34c759");
                 }
 
-                log("Audio uploadé: " + data.filename, "#34c759");
+                if (urlInput) urlInput.value = uploadPath;
+
                 btn.innerText = "✅ OK";
                 setTimeout(() => { btn.innerText = originalText; btn.disabled = false; }, 2000);
 
@@ -4189,31 +4210,54 @@ Voici ce que je veux : `;
             const file = input.files[0];
             if (!file) return;
 
-            const formData = new FormData();
-            formData.append('videoFile', file);
-
             const btn = input.previousElementSibling;
             const originalText = btn.innerText;
             btn.innerText = "UPLOADING...";
             btn.disabled = true;
 
+            const urlInput = input.parentElement.nextElementSibling;
+            const currentUrl = urlInput ? urlInput.value : '';
+            if (currentUrl && currentUrl.includes('/uploads/') && window.OVH_SYNC_URL) {
+                try {
+                    const filename = currentUrl.split('/uploads/')[1];
+                    await fetch(`${window.OVH_SYNC_URL}?action=delete&file=${filename}&key=${window.OVH_SYNC_KEY}`, { method: 'POST' });
+                } catch (e) { }
+            }
+
+            const formData = new FormData();
+
             try {
-                const response = await fetch('/upload-video', {
-                    method: 'POST',
-                    body: formData
-                });
+                let uploadPath = '';
 
-                if (!response.ok) throw new Error('Upload failed');
-
-                const data = await response.json();
-
-                // Mettre à jour le champ URL
-                const urlInput = input.parentElement.nextElementSibling; // L'input text est juste après le div wrapper
-                if (urlInput && urlInput.id === 'edit-val') {
-                    urlInput.value = data.path;
+                if (window.OVH_SYNC_URL) {
+                    formData.append('image', file);
+                    const response = await fetch(`${window.OVH_SYNC_URL}?action=upload&key=${window.OVH_SYNC_KEY}`, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const data = await response.json();
+                    if (data.status === 'success') {
+                        uploadPath = data.url;
+                        log("Vidéo hébergée sur OVH avec succès", "#34c759");
+                    } else {
+                        throw new Error(data.error || "Erreur OVH");
+                    }
+                } else {
+                    formData.append('videoFile', file);
+                    const response = await fetch('/upload-video', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    if (!response.ok) throw new Error('Upload failed');
+                    const data = await response.json();
+                    uploadPath = data.path;
+                    log("Vidéo uploadée: " + file.name, "#34c759");
                 }
 
-                log("Vidéo uploadée: " + data.filename, "#34c759");
+                if (urlInput && urlInput.id === 'edit-val') {
+                    urlInput.value = uploadPath;
+                }
+
                 btn.innerText = "✅ OK";
                 setTimeout(() => { btn.innerText = originalText; btn.disabled = false; }, 2000);
 
