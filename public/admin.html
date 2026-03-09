@@ -1744,7 +1744,7 @@
                 style="max-width: 100%; height: auto; max-height: 60vh; object-fit: contain; display: none; transition: transform 0.2s ease-out;">
         </div>
         <div style="font-size: 1.5rem; color: #fff; letter-spacing: 2px; text-transform: uppercase;">
-            Touchez pour participer
+
         </div>
         <div id="connect-tagline-text"
             style="color: #888; font-size: 0.8rem; margin-top: 10px; letter-spacing: 1px; text-transform: uppercase;">
@@ -3473,6 +3473,13 @@ Voici ce que je veux : `;
                 const kineticTextOverlay = document.getElementById('kinetic-text-overlay');
                 if (kineticTextOverlay) kineticTextOverlay.removeAttribute('data-value');
 
+                const vVid = document.getElementById('video-display');
+                if (vVid) {
+                    vVid.pause();
+                    vVid.removeAttribute('data-current-url');
+                    vVid.src = '';
+                }
+
                 // Bulletproof cleanup: hide ALL children of engine-screen and reset common inline styles
                 document.querySelectorAll('#engine-screen > *').forEach(el => {
                     if (el && el.id !== 'debug-log') {
@@ -3625,7 +3632,27 @@ Voici ce que je veux : `;
                         break;
                     case 'video':
                         videoVid.style.display = 'block';
-                        if (videoVid.src !== step.url) { videoVid.src = step.url; videoVid.play(); }
+                        // Initialisation sécurisée via attribut data
+                        if (videoVid.getAttribute('data-current-url') !== step.url) {
+                            videoVid.setAttribute('data-current-url', step.url);
+                            videoVid.src = step.url;
+                            videoVid.load();
+
+                            // Tentative de calage immédiat
+                            const startOffset = elapsed / 1000;
+                            if (startOffset > 0) videoVid.currentTime = startOffset;
+
+                            const playPromise = videoVid.play();
+                            if (playPromise !== undefined) {
+                                playPromise.catch(e => console.log("Video autoplay blocked/error", e));
+                            }
+                        } else {
+                            // Sync Loop : si décalage > 0.5s, on recale (utile si buffering ou retard chargement)
+                            const targetTime = elapsed / 1000;
+                            if (!videoVid.paused && !videoVid.seeking && Math.abs(videoVid.currentTime - targetTime) > 0.5) {
+                                videoVid.currentTime = targetTime;
+                            }
+                        }
                         break;
                     case 'words':
                         emojiDiv.style.fontSize = '8vh';
