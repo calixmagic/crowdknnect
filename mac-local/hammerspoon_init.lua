@@ -1,0 +1,5 @@
+-- Ajoute dans ~/.hammerspoon/init.lua  (brew install --cask hammerspoon)
+-- Raccourci: Option + Espace (appui = start, re-appui = stop + colle)
+hs.hotkey.bind({"alt"}, "space", function()
+  hs.task.new("/usr/bin/env", nil, {"python3", os.getenv("HOME") .. "/crowdknnect/mac-local/dictee.py"}):start()
+end)
